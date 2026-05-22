@@ -98,6 +98,16 @@ agent/api/trigger       → 501 not_implemented
 
 ---
 
+## Deployment — Vercel
+
+- Hosted at https://carolinafirstandonly.vercel.app (production)
+- Project: `paheejs-projects/carolinafirstandonly` (org ID `team_fej3dRHVSy48d1vL7S03zKkK`, project ID `prj_tqn3WbPGORzDJr92srj3UAScsUWe`)
+- Linked to the GitHub repo — pushes to `main` auto-deploy via Vercel's Git integration
+- Root Directory: `apps/web`. Framework auto-detected as Next.js. No `vercel.json` — Vercel handles the pnpm workspace install at the repo root + builds at `apps/web` automatically.
+- Env vars: synced for **Production** and **Development**. **Preview** environment is unset; preview deployments from feature branches won't have Supabase config until you add them per-branch (see Gotcha 6 below).
+
+To redeploy via CLI: `cd <repo root> && vercel deploy --prod`. Don't run from `apps/web` — the CLI will treat it as a non-monorepo project and fail.
+
 ## Gotchas to not relearn
 
 ### 1. Tailwind v4 `@source` path is relative to the CSS file
@@ -144,6 +154,32 @@ API (we chose the new one — see `packages/database/src/server.ts`).
 ### 5. Next.js auto-edits `tsconfig.json` and `next-env.d.ts` on first build
 Don't be alarmed when `allowJs: true` and a `<reference path>` line appear
 after the first `next build`. Those are Next-added; leave them in.
+
+### 6. Vercel monorepo: `vercel link` from the app dir is a trap
+Linking from `apps/web` creates a project whose Root Directory is
+unspecified (= repo root in Vercel's eyes), and CLI deploys from there
+only upload that subdirectory — so workspace deps don't resolve and the
+build tries `npm install`. Fix:
+
+1. `vercel link` from the repo root (so `.vercel/project.json` lives at the root).
+2. Set Root Directory to `apps/web` server-side. The CLI doesn't expose a command
+   for this — PATCH the project via the API:
+   ```bash
+   TOKEN=$(jq -r .token < "$HOME/Library/Application Support/com.vercel.cli/auth.json")
+   curl -X PATCH "https://api.vercel.com/v9/projects/<projectId>?teamId=<teamId>" \
+     -H "Authorization: Bearer $TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"rootDirectory":"apps/web"}'
+   ```
+3. **Do not** ship a `vercel.json` with `buildCommand`/`installCommand` overrides
+   for a pnpm workspace; let Vercel's framework auto-detection handle it.
+4. Deploy from the repo root with `vercel deploy --prod` (not from `apps/web`).
+
+### 7. Vercel CLI's `env add NAME preview` won't default to "all branches"
+Despite the CLI help saying "omit branch for all Preview branches," omitting
+errors. Workaround: add env vars for `production` and `development` only;
+add `preview` per-branch when you start using preview deployments
+(`vercel env add NAME preview <branch>`).
 
 ---
 

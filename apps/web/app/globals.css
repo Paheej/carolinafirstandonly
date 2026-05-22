@@ -1,0 +1,7 @@
+@import "@cfo/ui/styles.css";
+
+/* Tailwind needs to scan the UI package's source so utility classes used
+   inside packages/ui (md:flex, h-5, text-[10px], …) get generated. Paths
+   are resolved relative to THIS file (apps/web/app/globals.css), so it
+   takes three `../` to reach the workspace root. */
+@source "../../../packages/ui";

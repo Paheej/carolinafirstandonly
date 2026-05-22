@@ -1,0 +1,24 @@
+{
+  "name": "carolinafirstandonly",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @cfo/web dev",
+    "dev:agent": "pnpm --filter @cfo/agent dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "db:start": "supabase --workdir packages/database start",
+    "db:stop": "supabase --workdir packages/database stop",
+    "db:reset": "supabase --workdir packages/database db reset",
+    "db:diff": "supabase --workdir packages/database db diff",
+    "db:types": "supabase --workdir packages/database gen types typescript --local > packages/database/src/types.generated.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

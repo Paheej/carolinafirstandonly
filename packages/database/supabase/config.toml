@@ -31,15 +31,18 @@ file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+site_url = "https://carolinafirstandonly.vercel.app"
+additional_redirect_urls = [
+    "https://carolinafirstandonly.vercel.app/**",
+    "http://localhost:3000/**",
+]
 jwt_expiry = 3600
 enable_signup = true
 enable_anonymous_sign_ins = false
 
 [auth.email]
 enable_signup = true
-enable_confirmations = false  # easier local dev; tighten before prod
+enable_confirmations = true
 
 [auth.external.google]
 enabled = false

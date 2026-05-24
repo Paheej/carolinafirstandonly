@@ -6,6 +6,55 @@ spec) before starting a new phase.
 
 ---
 
+## Phase 1 — Archive ✅
+
+**Shipped 2026-05-23.** Builds + typechecks clean. Public archive renders
+with seeded shells; the recap submission and admin review queue are wired
+end-to-end but pending real content/photos to exercise.
+
+### What's actually in the repo
+
+| Area | State |
+|---|---|
+| `packages/database` migrations `0003_archive.sql` (seasons, archive_events, recaps, recap_submissions + RLS + slugify/unique_recap_slug helpers + `publish_recap_on_approval` + `notify_admins_on_recap_submission` + `notify_submitter_on_recap_review` + `touch_updated_at`), `0004_seed_archive_shells.sql` (3 season + 3 event shells with placeholder markdown) | ✅ |
+| `packages/database/src/types.ts` extended with seasons/archive_events/recaps/recap_submissions and `RecapPhoto`. **Important:** every table now carries `Relationships: []` — without it, postgrest-js v2.106 silently degrades query types to `never` | ✅ |
+| `packages/ui` — `MarkdownRender` (react-markdown + remark-gfm, no rehype-raw, sanitized by default) + `MarkdownEditor` (`@uiw/react-md-editor` via `next/dynamic`, ssr: false) + parchment `.cfo-prose` styles + editor theme | ✅ |
+| `apps/web` routes — `/archive`, `/archive/seasons/[slug]`, `/archive/events/[slug]`, `/archive/recaps/[slug]`, `/archive/submit` (+`/thanks`), `/archive/pending`, `/admin` (small dashboard) | ✅ |
+| `apps/web/lib/archive.ts` — server-side query helpers (`getSeasons`, `getArchiveEventBySlug`, `getRecapBySlug`, `getRecapTargets`, etc.) | ✅ |
+| Submission server action `apps/web/app/archive/submit/actions.ts` + client form `SubmitRecapForm.tsx` | ✅ |
+| Admin review actions `apps/web/app/archive/pending/actions.ts` (approve / reject / edit) + client card `PendingSubmissionCard.tsx` | ✅ |
+| ImageKit integration — `/api/imagekit/auth` mints HMAC-SHA1 signed upload tokens; `_components/PhotoUploader.tsx` POSTs directly to `upload.imagekit.io/api/v1/files/upload`. No SDK. Auth-gated. | ✅ |
+| Google Sites scraper at `tools/migrate-google-site/` (Playwright + turndown + turndown-plugin-gfm) — produces a single reviewable JSON file. Workspace package; see its README. | ✅ |
+
+### Decisions locked in Phase 1
+
+- **Photo host: ImageKit.io.** Cloudinary's free tier was already used for another project. Picked ImageKit over Vercel Blob (no transforms) and Supabase Storage (in-stack but felt better to isolate user uploads from the database). Free tier covers 20GB storage + 20GB bandwidth. Three env vars: `NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY`, `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT`, `IMAGEKIT_PRIVATE_KEY`.
+- **Content migration: Playwright scrape → JSON for manual review.** Reviewed JSON gets folded into a later `0005_seed_archive_content.sql` migration that UPDATEs the shells from `0004_seed_archive_shells.sql`.
+- **`@supabase/ssr` upgraded 0.5.2 → 0.10.3** and `@supabase/supabase-js` pinned to `^2.106.1`. The newer `supabase-js` added generic args to `SupabaseClient<...>` that the old `ssr@0.5.2` mis-passes — net effect was every `from()` returning `never`. The bump is the fix.
+
+### Routes that exist now (Phase 1 additions)
+```
+/archive
+/archive/seasons/[slug]
+/archive/events/[slug]
+/archive/recaps/[slug]
+/archive/submit            (auth required)
+/archive/submit/thanks
+/archive/pending           (admin only)
+/admin                     (admin only — index card list)
+/api/imagekit/auth         (auth required)
+```
+
+### Gotchas surfaced this phase
+
+- **`Relationships: []` is load-bearing.** `postgrest-js` v2.106's `GenericTable` constraint requires it; missing the property makes the table fail constraint matching and the schema generic resolves to `any/never`. Every table type in `types.ts` now has it.
+- **`@supabase/ssr@0.5.2` is incompatible with the v2.106+ `SupabaseClient` generic shape.** Bump ssr to 0.10.x.
+- **`@uiw/react-md-editor` blows up under SSR** (reads `navigator` at module load). Use `next/dynamic({ ssr: false })`. That's why `@cfo/ui` now lists `next` as a peer dep — alongside `@cfo/database`'s prior peer.
+- **The Google Sites scraper does NOT migrate image binaries.** `images[]` in the output JSON contains the Google-hosted URLs. Re-uploading them to ImageKit is a manual step (do it via the `PhotoUploader` once a recap exists, or via ImageKit's web UI when seeding directly from the JSON).
+- **Tailwind v4 `@source` path:** `apps/web/app/globals.css` still has `@source "../../../packages/ui";` — pulling in `@uiw/react-md-editor`'s injected utilities did NOT require another `@source` entry because its CSS is imported directly inside `MarkdownEditor.tsx`. If we later switch to tree-shaking its CSS via Tailwind utilities, that'll change.
+
+---
+
 ## Phase 0 — Foundation ✅
 
 **Shipped 2026-05-22.** Smoke-tested end-to-end: signup → profile auto-create
@@ -185,37 +234,37 @@ add `preview` per-branch when you start using preview deployments
 
 ## What's NOT done (deferred to later phases)
 
-These are intentional — they're either Phase-1+ work or unblocked-but-not-needed:
+These are intentional — they're either Phase-2+ work or unblocked-but-not-needed:
 
-- Real schema for `seasons`, `archive_events`, `recaps`, `recap_submissions`,
-  `groups`, `events`, `news_*`, `agent_*`, `calendar_*` — **Phase 1+**.
+- Schema for `groups`, `events`, `news_*`, `agent_*`, `calendar_*` —
+  **Phase 2+**.
 - Generated DB types haven't replaced the hand-written `types.ts` yet
-  (no schema churn justifies the swap yet).
+  (no schema churn justifies the swap yet — note the `Relationships: []`
+  fix would need to be preserved or the generator would emit them too).
 - OAuth providers (Google, Discord) not enabled in Supabase dashboard.
-- Cloudinary not wired (Phase 1 photo upload).
+- ImageKit env vars not yet set in Vercel — uploads will 500 until
+  `NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY`, `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT`,
+  and `IMAGEKIT_PRIVATE_KEY` are added (Production + Development).
 - Anthropic API not called (Phase 6 agent).
-- No Vercel deployment yet — site is local-only. DNS cutover is Phase 7.
+- Google Sites content not yet ingested — run `tools/migrate-google-site`
+  when ready and write `0005_seed_archive_content.sql` to UPDATE the shells.
 
 ---
 
 ## Open items the next phase needs decided
 
-From `CLAUDE.md`'s "Open Items the Builder Should Surface" — these are the
-ones Phase 1 should resolve before starting:
+From `CLAUDE.md`'s "Open Items the Builder Should Surface":
 
-1. **Cloudinary vs Supabase Storage.** Spec leans Cloudinary for photos
-   with on-the-fly transforms. Confirm before building the recap photo
-   uploader.
-2. **Google Sites content extraction.** Three seasons + three events
-   need to come over. Playwright scrape → markdown vs. manual port?
-   The user has the source site; they may have a preference here.
-3. (Phase 5+) News categories seed list — assumed to be
+1. (Phase 5+) News categories seed list — assumed to be
    `official_news, tactics, painting, lore, community, industry,
    battle_report`. Confirm before seeding.
+2. Cloudinary vs Supabase Storage → **decided Phase 1: ImageKit.io.**
+3. Google Sites content extraction → **decided Phase 1: Playwright
+   scrape into JSON for review.**
 
 ---
 
-## How to start a new conversation for Phase 1
+## How to start a new conversation for Phase 2
 
 In the new session, this is what to load and in what order:
 
@@ -226,16 +275,16 @@ In the new session, this is what to load and in what order:
 Then look at:
 - `packages/ui/src/index.ts` to see what primitives already exist
 - `packages/database/supabase/migrations/` to see what's been applied
-- `apps/web/app/page.tsx` for the design-system reference rendering
+- `apps/web/lib/archive.ts` for the per-feature data-access pattern
+  (mirror this when building groups/events lib helpers)
+- `apps/web/app/archive/submit/` for the server-action + client-form
+  pattern (mirror it for `/groups/new` and `/events/new`)
 
-Phase 1 starting point:
-- Add migration `0003_archive.sql` with `seasons`, `archive_events`,
-  `recaps`, `recap_submissions` per the spec
-- Decide Cloudinary vs. Supabase Storage (ask the user)
-- Add the markdown-render + markdown-editor primitives to `@cfo/ui`
-  (`MarkdownRender` wrapping `react-markdown` + `remark-gfm`,
-  `MarkdownEditor` wrapping `@uiw/react-md-editor`)
-- Build the public read routes first (`/archive`, season/event/recap
-  detail pages) with placeholder seed data so the design lands before
-  the user-submission flow
-- Then `/archive/submit` (auth-gated) and `/archive/pending` (admin-only)
+Phase 2 starting point:
+- Add migration `0005_groups.sql` (groups, group_members,
+  group_pinned_posts, group_role_templates per `CLAUDE.md`)
+- Build `/profile/[username]` and `/profile/settings` (settings is a
+  partial — Phase 4 fills in calendar connections)
+- Build `/groups`, `/groups/new`, `/groups/[slug]` with pinned-posts CRUD
+- Add `Avatar`, `Dialog`, `Select`, `Checkbox`, `Radio`, `Tabs` to
+  `@cfo/ui` if needed (Modal is required for group settings invitations)

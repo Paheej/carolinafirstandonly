@@ -1,0 +1,21 @@
+{
+  "name": "@cfo/migrate-google-site",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "scrape": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/turndown": "^5.0.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

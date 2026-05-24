@@ -332,3 +332,172 @@
 }
 
 #__next, main, header, footer { position: relative; z-index: 1; }
+
+/* ---------------------------------------------------------------------------
+   Prose — used by <MarkdownRender />.
+   Hand-rolled rather than @tailwindcss/typography so the parchment palette,
+   EB Garamond headings, and brass underlines carry through naturally.
+--------------------------------------------------------------------------- */
+@layer components {
+    .cfo-prose {
+        color: var(--color-ink);
+        font-family: var(--font-body);
+        line-height: 1.7;
+        font-size: 1rem;
+    }
+    .cfo-prose > * + * { margin-top: 1rem; }
+
+    .cfo-prose h1,
+    .cfo-prose h2,
+    .cfo-prose h3,
+    .cfo-prose h4 {
+        font-family: var(--font-display);
+        color: var(--color-ink);
+        letter-spacing: -0.01em;
+        margin-top: 1.75em;
+        line-height: 1.2;
+    }
+    .cfo-prose h1 { font-size: 2rem; }
+    .cfo-prose h2 { font-size: 1.6rem; }
+    .cfo-prose h3 { font-size: 1.3rem; }
+    .cfo-prose h4 { font-size: 1.1rem; }
+    .cfo-prose h2,
+    .cfo-prose h3 { position: relative; padding-bottom: 0.3em; }
+    .cfo-prose h2::after,
+    .cfo-prose h3::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 3ch;
+        height: 1px;
+        background: linear-gradient(
+            to right,
+            var(--color-brass) 0%,
+            var(--color-brass-dark) 70%,
+            transparent 100%
+        );
+    }
+
+    .cfo-prose p { color: var(--color-ink); }
+    .cfo-prose strong { color: var(--color-ink); font-weight: 600; }
+    .cfo-prose em { color: var(--color-ink-soft); }
+
+    .cfo-prose a {
+        color: var(--color-forest);
+        text-decoration: underline;
+        text-decoration-color: rgba(45, 74, 43, 0.4);
+        text-underline-offset: 3px;
+    }
+    .cfo-prose a:hover {
+        color: var(--color-forest-dark);
+        text-decoration-color: var(--color-forest-dark);
+    }
+
+    .cfo-prose ul,
+    .cfo-prose ol {
+        padding-left: 1.4em;
+    }
+    .cfo-prose ul { list-style-type: disc; }
+    .cfo-prose ol { list-style-type: decimal; }
+    .cfo-prose li { margin-top: 0.35em; }
+    .cfo-prose li > p { margin-top: 0; }
+
+    .cfo-prose blockquote {
+        margin: 1.25em 0;
+        padding: 0.6em 1em;
+        border-left: 3px solid var(--color-brass-dark);
+        background: rgba(176, 141, 87, 0.12);
+        color: var(--color-ink-soft);
+        font-style: italic;
+        border-radius: 0 2px 2px 0;
+    }
+
+    .cfo-prose code {
+        background: rgba(176, 141, 87, 0.2);
+        border: 1px solid rgba(138, 109, 63, 0.3);
+        padding: 0.1em 0.35em;
+        border-radius: 2px;
+        font-family: var(--font-mono);
+        font-size: 0.92em;
+        color: var(--color-leather);
+    }
+    .cfo-prose pre {
+        background: #1a1815;
+        color: #f4ead5;
+        padding: 1em 1.25em;
+        border-radius: 2px;
+        overflow-x: auto;
+        font-family: var(--font-mono);
+        font-size: 0.9em;
+        line-height: 1.5;
+    }
+    .cfo-prose pre code {
+        background: transparent;
+        border: none;
+        padding: 0;
+        color: inherit;
+    }
+
+    .cfo-prose hr {
+        border: none;
+        border-top: 1px dashed rgba(138, 109, 63, 0.6);
+        margin: 2.5em 0;
+    }
+
+    .cfo-prose table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.25em 0;
+        font-size: 0.95em;
+    }
+    .cfo-prose th,
+    .cfo-prose td {
+        border: 1px solid rgba(138, 109, 63, 0.4);
+        padding: 0.5em 0.75em;
+        text-align: left;
+    }
+    .cfo-prose th {
+        background: rgba(176, 141, 87, 0.18);
+        font-family: var(--font-display);
+        font-weight: 600;
+    }
+
+    .cfo-prose img {
+        max-width: 100%;
+        border-radius: 2px;
+        border: 1px solid rgba(138, 109, 63, 0.4);
+        box-shadow: 0 4px 14px -6px rgba(26, 24, 21, 0.25);
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   <MarkdownEditor /> — restyle @uiw/react-md-editor's chrome
+--------------------------------------------------------------------------- */
+@layer components {
+    .cfo-md-editor .w-md-editor {
+        background: transparent;
+        color: var(--color-ink);
+        box-shadow: none;
+        border-radius: 2px;
+    }
+    .cfo-md-editor .w-md-editor-toolbar {
+        background: var(--color-parchment-dark);
+        border-bottom: 1px solid rgba(138, 109, 63, 0.4);
+    }
+    .cfo-md-editor .w-md-editor-toolbar button { color: var(--color-ink); }
+    .cfo-md-editor .w-md-editor-toolbar button:hover {
+        color: var(--color-forest-dark);
+        background: rgba(176, 141, 87, 0.2);
+    }
+    .cfo-md-editor .w-md-editor-text-pre > code,
+    .cfo-md-editor .w-md-editor-text-input,
+    .cfo-md-editor textarea {
+        color: var(--color-ink) !important;
+        font-family: var(--font-mono) !important;
+    }
+    .cfo-md-editor .w-md-editor-preview {
+        background: var(--color-parchment);
+        border-left: 1px solid rgba(138, 109, 63, 0.3);
+    }
+}

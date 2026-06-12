@@ -18,7 +18,7 @@ end-to-end but pending real content/photos to exercise.
 |---|---|
 | `packages/database` migrations `0003_archive.sql` (seasons, archive_events, recaps, recap_submissions + RLS + slugify/unique_recap_slug helpers + `publish_recap_on_approval` + `notify_admins_on_recap_submission` + `notify_submitter_on_recap_review` + `touch_updated_at`), `0004_seed_archive_shells.sql` (3 season + 3 event shells with placeholder markdown) | ✅ |
 | `packages/database/src/types.ts` extended with seasons/archive_events/recaps/recap_submissions and `RecapPhoto`. **Important:** every table now carries `Relationships: []` — without it, postgrest-js v2.106 silently degrades query types to `never` | ✅ |
-| `packages/ui` — `MarkdownRender` (react-markdown + remark-gfm, no rehype-raw, sanitized by default) + `MarkdownEditor` (`@uiw/react-md-editor` via `next/dynamic`, ssr: false) + parchment `.cfo-prose` styles + editor theme | ✅ |
+| `packages/ui` — `MarkdownRender` (react-markdown + remark-gfm + rehype-raw + rehype-sanitize w/ figure/figcaption/img whitelist) + `MarkdownEditor` (`@uiw/react-md-editor` via `next/dynamic`, ssr: false) + parchment `.cfo-prose` styles + editor theme | ✅ |
 | `apps/web` routes — `/archive`, `/archive/seasons/[slug]`, `/archive/events/[slug]`, `/archive/recaps/[slug]`, `/archive/submit` (+`/thanks`), `/archive/pending`, `/admin` (small dashboard) | ✅ |
 | `apps/web/lib/archive.ts` — server-side query helpers (`getSeasons`, `getArchiveEventBySlug`, `getRecapBySlug`, `getRecapTargets`, etc.) | ✅ |
 | Submission server action `apps/web/app/archive/submit/actions.ts` + client form `SubmitRecapForm.tsx` | ✅ |

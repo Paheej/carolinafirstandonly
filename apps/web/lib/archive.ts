@@ -4,6 +4,7 @@ import type {
     Season,
     ArchiveEvent,
     Recap,
+    ArchivePage,
 } from '@cfo/database/types';
 
 /**
@@ -84,6 +85,28 @@ export async function getRecapBySlug(slug: string): Promise<Recap | null> {
     const supabase = createServerSupabase(await cookies());
     const { data } = await supabase
         .from('recaps')
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+    return data;
+}
+
+export async function getArchivePages(): Promise<ArchivePage[]> {
+    const supabase = createServerSupabase(await cookies());
+    const { data } = await supabase
+        .from('archive_pages')
+        .select('*')
+        .order('category', { ascending: true, nullsFirst: false })
+        .order('display_order', { ascending: true });
+    return data ?? [];
+}
+
+export async function getArchivePageBySlug(
+    slug: string,
+): Promise<ArchivePage | null> {
+    const supabase = createServerSupabase(await cookies());
+    const { data } = await supabase
+        .from('archive_pages')
         .select('*')
         .eq('slug', slug)
         .maybeSingle();

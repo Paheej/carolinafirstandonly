@@ -175,6 +175,27 @@ export interface Database {
                 Update: Partial<Database['public']['Tables']['recaps']['Insert']>;
                 Relationships: [];
             };
+            archive_pages: {
+                Row: {
+                    id: string;
+                    slug: string;
+                    title: string;
+                    body_md: string;
+                    category: string | null;
+                    display_order: number;
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    slug: string;
+                    title: string;
+                    body_md: string;
+                    category?: string | null;
+                    display_order?: number;
+                };
+                Update: Partial<Database['public']['Tables']['archive_pages']['Insert']>;
+                Relationships: [];
+            };
             recap_submissions: {
                 Row: {
                     id: string;
@@ -233,3 +254,4 @@ export type Season = Database['public']['Tables']['seasons']['Row'];
 export type ArchiveEvent = Database['public']['Tables']['archive_events']['Row'];
 export type Recap = Database['public']['Tables']['recaps']['Row'];
 export type RecapSubmission = Database['public']['Tables']['recap_submissions']['Row'];
+export type ArchivePage = Database['public']['Tables']['archive_pages']['Row'];

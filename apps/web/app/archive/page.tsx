@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { Card, CardBody, Badge, Button } from '@cfo/ui';
-import { BookMarked, Calendar, ChevronRight, PenSquare, ShieldCheck } from 'lucide-react';
-import { getSeasons, getArchiveEvents } from '@/lib/archive';
+import { BookMarked, Calendar, ChevronRight, FileText, PenSquare, ShieldCheck } from 'lucide-react';
+import { getSeasons, getArchiveEvents, getArchivePages } from '@/lib/archive';
 import { getCurrentUser } from '@/lib/auth';
 
 export const metadata: Metadata = {
@@ -18,9 +18,10 @@ function formatDateRange(start: string | null, end: string | null) {
 }
 
 export default async function ArchiveIndexPage() {
-    const [seasons, events, user] = await Promise.all([
+    const [seasons, events, pages, user] = await Promise.all([
         getSeasons(),
         getArchiveEvents(),
+        getArchivePages(),
         getCurrentUser(),
     ]);
 
@@ -167,6 +168,38 @@ export default async function ArchiveIndexPage() {
                     </ul>
                 )}
             </section>
+            {/* Reference */}
+            {pages.length > 0 ? (
+                <section>
+                    <div className="mb-5 flex items-baseline justify-between">
+                        <h2 className="cfo-heading-underline font-display text-2xl">
+                            Reference
+                        </h2>
+                        <span className="hidden sm:inline text-xs uppercase tracking-[0.18em] text-ink-soft/70 font-mono">
+                            {pages.length} entries
+                        </span>
+                    </div>
+                    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        {pages.map((p) => (
+                            <li key={p.id}>
+                                <Link href={`/archive/pages/${p.slug}`} className="block no-underline">
+                                    <Card interactive>
+                                        <CardBody className="flex items-center justify-between gap-4 px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <FileText size={16} className="text-leather" />
+                                                <h3 className="font-display text-lg text-ink">
+                                                    {p.title}
+                                                </h3>
+                                            </div>
+                                            <ChevronRight size={16} className="text-ink-soft" />
+                                        </CardBody>
+                                    </Card>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            ) : null}
         </div>
     );
 }

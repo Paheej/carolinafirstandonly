@@ -146,7 +146,7 @@ export default async function HomePage() {
                 </div>
             </section>
 
-            {/* ----- PHASE 0 NOTICE --------------------------------------- */}
+            {/* ----- PHASE 1 NOTICE --------------------------------------- */}
             <section className="cfo-pinned-notice relative">
                 <div
                     className="relative rounded-sm border-x border-b border-t-2 border-brass-dark/60 bg-parchment px-7 py-7 pr-28"
@@ -157,24 +157,24 @@ export default async function HomePage() {
                         Builder's note
                     </div>
                     <h3 className="mt-2 font-display text-2xl text-ink">
-                        Phase&nbsp;0 — Foundation
+                        Phase&nbsp;1 — Archive
                     </h3>
                     <p className="mt-2 text-sm sm:text-base text-ink-soft max-w-2xl">
-                        The site shell, auth, and design system are live. Archive,
-                        news, groups, events, and the AI agent land in subsequent
-                        phases. If something looks off, that's where to point.
+                        Seasons, special events, recap submissions, and the
+                        admin review queue are live. News, groups, events, and
+                        the AI agent land in subsequent phases.
                     </p>
 
                     <span
                         className="cfo-seal absolute top-5 right-6"
                         aria-hidden="true"
-                        title="Phase 0"
+                        title="Phase 1"
                     >
                         <span>
                             Phase
                             <br />
                             <strong className="text-base font-display tracking-normal">
-                                0
+                                1
                             </strong>
                         </span>
                     </span>

@@ -107,6 +107,8 @@ export interface Database {
                     starts_on: string | null;
                     ends_on: string | null;
                     display_order: number;
+                    game_system: string | null;
+                    game_edition: string | null;
                     created_at: string;
                     updated_at: string;
                 };
@@ -119,6 +121,8 @@ export interface Database {
                     starts_on?: string | null;
                     ends_on?: string | null;
                     display_order?: number;
+                    game_system?: string | null;
+                    game_edition?: string | null;
                 };
                 Update: Partial<Database['public']['Tables']['seasons']['Insert']>;
                 Relationships: [];
@@ -133,6 +137,8 @@ export interface Database {
                     hero_image_url: string | null;
                     season_id: string | null;
                     display_order: number;
+                    game_system: string | null;
+                    game_edition: string | null;
                     created_at: string;
                     updated_at: string;
                 };
@@ -144,6 +150,8 @@ export interface Database {
                     hero_image_url?: string | null;
                     season_id?: string | null;
                     display_order?: number;
+                    game_system?: string | null;
+                    game_edition?: string | null;
                 };
                 Update: Partial<Database['public']['Tables']['archive_events']['Insert']>;
                 Relationships: [];
@@ -182,6 +190,7 @@ export interface Database {
                     title: string;
                     body_md: string;
                     category: string | null;
+                    season_id: string | null;
                     display_order: number;
                     created_at: string;
                     updated_at: string;
@@ -191,6 +200,7 @@ export interface Database {
                     title: string;
                     body_md: string;
                     category?: string | null;
+                    season_id?: string | null;
                     display_order?: number;
                 };
                 Update: Partial<Database['public']['Tables']['archive_pages']['Insert']>;

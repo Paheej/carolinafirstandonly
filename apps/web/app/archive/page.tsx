@@ -90,7 +90,12 @@ export default async function ArchiveIndexPage() {
                                     <Card interactive className="h-full">
                                         <CardBody className="flex h-full flex-col gap-3 px-6 py-6">
                                             <div className="flex items-center justify-between gap-2">
-                                                <Badge variant="forest">Season</Badge>
+                                                {s.game_system ? (
+                                                    <Badge variant="brass">
+                                                        {s.game_system}
+                                                        {s.game_edition ? ` · ${s.game_edition}` : null}
+                                                    </Badge>
+                                                ) : <span />}
                                                 {s.year ? (
                                                     <span className="font-mono text-[11px] text-ink-soft">
                                                         {s.year}
@@ -142,7 +147,12 @@ export default async function ArchiveIndexPage() {
                                 <Link href={`/archive/events/${e.slug}`} className="block no-underline">
                                     <Card interactive className="h-full">
                                         <CardBody className="flex h-full flex-col gap-3 px-6 py-6">
-                                            <Badge variant="leather">Special event</Badge>
+                                            {e.game_system ? (
+                                                <Badge variant="brass">
+                                                    {e.game_system}
+                                                    {e.game_edition ? ` · ${e.game_edition}` : null}
+                                                </Badge>
+                                            ) : null}
                                             <h3 className="font-display text-2xl text-ink leading-tight">
                                                 {e.name}
                                             </h3>

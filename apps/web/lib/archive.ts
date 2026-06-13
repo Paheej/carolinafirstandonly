@@ -101,6 +101,18 @@ export async function getArchivePages(): Promise<ArchivePage[]> {
     return data ?? [];
 }
 
+export async function getArchivePagesForSeason(
+    seasonId: string,
+): Promise<ArchivePage[]> {
+    const supabase = createServerSupabase(await cookies());
+    const { data } = await supabase
+        .from('archive_pages')
+        .select('*')
+        .eq('season_id', seasonId)
+        .order('display_order', { ascending: true });
+    return data ?? [];
+}
+
 export async function getArchivePageBySlug(
     slug: string,
 ): Promise<ArchivePage | null> {

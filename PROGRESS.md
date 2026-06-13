@@ -6,6 +6,45 @@ spec) before starting a new phase.
 
 ---
 
+## Phase 1 content migration ⏳
+
+**Branch:** `phase-1-content-migration` (PR open against `main`).
+
+Migrations `0005` + `0006` need to be pushed to Supabase before the
+content shows up in deployed builds.
+
+### What it ships
+
+| Area | State |
+|---|---|
+| `0005_archive_pages.sql` — `archive_pages` table for unstructured reference docs (campaign rules, player hubs, faction guides). Public read, admin write. | ✅ in repo |
+| `0006_seed_archive_content.sql` — UPDATEs seasons 1/2/3 with real names + descriptions, renames `special-event-1/2/3` → `showdown-at-snyders` / `old-alliances` / `drafted`, INSERTs 11 S2 recap rows + 6 S2 reference pages. 1412 lines, generated. | ✅ in repo |
+| `apps/web/app/archive/pages/[slug]/page.tsx` — renders an `archive_pages` row via `MarkdownRender`. Archive index gains a Reference section listing pages. | ✅ in repo |
+| `archive_pages` row in `packages/database/src/types.ts` (with `Relationships: []`). | ✅ in repo |
+| `tools/migrate-google-site/src/takeout.ts` — reads Google Sites Takeout HTML pages from disk, uploads images to ImageKit with positional naming, emits a manifest mapping each slug to its cleaned markdown + image URLs. | ✅ in repo |
+| `tools/migrate-google-site/src/rewrite-links.ts` — rewrites `[text](Page Name.html)` style takeout links to live `/archive/...` routes. | ✅ in repo |
+| `tools/migrate-google-site/src/build-migration.ts` — emits `0006_seed_archive_content.sql` from the takeout output + the hand-curated Showdown markdown. | ✅ in repo |
+| Migrations pushed to Supabase | ❌ pending `supabase db push` |
+
+### How to push the migrations
+
+```bash
+SUPABASE_DB_PASSWORD=<pwd> supabase db push --workdir packages/database
+```
+
+That applies 0005 then 0006 in order. Existing row IDs survive the slug
+renames (UPDATE in place), so FKs in `recap_submissions` or future
+submissions stay linked.
+
+### Gotchas surfaced this phase
+
+- **Google Sites Takeout `<img>` tags carry no `alt` text.** The extractor leaves images as plain `![](url)` and figcaptions need to be added manually after the fact. Showdown was done by hand for that reason.
+- **The "real" page heading isn't always the first or last `<h1>` in a takeout page.** Several Season 2 / S2 pages had a "Season 3 Campaign" callout at the top with its own `<h1>`. Cutting at the *element wrapping `role="main"`* turned out to be the reliable anchor — the first attempt (`lastIndexOf('<h1')`) sliced off most of the body.
+- **Several pages in the takeout are genuine stubs.** Bills's Dark Angels, Mike's Death Guard, Colby's Orks, all Player Hub / Player Faction pages — these were placeholder rows on the original Google Sites with no body content. The migration writes them with a placeholder note rather than dropping the rows (other migrated pages link to them).
+- **`tsconfig` in `tools/migrate-google-site` has `noUncheckedIndexedAccess` on**, so every `obj[key]` and `arr[i]` widens to `T | undefined`. Defensive `if (!x) continue` checks or non-null assertions are required.
+
+---
+
 ## Phase 1 — Archive ✅
 
 **Shipped 2026-05-23.** Builds + typechecks clean. Public archive renders

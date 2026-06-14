@@ -107,6 +107,8 @@ export interface Database {
                     starts_on: string | null;
                     ends_on: string | null;
                     display_order: number;
+                    game_system: string | null;
+                    game_edition: string | null;
                     created_at: string;
                     updated_at: string;
                 };
@@ -119,6 +121,8 @@ export interface Database {
                     starts_on?: string | null;
                     ends_on?: string | null;
                     display_order?: number;
+                    game_system?: string | null;
+                    game_edition?: string | null;
                 };
                 Update: Partial<Database['public']['Tables']['seasons']['Insert']>;
                 Relationships: [];
@@ -133,6 +137,8 @@ export interface Database {
                     hero_image_url: string | null;
                     season_id: string | null;
                     display_order: number;
+                    game_system: string | null;
+                    game_edition: string | null;
                     created_at: string;
                     updated_at: string;
                 };
@@ -144,6 +150,8 @@ export interface Database {
                     hero_image_url?: string | null;
                     season_id?: string | null;
                     display_order?: number;
+                    game_system?: string | null;
+                    game_edition?: string | null;
                 };
                 Update: Partial<Database['public']['Tables']['archive_events']['Insert']>;
                 Relationships: [];
@@ -173,6 +181,65 @@ export interface Database {
                     published_at?: string | null;
                 };
                 Update: Partial<Database['public']['Tables']['recaps']['Insert']>;
+                Relationships: [];
+            };
+            game_systems: {
+                Row: {
+                    id: string;
+                    slug: string;
+                    name: string;
+                    icon: string;
+                    display_order: number;
+                    created_at: string;
+                };
+                Insert: {
+                    slug: string;
+                    name: string;
+                    icon: string;
+                    display_order?: number;
+                };
+                Update: Partial<Database['public']['Tables']['game_systems']['Insert']>;
+                Relationships: [];
+            };
+            game_editions: {
+                Row: {
+                    id: string;
+                    system_id: string;
+                    slug: string;
+                    name: string;
+                    display_order: number;
+                    created_at: string;
+                };
+                Insert: {
+                    system_id: string;
+                    slug: string;
+                    name: string;
+                    display_order?: number;
+                };
+                Update: Partial<Database['public']['Tables']['game_editions']['Insert']>;
+                Relationships: [];
+            };
+            archive_pages: {
+                Row: {
+                    id: string;
+                    slug: string;
+                    title: string;
+                    body_md: string;
+                    category: string | null;
+                    season_id: string | null;
+                    display_order: number;
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    slug: string;
+                    title: string;
+                    body_md: string;
+                    category?: string | null;
+                    season_id?: string | null;
+                    display_order?: number;
+                };
+                Update: Partial<Database['public']['Tables']['archive_pages']['Insert']>;
                 Relationships: [];
             };
             recap_submissions: {
@@ -233,3 +300,6 @@ export type Season = Database['public']['Tables']['seasons']['Row'];
 export type ArchiveEvent = Database['public']['Tables']['archive_events']['Row'];
 export type Recap = Database['public']['Tables']['recaps']['Row'];
 export type RecapSubmission = Database['public']['Tables']['recap_submissions']['Row'];
+export type ArchivePage = Database['public']['Tables']['archive_pages']['Row'];
+export type GameSystem = Database['public']['Tables']['game_systems']['Row'];
+export type GameEdition = Database['public']['Tables']['game_editions']['Row'];

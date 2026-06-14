@@ -11,6 +11,8 @@ export type { FooterProps } from './Footer';
 export { Container } from './Container';
 export { Badge } from './Badge';
 export type { BadgeProps } from './Badge';
+export { SystemPill, ALLOWED_SYSTEM_ICONS } from './SystemPill';
+export type { SystemPillProps } from './SystemPill';
 export { Skeleton } from './Skeleton';
 export { MarkdownRender } from './MarkdownRender';
 export type { MarkdownRenderProps } from './MarkdownRender';

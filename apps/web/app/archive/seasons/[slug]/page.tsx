@@ -1,9 +1,14 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { Card, CardBody, Badge, MarkdownRender, Button } from '@cfo/ui';
-import { ArrowLeft, Calendar, PenSquare, ChevronRight } from 'lucide-react';
-import { getSeasonBySlug, getPublishedRecapsForSeason } from '@/lib/archive';
+import { Card, CardBody, MarkdownRender, Button, SystemPill } from '@cfo/ui';
+import { ArrowLeft, Calendar, ChevronRight, FileText, PenSquare, Pencil } from 'lucide-react';
+import {
+    getSeasonBySlug,
+    getPublishedRecapsForSeason,
+    getArchivePagesForSeason,
+    getSystemIconMap,
+} from '@/lib/archive';
 import { getCurrentUser } from '@/lib/auth';
 
 interface PageProps {
@@ -29,10 +34,14 @@ export default async function SeasonPage({ params }: PageProps) {
     const season = await getSeasonBySlug(slug);
     if (!season) notFound();
 
-    const [recaps, user] = await Promise.all([
+    const [recaps, pages, iconMap, user] = await Promise.all([
         getPublishedRecapsForSeason(season.id),
+        getArchivePagesForSeason(season.id),
+        getSystemIconMap(),
         getCurrentUser(),
     ]);
+
+    const isAdmin = user?.profile?.is_admin ?? false;
 
     return (
         <article className="space-y-10">
@@ -44,7 +53,11 @@ export default async function SeasonPage({ params }: PageProps) {
 
             <header className="space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="forest">Season</Badge>
+                    <SystemPill
+                        system={season.game_system}
+                        edition={season.game_edition}
+                        icon={season.game_system ? iconMap[season.game_system] : null}
+                    />
                     {season.year ? (
                         <span className="font-mono text-xs text-ink-soft">{season.year}</span>
                     ) : null}
@@ -55,17 +68,29 @@ export default async function SeasonPage({ params }: PageProps) {
                         </span>
                     ) : null}
                 </div>
-                <h1 className="cfo-heading-underline font-display text-4xl sm:text-5xl text-ink">
-                    {season.name}
-                </h1>
+                <div className="flex items-start justify-between gap-3">
+                    <h1 className="cfo-heading-underline font-display text-4xl sm:text-5xl text-ink">
+                        {season.name}
+                    </h1>
+                    {isAdmin ? (
+                        <Link href={`/archive/seasons/${season.slug}/edit`} className="no-underline shrink-0">
+                            <Button size="sm" variant="secondary">
+                                <Pencil size={14} /> Edit
+                            </Button>
+                        </Link>
+                    ) : null}
+                </div>
             </header>
 
             {season.description_md ? (
-                <Card>
-                    <CardBody className="px-7 py-7">
-                        <MarkdownRender source={season.description_md} />
-                    </CardBody>
-                </Card>
+                <section className="space-y-3">
+                    <h2 className="cfo-heading-underline font-display text-2xl">Overview</h2>
+                    <Card>
+                        <CardBody className="px-7 py-7">
+                            <MarkdownRender source={season.description_md} />
+                        </CardBody>
+                    </Card>
+                </section>
             ) : null}
 
             <section className="space-y-5">
@@ -132,6 +157,38 @@ export default async function SeasonPage({ params }: PageProps) {
                     </ul>
                 )}
             </section>
+
+            {pages.length > 0 ? (
+                <section className="space-y-5">
+                    <div className="flex items-baseline justify-between">
+                        <h2 className="cfo-heading-underline font-display text-2xl">
+                            Pages
+                        </h2>
+                        <span className="hidden sm:inline text-xs uppercase tracking-[0.18em] text-ink-soft/70 font-mono">
+                            {pages.length} entries
+                        </span>
+                    </div>
+                    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                        {pages.map((p) => (
+                            <li key={p.id}>
+                                <Link href={`/archive/pages/${p.slug}`} className="block no-underline">
+                                    <Card interactive>
+                                        <CardBody className="flex items-center justify-between gap-4 px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <FileText size={16} className="text-leather" />
+                                                <h3 className="font-display text-lg text-ink">
+                                                    {p.title}
+                                                </h3>
+                                            </div>
+                                            <ChevronRight size={16} className="text-ink-soft" />
+                                        </CardBody>
+                                    </Card>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            ) : null}
         </article>
     );
 }

@@ -4,6 +4,9 @@ import type {
     Season,
     ArchiveEvent,
     Recap,
+    ArchivePage,
+    GameSystem,
+    GameEdition,
 } from '@cfo/database/types';
 
 /**
@@ -84,6 +87,68 @@ export async function getRecapBySlug(slug: string): Promise<Recap | null> {
     const supabase = createServerSupabase(await cookies());
     const { data } = await supabase
         .from('recaps')
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+    return data;
+}
+
+export async function getArchivePages(): Promise<ArchivePage[]> {
+    const supabase = createServerSupabase(await cookies());
+    const { data } = await supabase
+        .from('archive_pages')
+        .select('*')
+        .order('category', { ascending: true, nullsFirst: false })
+        .order('display_order', { ascending: true });
+    return data ?? [];
+}
+
+export async function getGameSystems(): Promise<GameSystem[]> {
+    const supabase = createServerSupabase(await cookies());
+    const { data } = await supabase
+        .from('game_systems')
+        .select('*')
+        .order('display_order', { ascending: true });
+    return data ?? [];
+}
+
+export async function getGameEditions(): Promise<GameEdition[]> {
+    const supabase = createServerSupabase(await cookies());
+    const { data } = await supabase
+        .from('game_editions')
+        .select('*')
+        .order('display_order', { ascending: true });
+    return data ?? [];
+}
+
+/**
+ * Returns a map from the display name stored in seasons/archive_events
+ * (e.g. "40K") to the lucide icon name (e.g. "Skull"). Used so the public
+ * archive routes can render the SystemPill with its icon without a join.
+ */
+export async function getSystemIconMap(): Promise<Record<string, string>> {
+    const systems = await getGameSystems();
+    return Object.fromEntries(systems.map((s) => [s.name, s.icon]));
+}
+
+export async function getArchivePagesForSeason(
+    seasonId: string,
+): Promise<ArchivePage[]> {
+    const supabase = createServerSupabase(await cookies());
+    const { data } = await supabase
+        .from('archive_pages')
+        .select('*')
+        .eq('season_id', seasonId)
+        .order('display_order', { ascending: true });
+    return data ?? [];
+}
+
+export async function getArchivePageBySlug(
+    slug: string,
+): Promise<ArchivePage | null> {
+    const supabase = createServerSupabase(await cookies());
+    const { data } = await supabase
+        .from('archive_pages')
         .select('*')
         .eq('slug', slug)
         .maybeSingle();

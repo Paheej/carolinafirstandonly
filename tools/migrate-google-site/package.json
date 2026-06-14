@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "scrape": "tsx src/index.ts",
+    "takeout": "tsx src/takeout.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

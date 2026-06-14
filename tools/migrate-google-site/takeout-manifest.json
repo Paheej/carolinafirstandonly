@@ -1,0 +1,152 @@
+{
+  "takeoutDir": "/Users/paul_street/Downloads/Takeout/Drive/sites/Copy of www.carolinafirstandonly.com/DRAFT",
+  "items": [
+    {
+      "page": "Season 2",
+      "kind": "season",
+      "slug": "season-2",
+      "imagekitFolder": "/seasons/season-2/",
+      "title": "Season II (2021)"
+    },
+    {
+      "page": "Season 3",
+      "kind": "season",
+      "slug": "season-3",
+      "imagekitFolder": "/seasons/season-3/",
+      "title": "Season III (2022)"
+    },
+    {
+      "page": "Old Alliances",
+      "kind": "event",
+      "slug": "old-alliances",
+      "imagekitFolder": "/events/old-alliances/",
+      "title": "Old Alliances"
+    },
+    {
+      "page": "Drafted",
+      "kind": "event",
+      "slug": "drafted",
+      "imagekitFolder": "/events/drafted/",
+      "title": "Drafted!"
+    },
+    {
+      "page": "S2 - Battle Report Flood Tide on Fathom",
+      "kind": "recap",
+      "slug": "s2-battle-report-flood-tide-on-fathom",
+      "imagekitFolder": "/recaps/s2-flood-tide-on-fathom/",
+      "title": "Flood Tide on Fathom"
+    },
+    {
+      "page": "S2 - Battle Report Reclaiming of the Book of St",
+      "kind": "recap",
+      "slug": "s2-battle-report-reclaiming-book-of-st-lucius",
+      "imagekitFolder": "/recaps/s2-reclaiming-book-of-st-lucius/",
+      "title": "Reclaiming the Book of St Lucius"
+    },
+    {
+      "page": "S2 - Battle Report Entrapment",
+      "kind": "recap",
+      "slug": "s2-battle-report-entrapment",
+      "imagekitFolder": "/recaps/s2-entrapment/",
+      "title": "Entrapment"
+    },
+    {
+      "page": "S2 - Bills Dark Angels",
+      "kind": "recap",
+      "slug": "s2-bills-dark-angels",
+      "imagekitFolder": "/recaps/s2-bills-dark-angels/",
+      "title": "Bill's Dark Angels"
+    },
+    {
+      "page": "S2 - Mikes Death Guard",
+      "kind": "recap",
+      "slug": "s2-mikes-death-guard",
+      "imagekitFolder": "/recaps/s2-mikes-death-guard/",
+      "title": "Mike's Death Guard"
+    },
+    {
+      "page": "S2 - Colbys Orks",
+      "kind": "recap",
+      "slug": "s2-colbys-orks",
+      "imagekitFolder": "/recaps/s2-colbys-orks/",
+      "title": "Colby's Orks"
+    },
+    {
+      "page": "S2 - Phase One",
+      "kind": "recap",
+      "slug": "s2-phase-one",
+      "imagekitFolder": "/recaps/s2-phase-one/",
+      "title": "Season II — Phase One"
+    },
+    {
+      "page": "S2 - Phase Two",
+      "kind": "recap",
+      "slug": "s2-phase-two",
+      "imagekitFolder": "/recaps/s2-phase-two/",
+      "title": "Season II — Phase Two"
+    },
+    {
+      "page": "S2 - Phase Three",
+      "kind": "recap",
+      "slug": "s2-phase-three",
+      "imagekitFolder": "/recaps/s2-phase-three/",
+      "title": "Season II — Phase Three"
+    },
+    {
+      "page": "S2 - Phase One Analysis",
+      "kind": "recap",
+      "slug": "s2-phase-one-analysis",
+      "imagekitFolder": "/recaps/s2-phase-one-analysis/",
+      "title": "Season II — Phase One Analysis"
+    },
+    {
+      "page": "S2 - Campaign Master Edicts",
+      "kind": "recap",
+      "slug": "s2-campaign-master-edicts",
+      "imagekitFolder": "/recaps/s2-campaign-master-edicts/",
+      "title": "Season II — Campaign Master Edicts"
+    },
+    {
+      "page": "S2 - Player Hub Charlotte",
+      "kind": "page",
+      "slug": "s2-player-hub-charlotte",
+      "imagekitFolder": "/pages/s2-player-hub-charlotte/",
+      "title": "Season II — Player Hub: Charlotte"
+    },
+    {
+      "page": "S2 - Player Hub Greensboro",
+      "kind": "page",
+      "slug": "s2-player-hub-greensboro",
+      "imagekitFolder": "/pages/s2-player-hub-greensboro/",
+      "title": "Season II — Player Hub: Greensboro"
+    },
+    {
+      "page": "S2 - Player Faction Attacker",
+      "kind": "page",
+      "slug": "s2-player-faction-attacker",
+      "imagekitFolder": "/pages/s2-player-faction-attacker/",
+      "title": "Season II — Player Faction: Attacker"
+    },
+    {
+      "page": "S2 - Player Faction Defender",
+      "kind": "page",
+      "slug": "s2-player-faction-defender",
+      "imagekitFolder": "/pages/s2-player-faction-defender/",
+      "title": "Season II — Player Faction: Defender"
+    },
+    {
+      "page": "S2 - Player Faction Raider",
+      "kind": "page",
+      "slug": "s2-player-faction-raider",
+      "imagekitFolder": "/pages/s2-player-faction-raider/",
+      "title": "Season II — Player Faction: Raider"
+    },
+    {
+      "page": "S2 - House Rules",
+      "kind": "page",
+      "slug": "s2-house-rules",
+      "imagekitFolder": "/pages/s2-house-rules/",
+      "title": "Season II — House Rules"
+    }
+  ]
+}

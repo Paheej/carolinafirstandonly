@@ -183,6 +183,42 @@ export interface Database {
                 Update: Partial<Database['public']['Tables']['recaps']['Insert']>;
                 Relationships: [];
             };
+            game_systems: {
+                Row: {
+                    id: string;
+                    slug: string;
+                    name: string;
+                    icon: string;
+                    display_order: number;
+                    created_at: string;
+                };
+                Insert: {
+                    slug: string;
+                    name: string;
+                    icon: string;
+                    display_order?: number;
+                };
+                Update: Partial<Database['public']['Tables']['game_systems']['Insert']>;
+                Relationships: [];
+            };
+            game_editions: {
+                Row: {
+                    id: string;
+                    system_id: string;
+                    slug: string;
+                    name: string;
+                    display_order: number;
+                    created_at: string;
+                };
+                Insert: {
+                    system_id: string;
+                    slug: string;
+                    name: string;
+                    display_order?: number;
+                };
+                Update: Partial<Database['public']['Tables']['game_editions']['Insert']>;
+                Relationships: [];
+            };
             archive_pages: {
                 Row: {
                     id: string;
@@ -265,3 +301,5 @@ export type ArchiveEvent = Database['public']['Tables']['archive_events']['Row']
 export type Recap = Database['public']['Tables']['recaps']['Row'];
 export type RecapSubmission = Database['public']['Tables']['recap_submissions']['Row'];
 export type ArchivePage = Database['public']['Tables']['archive_pages']['Row'];
+export type GameSystem = Database['public']['Tables']['game_systems']['Row'];
+export type GameEdition = Database['public']['Tables']['game_editions']['Row'];

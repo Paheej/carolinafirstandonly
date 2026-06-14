@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { Card, CardBody, Badge, MarkdownRender, Button } from '@cfo/ui';
-import { ArrowLeft, Calendar, ChevronRight, FileText, PenSquare } from 'lucide-react';
+import { Card, CardBody, MarkdownRender, Button, SystemPill } from '@cfo/ui';
+import { ArrowLeft, Calendar, ChevronRight, FileText, PenSquare, Pencil } from 'lucide-react';
 import {
     getSeasonBySlug,
     getPublishedRecapsForSeason,
     getArchivePagesForSeason,
+    getSystemIconMap,
 } from '@/lib/archive';
 import { getCurrentUser } from '@/lib/auth';
 
@@ -33,11 +34,14 @@ export default async function SeasonPage({ params }: PageProps) {
     const season = await getSeasonBySlug(slug);
     if (!season) notFound();
 
-    const [recaps, pages, user] = await Promise.all([
+    const [recaps, pages, iconMap, user] = await Promise.all([
         getPublishedRecapsForSeason(season.id),
         getArchivePagesForSeason(season.id),
+        getSystemIconMap(),
         getCurrentUser(),
     ]);
+
+    const isAdmin = user?.profile?.is_admin ?? false;
 
     return (
         <article className="space-y-10">
@@ -49,12 +53,11 @@ export default async function SeasonPage({ params }: PageProps) {
 
             <header className="space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                    {season.game_system ? (
-                        <Badge variant="brass">
-                            {season.game_system}
-                            {season.game_edition ? ` · ${season.game_edition}` : null}
-                        </Badge>
-                    ) : null}
+                    <SystemPill
+                        system={season.game_system}
+                        edition={season.game_edition}
+                        icon={season.game_system ? iconMap[season.game_system] : null}
+                    />
                     {season.year ? (
                         <span className="font-mono text-xs text-ink-soft">{season.year}</span>
                     ) : null}
@@ -65,9 +68,18 @@ export default async function SeasonPage({ params }: PageProps) {
                         </span>
                     ) : null}
                 </div>
-                <h1 className="cfo-heading-underline font-display text-4xl sm:text-5xl text-ink">
-                    {season.name}
-                </h1>
+                <div className="flex items-start justify-between gap-3">
+                    <h1 className="cfo-heading-underline font-display text-4xl sm:text-5xl text-ink">
+                        {season.name}
+                    </h1>
+                    {isAdmin ? (
+                        <Link href={`/archive/seasons/${season.slug}/edit`} className="no-underline shrink-0">
+                            <Button size="sm" variant="secondary">
+                                <Pencil size={14} /> Edit
+                            </Button>
+                        </Link>
+                    ) : null}
+                </div>
             </header>
 
             {season.description_md ? (

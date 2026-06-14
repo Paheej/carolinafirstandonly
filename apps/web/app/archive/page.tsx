@@ -1,8 +1,12 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Card, CardBody, Badge, Button } from '@cfo/ui';
-import { BookMarked, Calendar, ChevronRight, FileText, PenSquare, ShieldCheck } from 'lucide-react';
-import { getSeasons, getArchiveEvents, getArchivePages } from '@/lib/archive';
+import { Card, CardBody, Button, SystemPill } from '@cfo/ui';
+import { BookMarked, Calendar, ChevronRight, PenSquare, Plus, ShieldCheck } from 'lucide-react';
+import {
+    getSeasons,
+    getArchiveEvents,
+    getSystemIconMap,
+} from '@/lib/archive';
 import { getCurrentUser } from '@/lib/auth';
 
 export const metadata: Metadata = {
@@ -18,12 +22,14 @@ function formatDateRange(start: string | null, end: string | null) {
 }
 
 export default async function ArchiveIndexPage() {
-    const [seasons, events, pages, user] = await Promise.all([
+    const [seasons, events, iconMap, user] = await Promise.all([
         getSeasons(),
         getArchiveEvents(),
-        getArchivePages(),
+        getSystemIconMap(),
         getCurrentUser(),
     ]);
+
+    const isAdmin = user?.profile?.is_admin ?? false;
 
     return (
         <div className="space-y-12">
@@ -43,7 +49,7 @@ export default async function ArchiveIndexPage() {
                     </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                    {user?.profile?.is_admin ? (
+                    {isAdmin ? (
                         <Link href="/archive/pending" className="no-underline">
                             <Button variant="secondary">
                                 <ShieldCheck size={16} /> Review pending
@@ -72,9 +78,18 @@ export default async function ArchiveIndexPage() {
                     <h2 className="cfo-heading-underline font-display text-2xl">
                         Seasons
                     </h2>
-                    <span className="hidden sm:inline text-xs uppercase tracking-[0.18em] text-ink-soft/70 font-mono">
-                        {seasons.length} entries
-                    </span>
+                    <div className="flex items-center gap-3">
+                        <span className="hidden sm:inline text-xs uppercase tracking-[0.18em] text-ink-soft/70 font-mono">
+                            {seasons.length} entries
+                        </span>
+                        {isAdmin ? (
+                            <Link href="/archive/seasons/new" className="no-underline">
+                                <Button size="sm" variant="secondary">
+                                    <Plus size={14} /> New
+                                </Button>
+                            </Link>
+                        ) : null}
+                    </div>
                 </div>
 
                 {seasons.length === 0 ? (
@@ -90,12 +105,11 @@ export default async function ArchiveIndexPage() {
                                     <Card interactive className="h-full">
                                         <CardBody className="flex h-full flex-col gap-3 px-6 py-6">
                                             <div className="flex items-center justify-between gap-2">
-                                                {s.game_system ? (
-                                                    <Badge variant="brass">
-                                                        {s.game_system}
-                                                        {s.game_edition ? ` · ${s.game_edition}` : null}
-                                                    </Badge>
-                                                ) : <span />}
+                                                <SystemPill
+                                                    system={s.game_system}
+                                                    edition={s.game_edition}
+                                                    icon={s.game_system ? iconMap[s.game_system] : null}
+                                                />
                                                 {s.year ? (
                                                     <span className="font-mono text-[11px] text-ink-soft">
                                                         {s.year}
@@ -130,9 +144,18 @@ export default async function ArchiveIndexPage() {
                     <h2 className="cfo-heading-underline font-display text-2xl">
                         Special events
                     </h2>
-                    <span className="hidden sm:inline text-xs uppercase tracking-[0.18em] text-ink-soft/70 font-mono">
-                        {events.length} entries
-                    </span>
+                    <div className="flex items-center gap-3">
+                        <span className="hidden sm:inline text-xs uppercase tracking-[0.18em] text-ink-soft/70 font-mono">
+                            {events.length} entries
+                        </span>
+                        {isAdmin ? (
+                            <Link href="/archive/events/new" className="no-underline">
+                                <Button size="sm" variant="secondary">
+                                    <Plus size={14} /> New
+                                </Button>
+                            </Link>
+                        ) : null}
+                    </div>
                 </div>
 
                 {events.length === 0 ? (
@@ -147,12 +170,11 @@ export default async function ArchiveIndexPage() {
                                 <Link href={`/archive/events/${e.slug}`} className="block no-underline">
                                     <Card interactive className="h-full">
                                         <CardBody className="flex h-full flex-col gap-3 px-6 py-6">
-                                            {e.game_system ? (
-                                                <Badge variant="brass">
-                                                    {e.game_system}
-                                                    {e.game_edition ? ` · ${e.game_edition}` : null}
-                                                </Badge>
-                                            ) : null}
+                                            <SystemPill
+                                                system={e.game_system}
+                                                edition={e.game_edition}
+                                                icon={e.game_system ? iconMap[e.game_system] : null}
+                                            />
                                             <h3 className="font-display text-2xl text-ink leading-tight">
                                                 {e.name}
                                             </h3>
@@ -178,38 +200,6 @@ export default async function ArchiveIndexPage() {
                     </ul>
                 )}
             </section>
-            {/* Reference */}
-            {pages.length > 0 ? (
-                <section>
-                    <div className="mb-5 flex items-baseline justify-between">
-                        <h2 className="cfo-heading-underline font-display text-2xl">
-                            Reference
-                        </h2>
-                        <span className="hidden sm:inline text-xs uppercase tracking-[0.18em] text-ink-soft/70 font-mono">
-                            {pages.length} entries
-                        </span>
-                    </div>
-                    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        {pages.map((p) => (
-                            <li key={p.id}>
-                                <Link href={`/archive/pages/${p.slug}`} className="block no-underline">
-                                    <Card interactive>
-                                        <CardBody className="flex items-center justify-between gap-4 px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <FileText size={16} className="text-leather" />
-                                                <h3 className="font-display text-lg text-ink">
-                                                    {p.title}
-                                                </h3>
-                                            </div>
-                                            <ChevronRight size={16} className="text-ink-soft" />
-                                        </CardBody>
-                                    </Card>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </section>
-            ) : null}
         </div>
     );
 }

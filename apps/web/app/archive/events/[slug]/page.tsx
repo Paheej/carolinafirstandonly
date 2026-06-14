@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { Card, CardBody, Badge, MarkdownRender } from '@cfo/ui';
-import { ArrowLeft, Calendar } from 'lucide-react';
-import { getArchiveEventBySlug } from '@/lib/archive';
+import { Card, CardBody, MarkdownRender, Button, SystemPill } from '@cfo/ui';
+import { ArrowLeft, Calendar, Pencil } from 'lucide-react';
+import { getArchiveEventBySlug, getSystemIconMap } from '@/lib/archive';
+import { getCurrentUser } from '@/lib/auth';
 
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -21,6 +22,12 @@ export default async function ArchiveEventPage({ params }: PageProps) {
     const event = await getArchiveEventBySlug(slug);
     if (!event) notFound();
 
+    const [iconMap, user] = await Promise.all([
+        getSystemIconMap(),
+        getCurrentUser(),
+    ]);
+    const isAdmin = user?.profile?.is_admin ?? false;
+
     return (
         <article className="space-y-10">
             <nav className="text-sm">
@@ -31,12 +38,11 @@ export default async function ArchiveEventPage({ params }: PageProps) {
 
             <header className="space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                    {event.game_system ? (
-                        <Badge variant="brass">
-                            {event.game_system}
-                            {event.game_edition ? ` · ${event.game_edition}` : null}
-                        </Badge>
-                    ) : null}
+                    <SystemPill
+                        system={event.game_system}
+                        edition={event.game_edition}
+                        icon={event.game_system ? iconMap[event.game_system] : null}
+                    />
                     {event.event_date ? (
                         <span className="inline-flex items-center gap-1 text-xs text-ink-soft">
                             <Calendar size={12} />
@@ -48,9 +54,18 @@ export default async function ArchiveEventPage({ params }: PageProps) {
                         </span>
                     ) : null}
                 </div>
-                <h1 className="cfo-heading-underline font-display text-4xl sm:text-5xl text-ink">
-                    {event.name}
-                </h1>
+                <div className="flex items-start justify-between gap-3">
+                    <h1 className="cfo-heading-underline font-display text-4xl sm:text-5xl text-ink">
+                        {event.name}
+                    </h1>
+                    {isAdmin ? (
+                        <Link href={`/archive/events/${event.slug}/edit`} className="no-underline shrink-0">
+                            <Button size="sm" variant="secondary">
+                                <Pencil size={14} /> Edit
+                            </Button>
+                        </Link>
+                    ) : null}
+                </div>
             </header>
 
             {event.description_md ? (

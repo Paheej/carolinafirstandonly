@@ -58,7 +58,7 @@ export default async function EditSeasonPage({ params }: PageProps) {
                 initial={initial}
                 systems={systems}
                 editions={editions}
-                onSubmit={(v) => updateSeason(season.slug, v)}
+                onSubmit={updateSeason.bind(null, season.slug)}
             />
         </article>
     );

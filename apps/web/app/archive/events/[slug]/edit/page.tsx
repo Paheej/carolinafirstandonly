@@ -60,7 +60,7 @@ export default async function EditEventPage({ params }: PageProps) {
                 systems={systems}
                 editions={editions}
                 seasons={seasons.map((s) => ({ id: s.id, name: s.name }))}
-                onSubmit={(v) => updateEvent(event.slug, v)}
+                onSubmit={updateEvent.bind(null, event.slug)}
             />
         </article>
     );

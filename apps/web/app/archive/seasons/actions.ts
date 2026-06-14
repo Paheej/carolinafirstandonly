@@ -75,21 +75,21 @@ export async function updateSeason(
     values: SeasonFormValues,
 ): Promise<SeasonActionResult> {
     if (values.name.trim().length < 2) return { ok: false, error: 'Name is required.' };
-    if (!/^[a-z0-9-]+$/.test(values.slug)) {
-        return { ok: false, error: 'Slug must be lowercase letters, numbers, and dashes.' };
-    }
 
     const { supabase, error: authErr } = await assertAdmin();
     if (authErr) return { ok: false, error: authErr };
 
+    // Slug is locked on edit (form disables the field); enforce that here too
+    // so a tampered client can't rename a published URL out from under us.
+    const row = { ...rowFromValues(values), slug: currentSlug };
+
     const { error } = await supabase
         .from('seasons')
-        .update(rowFromValues(values))
+        .update(row)
         .eq('slug', currentSlug);
     if (error) return { ok: false, error: error.message };
 
     revalidatePath('/archive');
     revalidatePath(`/archive/seasons/${currentSlug}`);
-    if (values.slug !== currentSlug) revalidatePath(`/archive/seasons/${values.slug}`);
-    redirect(`/archive/seasons/${values.slug.trim()}`);
+    redirect(`/archive/seasons/${currentSlug}`);
 }

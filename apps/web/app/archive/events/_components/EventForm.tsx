@@ -132,7 +132,14 @@ export function EventForm({
                                 placeholder="showdown-at-snyders"
                                 pattern="[a-z0-9-]+"
                                 required
+                                disabled={mode === 'edit'}
+                                readOnly={mode === 'edit'}
                             />
+                            {mode === 'edit' ? (
+                                <p className="mt-1 text-[11px] text-ink-soft">
+                                    Slug is locked — changing it would break existing URLs.
+                                </p>
+                            ) : null}
                         </div>
                     </div>
 

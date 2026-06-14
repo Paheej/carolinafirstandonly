@@ -8,6 +8,8 @@ import {
     Dices,
     Shield,
     Flame,
+    Crosshair,
+    Mountain,
     type LucideIcon,
 } from 'lucide-react';
 import { Badge } from './Badge';
@@ -26,6 +28,8 @@ const ICONS: Record<string, LucideIcon> = {
     Dices,
     Shield,
     Flame,
+    Crosshair,
+    Mountain,
 };
 
 export const ALLOWED_SYSTEM_ICONS = Object.keys(ICONS);

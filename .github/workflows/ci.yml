@@ -26,6 +26,9 @@ jobs:
 
       - run: pnpm typecheck
 
+      - name: Database tests (migrations + RLS + RPCs in PGlite)
+        run: pnpm test:sql
+
       - name: Build web
         env:
           # Build-time placeholders so Next can finish prerendering. The

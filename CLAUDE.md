@@ -1,5 +1,7 @@
 # Carolina First and Only — Build Specification
 
+> **Starting a new session? Read `docs/HANDOFF.md` first** (current state, what's waiting on the owner, next phase), then `docs/RUNBOOK.md` (accounts, commands, deploy/migration steps, how to use Claude in Chrome for dashboards, working agreement). `PROGRESS.md` has per-phase detail and gotchas. The owner wants Claude to do setup work itself (CLIs + Claude in Chrome) rather than hand over instructions, and to ask before production migrations, merges, deletes, OAuth consents and review submissions.
+
 This document is the source of truth for Claude Code while building the `carolinafirstandonly.com` migration. Keep it in the repo root as `CLAUDE.md` so it's loaded automatically.
 
 ---

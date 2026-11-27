@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Apple Sign in with Apple private keys
 *.p8
+
+# Screenshot tool output
+tools/screenshots/out/

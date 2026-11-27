@@ -3,6 +3,7 @@ import type { EventRole, GameDay } from '@cfo/database/types';
 import type { PlannerGroup } from '@/lib/events';
 import { utcToZonedParts } from '@/lib/time';
 import { RoleRows, type RoleRowValue } from './RoleRows';
+import { AvailabilityStrip } from './AvailabilityStrip';
 
 export const VISIBILITY_LABEL: Record<GameDay['visibility'], string> = {
     public: 'Everyone',
@@ -83,6 +84,8 @@ export function EventFields({
                     <Input id="capacity" name="capacity" type="number" min={1} inputMode="numeric" defaultValue={event?.capacity ?? ''} placeholder="No limit" />
                 </div>
             </div>
+
+            {groups.length > 0 && <AvailabilityStrip />}
 
             <RoleRows initial={initialRoles} templatesByGroup={event ? undefined : templatesByGroup} groupSelectId="group_id" />
 

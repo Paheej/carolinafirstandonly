@@ -49,11 +49,13 @@ export default function PrivacyPage() {
                 </ul>
                 <h3>Calendars, only if you connect one</h3>
                 <p>
-                    A planned feature lets you connect a Google, Outlook or Apple calendar so the club can see
-                    when people are free. If you choose to connect one, we read only the times you&apos;re busy
-                    for the next 90 days. We never store event titles, descriptions, locations or attendees.
-                    Group members see combined availability (&ldquo;5 of 8 free&rdquo;), not your calendar. You
-                    can disconnect at any time, and we delete the stored busy times when you do.
+                    You can connect a Google, Outlook or Apple calendar so the club can see when people are free.
+                    You do this by pasting your calendar&apos;s private link into your profile settings. Once a day
+                    we read the calendar and keep only the times you&apos;re busy, for the next 90 days. We never
+                    store event titles, descriptions, locations or attendees; they&apos;re discarded as the calendar
+                    is read. We store your calendar link encrypted. Members of your groups see combined
+                    availability (&ldquo;5 of 8 free&rdquo;), not your calendar and not your name. You can pause or
+                    disconnect a calendar at any time, and disconnecting deletes the link and the stored busy times.
                 </p>
                 <h3>Technical data</h3>
                 <p>
@@ -120,8 +122,8 @@ export default function PrivacyPage() {
 
                 <h2>Security</h2>
                 <p>
-                    Connections to the site are encrypted. Passwords are hashed, and calendar access tokens are
-                    stored encrypted. Each person can only see what they&apos;re allowed to, enforced in the
+                    Connections to the site are encrypted. Passwords are hashed, and calendar links and access tokens
+                    are stored encrypted. Each person can only see what they&apos;re allowed to, enforced in the
                     database itself. No system is perfectly secure, but we take reasonable steps to protect your
                     information.
                 </p>

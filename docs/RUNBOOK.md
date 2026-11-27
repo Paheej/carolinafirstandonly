@@ -101,6 +101,11 @@ supabase db push --workdir packages/database --yes </dev/null    # apply
   `vercel ls carolinafirstandonly`, then `vercel inspect <deployment-url> --wait --timeout 6m`. The domain switches over a few seconds after "Ready".
 - **Environment variables:** `vercel env ls` and `vercel env add NAME production`. The local copy lives in `apps/web/.env.local`, which git ignores.
 
+## Secrets that must not be lost
+
+- `TOKEN_ENCRYPTION_KEY` (32 bytes, base64) encrypts members' calendar links. It's the same value in every Vercel environment and in `apps/web/.env.local`, because preview and production share one database. If you change it, every stored link becomes unreadable.
+- `CRON_SECRET`: Vercel sends it as `Authorization: Bearer …` to `/api/cron/calendar-sync`. To run the sync by hand: `curl -H "Authorization: Bearer $CRON_SECRET" https://carolinafirstandonly.vercel.app/api/cron/calendar-sync`.
+
 ## Browser work (Claude in Chrome)
 
 - The owner uses **Safari** day to day. **Google Chrome** was installed with Homebrew for this project, along with the **Claude in Chrome** extension.

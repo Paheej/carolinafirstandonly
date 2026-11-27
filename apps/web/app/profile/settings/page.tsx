@@ -9,6 +9,8 @@ import { updateProfile } from '../actions';
 import { deleteFeed, rotateFeed } from '@/app/events/actions';
 import { getMyFeedToken } from '@/lib/events';
 import { headers } from 'next/headers';
+import { getMyCalendars } from '@/lib/calendars';
+import { BusyCalendars } from './BusyCalendars';
 
 export const metadata: Metadata = { title: 'Profile settings' };
 
@@ -19,7 +21,13 @@ export default async function ProfileSettingsPage({
 }) {
     const user = await getCurrentUser();
     if (!user) redirect('/auth/login?next=/profile/settings');
-    const [sp, systems, token, h] = await Promise.all([searchParams, getGameSystems(), getMyFeedToken(user.id), headers()]);
+    const [sp, systems, token, h, calendars] = await Promise.all([
+        searchParams,
+        getGameSystems(),
+        getMyFeedToken(user.id),
+        headers(),
+        getMyCalendars(),
+    ]);
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? `https://${h.get('host')}`;
     const feedUrl = token ? `${origin}/api/calendar/${token}.ics` : null;
     const p = user.profile;
@@ -125,6 +133,7 @@ export default async function ProfileSettingsPage({
                     </form>
                 )}
             </section>
+            <BusyCalendars calendars={calendars} />
         </>
     );
 }

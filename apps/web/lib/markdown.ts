@@ -61,3 +61,14 @@ export function stripLeadingTitle(md: string, title: string): string {
     }
     return body;
 }
+
+/** Button text for a campaign tracked on another site. */
+export function externalLabel(url: string): string {
+    try {
+        const host = new URL(url).hostname.replace(/^www\./, '');
+        if (host === 'campaign-chronicle.app') return 'Open the Chronicle';
+        return `Open ${host}`;
+    } catch {
+        return 'Open the campaign site';
+    }
+}

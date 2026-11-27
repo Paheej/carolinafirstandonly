@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { stripLeadingTitle } from '@/lib/markdown';
 import { MarkdownRender, PageHead, SystemPill, buttonClasses } from '@cfo/ui';
-import { PenSquare, Pencil } from 'lucide-react';
+import { ExternalLink, PenSquare, Pencil } from 'lucide-react';
 import {
     getSeasonBySlug,
     getPublishedRecapsForSeason,
@@ -11,6 +11,7 @@ import {
     getSystemIconMap,
 } from '@/lib/archive';
 import { getCurrentUser } from '@/lib/auth';
+import { externalLabel } from '@/lib/markdown';
 
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -56,14 +57,24 @@ export default async function SeasonPage({ params }: PageProps) {
                 }
                 title={season.name}
                 actions={
-                    isAdmin ? (
-                        <Link href={`/archive/seasons/${season.slug}/edit`} className={buttonClasses('outline', 'sm')}>
-                            <Pencil size={14} /> Edit season
-                        </Link>
+                    season.external_url || isAdmin ? (
+                        <>
+                            {season.external_url ? (
+                                <a href={season.external_url} className={buttonClasses('primary', 'sm')}>
+                                    <ExternalLink size={14} /> {externalLabel(season.external_url)}
+                                </a>
+                            ) : null}
+                            {isAdmin ? (
+                                <Link href={`/archive/seasons/${season.slug}/edit`} className={buttonClasses('outline', 'sm')}>
+                                    <Pencil size={14} /> Edit campaign
+                                </Link>
+                            ) : null}
+                        </>
                     ) : null
                 }
             >
                 <div className="cfo-ui cfo-num mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-on-mat-soft">
+                    {season.status === 'active' ? <span className="font-semibold text-gold-bright">Running now</span> : null}
                     {season.game_system ? (
                         <SystemPill
                             system={season.game_system}
@@ -83,7 +94,7 @@ export default async function SeasonPage({ params }: PageProps) {
                     {season.description_md ? (
                         <MarkdownRender source={stripLeadingTitle(season.description_md, season.name)} />
                     ) : (
-                        <p className="text-graphite-soft">No overview written for this season yet.</p>
+                        <p className="text-graphite-soft">No overview written for this campaign yet.</p>
                     )}
                 </div>
 
@@ -92,7 +103,7 @@ export default async function SeasonPage({ params }: PageProps) {
                         <h2 className="mb-3 text-[1.5rem] font-bold">Battle reports</h2>
                         {recaps.length === 0 ? (
                             <p className="text-base text-graphite-soft">
-                                None yet. Played a game from this season?{' '}
+                                None yet. Played a game in this campaign?{' '}
                                 <Link href="/archive/submit" className="cfo-link">
                                     Write it up
                                 </Link>

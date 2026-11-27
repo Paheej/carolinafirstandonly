@@ -61,7 +61,7 @@ Both apps consume `@cfo/database`, `@cfo/ui`, and `@cfo/shared`. The agent app i
 
 ## Design System
 
-**Aesthetic:** "The war table." Black game-mat bands (nav, page heads, footer) over a grey primer page, in Wake Forest black and old gold. Most of the group went to Wake Forest — **never use Carolina blue.** The home hero is a top-down 60x44" Strike Force board (`<WarTable />`) with rulers, deployment zones and numbered objective markers; until Events ship it features the newest campaign, afterwards it should feature the next game day.
+**Aesthetic:** "The war table." Black game-mat bands (nav, page heads, footer) over a grey primer page, in Wake Forest black and old gold. Most of the group went to Wake Forest — **never use Carolina blue.** The home hero is a top-down 60x44" Strike Force board (`<WarTable />`) with rulers, deployment zones and numbered objective markers; until Events ship it features the campaigns with `seasons.status = 'active'` (currently Campaign of the Burning Star on campaign-chronicle.app and Curse of Strahd); afterwards it should feature the next game day. Seasons are campaigns; `archive_events` are one-off events (Drafted! is an event, not a campaign).
 
 ### Tokens
 
@@ -615,8 +615,9 @@ apps/agent/app/
 
 ### Groups
 
-- Anyone authed can create a group at `/groups/new` (slug, name, description, systems multi-select, visibility, banner)
-- Creator becomes `owner`. Owner can promote members to `admin`. Admins can edit group settings, kick members, pin posts.
+- Anyone authed can create a group at `/groups/new` (slug, name, description, systems multi-select, visibility, join policy, banner)
+- Creator becomes `owner`. Owner can promote members to `admin` and hand over ownership. Admins can edit group settings, approve/decline join requests, invite, remove members, pin posts.
+- `join_policy`: `open` (join instantly), `request` (default; admins approve), `invite` (username invites or expiring invite links only). All membership changes go through security-definer RPCs in `0011_groups.sql`; there are no direct insert policies on `group_members`.
 - Public groups visible to all; private groups only to members
 - `/groups/[slug]` shows: banner, description, member count, upcoming group events, pinned posts, member list
 - Group settings allow defining `group_role_templates` — e.g., D&D group sets default roles "GM" (max 1), "Player" (max 5). These become defaults when creating events in this group; can be overridden per event.

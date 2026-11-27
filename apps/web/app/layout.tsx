@@ -4,6 +4,7 @@ import { Archivo, Source_Serif_4 } from 'next/font/google';
 import { NavBar, Footer } from '@cfo/ui';
 import { SITE_NAME, SITE_TAGLINE } from '@cfo/shared';
 import { getCurrentUser } from '@/lib/auth';
+import { getUnreadCount } from '@/lib/groups';
 import { UserMenu } from './_components/UserMenu';
 import { MobileNav } from './_components/MobileNav';
 
@@ -30,6 +31,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
     const user = await getCurrentUser();
+    const unread = user ? await getUnreadCount(user.id) : 0;
     const links = [
         { href: '/archive', label: 'Archive' },
         { href: '/events', label: 'Events' },
@@ -44,8 +46,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <NavBar
                     siteName={SITE_NAME}
                     links={links}
-                    rightSlot={<UserMenu user={user} />}
-                    mobileMenu={<MobileNav links={links} user={user} />}
+                    rightSlot={<UserMenu user={user} unread={unread} />}
+                    mobileMenu={<MobileNav links={links} user={user} unread={unread} />}
                 />
                 <main className="cfo-main mx-auto max-w-6xl px-4 py-8 md:px-6 min-h-[calc(100dvh-12rem)]">
                     {children}

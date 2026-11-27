@@ -5,7 +5,7 @@ import { createServerSupabase } from '@cfo/database/server';
 export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const code = url.searchParams.get('code');
-    const next = url.searchParams.get('next') ?? '/';
+    const next = safeNext(url.searchParams.get('next'));
 
     if (code) {
         const supabase = createServerSupabase(await cookies());
@@ -18,4 +18,9 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.redirect(new URL(next, request.url));
+}
+
+/** Only same-site paths, so ?next= can't bounce people to another site. */
+function safeNext(v: string | null): string {
+    return v && /^\/(?![/\\])/.test(v) ? v : '/';
 }

@@ -16,7 +16,9 @@
     "db:stop": "supabase --workdir packages/database stop",
     "db:reset": "supabase --workdir packages/database db reset",
     "db:diff": "supabase --workdir packages/database db diff",
-    "db:types": "supabase --workdir packages/database gen types typescript --local > packages/database/src/types.generated.ts"
+    "db:types": "supabase --workdir packages/database gen types typescript --local > packages/database/src/types.generated.ts",
+    "test:sql": "pnpm --filter @cfo/sql-tests test",
+    "shots": "pnpm --filter @cfo/screenshots shoot"
   },
   "devDependencies": {
     "typescript": "^5.6.3"

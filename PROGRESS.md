@@ -1,14 +1,16 @@
 # Build Progress
 
+> Current state and next steps: `docs/HANDOFF.md`. How-to: `docs/RUNBOOK.md`.
+
 A running log of what's been shipped, where things live, and the gotchas
 that bit us. Read this **after** `CLAUDE.md` (which is the source-of-truth
 spec) before starting a new phase.
 
 ---
 
-## Phase 3 — Game days + RSVPs ⏳
+## Phase 3 — Game days + RSVPs ✅
 
-**Built 2026-11-27** on branch `phase-3-events`. Needs migration 0013 pushed before merging.
+**Shipped 2026-11-27** (PR #10, #11). Migration 0013 applied. Tested live in Chrome: plan, RSVP with role and note, .ics, Google/Outlook links, private feed without a session, edit (SEQUENCE bump), cancel and restore, and that a hidden game day doesn't leak to signed-out visitors.
 
 - `0013_events.sql`: events, event_roles, event_rsvps, event_invites, user_calendar_feeds. RPCs: `rsvp` (locks the event row; capacity + per-role limits; waitlist with stable positions), `invite_to_event`, `uninvite_from_event`, `cancel_event`, `restore_event`, `rotate_calendar_feed`, `delete_calendar_feed`, `calendar_feed_events`. Waitlist promotion runs when a 'yes' leaves, capacity grows, or a role's limit changes. `ics_sequence` bumps on time/place/title/cancel changes so calendar apps take the update.
 - Notifications: new group game day (group members), RSVP yes (organizer), promoted off waitlist, invited, time/place changed, cancelled, back on.
@@ -25,9 +27,9 @@ Gotchas:
 
 ---
 
-## Phase 2 — Groups + Profiles ⏳
+## Phase 2 — Groups + Profiles ✅
 
-**Built 2026-11-26** on branch `phase-2-groups` (stacked on `current-campaigns`). Needs migrations 0010–0012 pushed before merging.
+**Shipped 2026-11-27** (PR #7, #8). Migrations 0010–0012 applied.
 
 - `0010_current_campaigns.sql`: `seasons.status` (`active`/`completed`) + `external_url`; seeds Campaign of the Burning Star (campaign-chronicle.app) and Curse of Strahd as active. Home hero features active campaigns; sidebar splits Campaigns and Events.
 - `0011_groups.sql`: groups, group_members, group_join_requests, group_invites (direct + link), group_pinned_posts, group_role_templates. Membership changes only via RPCs: `join_group`, `cancel_join_request`, `decide_join_request`, `invite_member`, `decline_invite`, `create_invite_link`, `revoke_invite`, `redeem_invite_link`, `invite_link_preview`, `leave_group`, `set_member_role`, `remove_member`. Each notifies the people involved.

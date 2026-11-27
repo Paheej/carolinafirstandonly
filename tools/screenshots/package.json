@@ -1,0 +1,11 @@
+{
+  "name": "@cfo/screenshots",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "shoot": "node shoot.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.60.0"
+  }
+}

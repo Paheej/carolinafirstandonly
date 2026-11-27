@@ -3,6 +3,8 @@
 Community platform for a Charlotte-area tabletop gaming group.
 
 - **`CLAUDE.md`** — source-of-truth build spec (read first)
+- **`docs/HANDOFF.md`** — where things stand and what's next (start here in a new session)
+- **`docs/RUNBOOK.md`** — accounts, commands, deploys, migrations, tests
 - **`PROGRESS.md`** — what's shipped, where things live, gotchas to avoid (read before starting a new phase)
 
 ## Stack

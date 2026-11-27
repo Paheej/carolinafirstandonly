@@ -46,11 +46,11 @@ export function SystemPill({ system, edition, icon, className }: SystemPillProps
     if (!system) return null;
     const Icon = icon ? ICONS[icon] : undefined;
     return (
-        <Badge variant="brass" className={className}>
+        <Badge variant="gold" className={className}>
             {Icon ? <Icon size={12} strokeWidth={2.25} /> : null}
             <span>
                 {system}
-                {edition ? ` · ${edition}` : null}
+                {edition ? ` ${edition}` : null}
             </span>
         </Badge>
     );

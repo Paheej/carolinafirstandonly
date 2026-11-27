@@ -44,12 +44,12 @@ export default async function EditSeasonPage({ params }: PageProps) {
     return (
         <article className="space-y-8">
             <nav className="text-sm">
-                <Link href={`/archive/seasons/${season.slug}`} className="inline-flex items-center gap-1 text-ink-soft">
+                <Link href={`/archive/seasons/${season.slug}`} className="inline-flex items-center gap-1 text-graphite-soft">
                     <ArrowLeft size={14} /> {season.name}
                 </Link>
             </nav>
             <header>
-                <h1 className="cfo-heading-underline font-display text-3xl sm:text-4xl text-ink">
+                <h1 className="cfo-heading-underline font-display text-3xl sm:text-4xl text-graphite">
                     Edit {season.name}
                 </h1>
             </header>

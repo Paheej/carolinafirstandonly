@@ -76,14 +76,14 @@ export function AuthForm({ mode, initialError }: AuthFormProps) {
             <div className="grid gap-2">
                 <Button
                     type="button"
-                    variant="secondary"
+                    variant="outline"
                     onClick={() => handleOAuth('google')}
                 >
                     Continue with Google
                 </Button>
                 <Button
                     type="button"
-                    variant="secondary"
+                    variant="outline"
                     onClick={() => handleOAuth('discord')}
                 >
                     Continue with Discord
@@ -98,10 +98,10 @@ export function AuthForm({ mode, initialError }: AuthFormProps) {
                 </Button>
             </div>
 
-            <div className="flex items-center gap-3 text-xs text-ink-soft/70">
-                <span className="h-px flex-1 bg-brass-dark/40" />
+            <div className="flex items-center gap-3 text-xs text-graphite-soft/70">
+                <span className="h-px flex-1 bg-gold-deep/40" />
                 or with email
-                <span className="h-px flex-1 bg-brass-dark/40" />
+                <span className="h-px flex-1 bg-gold-deep/40" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
@@ -134,7 +134,7 @@ export function AuthForm({ mode, initialError }: AuthFormProps) {
                 </div>
 
                 {error ? (
-                    <p className="text-sm text-danger">{error}</p>
+                    <p className="text-sm text-casualty">{error}</p>
                 ) : null}
                 {info ? (
                     <p className="text-sm text-success">{info}</p>
@@ -144,7 +144,7 @@ export function AuthForm({ mode, initialError }: AuthFormProps) {
                     {pending
                         ? 'Working…'
                         : mode === 'login'
-                          ? 'Log in'
+                          ? 'Sign in'
                           : 'Create account'}
                 </Button>
             </form>

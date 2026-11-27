@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { Card, CardBody, MarkdownRender, Button, SystemPill } from '@cfo/ui';
-import { ArrowLeft, Calendar, ChevronRight, FileText, PenSquare, Pencil } from 'lucide-react';
+import { stripLeadingTitle } from '@/lib/markdown';
+import { MarkdownRender, PageHead, SystemPill, buttonClasses } from '@cfo/ui';
+import { PenSquare, Pencil } from 'lucide-react';
 import {
     getSeasonBySlug,
     getPublishedRecapsForSeason,
@@ -25,8 +26,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 function formatRange(start: string | null, end: string | null) {
     if (!start && !end) return null;
     const fmt = (d: string | null) =>
-        d ? new Date(d).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '…';
-    return `${fmt(start)} — ${fmt(end)}`;
+        d ? new Date(d).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : 'ongoing';
+    return `${fmt(start)} to ${fmt(end)}`;
 }
 
 export default async function SeasonPage({ params }: PageProps) {
@@ -43,152 +44,94 @@ export default async function SeasonPage({ params }: PageProps) {
 
     const isAdmin = user?.profile?.is_admin ?? false;
 
+    const range = formatRange(season.starts_on, season.ends_on);
+
     return (
-        <article className="space-y-10">
-            <nav className="text-sm">
-                <Link href="/archive" className="inline-flex items-center gap-1 text-ink-soft">
-                    <ArrowLeft size={14} /> Archive
-                </Link>
-            </nav>
-
-            <header className="space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                    <SystemPill
-                        system={season.game_system}
-                        edition={season.game_edition}
-                        icon={season.game_system ? iconMap[season.game_system] : null}
-                    />
-                    {season.year ? (
-                        <span className="font-mono text-xs text-ink-soft">{season.year}</span>
-                    ) : null}
-                    {formatRange(season.starts_on, season.ends_on) ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-ink-soft">
-                            <Calendar size={12} />
-                            {formatRange(season.starts_on, season.ends_on)}
-                        </span>
-                    ) : null}
-                </div>
-                <div className="flex items-start justify-between gap-3">
-                    <h1 className="cfo-heading-underline font-display text-4xl sm:text-5xl text-ink">
-                        {season.name}
-                    </h1>
-                    {isAdmin ? (
-                        <Link href={`/archive/seasons/${season.slug}/edit`} className="no-underline shrink-0">
-                            <Button size="sm" variant="secondary">
-                                <Pencil size={14} /> Edit
-                            </Button>
+        <>
+            <PageHead
+                kicker={
+                    <Link href="/archive" className="no-underline hover:underline">
+                        Archive
+                    </Link>
+                }
+                title={season.name}
+                actions={
+                    isAdmin ? (
+                        <Link href={`/archive/seasons/${season.slug}/edit`} className={buttonClasses('outline', 'sm')}>
+                            <Pencil size={14} /> Edit season
                         </Link>
+                    ) : null
+                }
+            >
+                <div className="cfo-ui cfo-num mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-on-mat-soft">
+                    {season.game_system ? (
+                        <SystemPill
+                            system={season.game_system}
+                            edition={season.game_edition}
+                            icon={iconMap[season.game_system] ?? null}
+                        />
                     ) : null}
+                    {range ?? (season.year ? <span>{season.year}</span> : null)}
+                    <span>
+                        {recaps.length} {recaps.length === 1 ? 'report' : 'reports'}
+                    </span>
                 </div>
-            </header>
+            </PageHead>
 
-            {season.description_md ? (
-                <section className="space-y-3">
-                    <h2 className="cfo-heading-underline font-display text-2xl">Overview</h2>
-                    <Card>
-                        <CardBody className="px-7 py-7">
-                            <MarkdownRender source={season.description_md} />
-                        </CardBody>
-                    </Card>
-                </section>
-            ) : null}
+            <div className="grid gap-12 py-12 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
+                <div className="min-w-0">
+                    {season.description_md ? (
+                        <MarkdownRender source={stripLeadingTitle(season.description_md, season.name)} />
+                    ) : (
+                        <p className="text-graphite-soft">No overview written for this season yet.</p>
+                    )}
+                </div>
 
-            <section className="space-y-5">
-                <div className="flex items-baseline justify-between">
-                    <h2 className="cfo-heading-underline font-display text-2xl">
-                        Recaps
-                    </h2>
-                    <div className="flex items-center gap-3">
-                        <span className="hidden sm:inline text-xs uppercase tracking-[0.18em] text-ink-soft/70 font-mono">
-                            {recaps.length} published
-                        </span>
+                <aside className="grid content-start gap-8">
+                    <section className="rounded-[3px] bg-primer-lift p-5">
+                        <h2 className="mb-3 text-[1.5rem] font-bold">Battle reports</h2>
+                        {recaps.length === 0 ? (
+                            <p className="text-base text-graphite-soft">
+                                None yet. Played a game from this season?{' '}
+                                <Link href="/archive/submit" className="cfo-link">
+                                    Write it up
+                                </Link>
+                                .
+                            </p>
+                        ) : (
+                            <ul className="cfo-ui grid gap-2">
+                                {recaps.map((r) => (
+                                    <li key={r.id}>
+                                        <Link href={`/archive/recaps/${r.slug}`} className="text-[1.05rem] font-semibold no-underline cfo-link-hover">
+                                            {r.title}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                         {user ? (
-                            <Link href="/archive/submit" className="no-underline">
-                                <Button size="sm" variant="secondary">
-                                    <PenSquare size={14} /> Add yours
-                                </Button>
+                            <Link href="/archive/submit" className={buttonClasses('secondary', 'sm', 'mt-4')}>
+                                <PenSquare size={14} /> Submit a battle report
                             </Link>
                         ) : null}
-                    </div>
-                </div>
+                    </section>
 
-                {recaps.length === 0 ? (
-                    <div className="rounded-sm border border-dashed border-brass-dark/50 bg-parchment/40 px-6 py-10 text-center">
-                        <h3 className="font-display text-xl text-ink">
-                            No recaps published yet
-                        </h3>
-                        <p className="mt-2 text-sm text-ink-soft">
-                            Played a game from this season?{' '}
-                            <Link href="/archive/submit" className="underline">
-                                Write it up
-                            </Link>
-                            .
-                        </p>
-                    </div>
-                ) : (
-                    <ul className="space-y-3">
-                        {recaps.map((r) => (
-                            <li key={r.id}>
-                                <Link
-                                    href={`/archive/recaps/${r.slug}`}
-                                    className="block no-underline"
-                                >
-                                    <Card interactive>
-                                        <CardBody className="flex items-center justify-between gap-4 px-6 py-4">
-                                            <div>
-                                                <h3 className="font-display text-xl text-ink">
-                                                    {r.title}
-                                                </h3>
-                                                {r.published_at ? (
-                                                    <span className="text-xs text-ink-soft">
-                                                        {new Date(r.published_at).toLocaleDateString(
-                                                            'en-US',
-                                                            { month: 'short', day: 'numeric', year: 'numeric' },
-                                                        )}
-                                                    </span>
-                                                ) : null}
-                                            </div>
-                                            <ChevronRight size={18} className="text-ink-soft" />
-                                        </CardBody>
-                                    </Card>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </section>
-
-            {pages.length > 0 ? (
-                <section className="space-y-5">
-                    <div className="flex items-baseline justify-between">
-                        <h2 className="cfo-heading-underline font-display text-2xl">
-                            Pages
-                        </h2>
-                        <span className="hidden sm:inline text-xs uppercase tracking-[0.18em] text-ink-soft/70 font-mono">
-                            {pages.length} entries
-                        </span>
-                    </div>
-                    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        {pages.map((p) => (
-                            <li key={p.id}>
-                                <Link href={`/archive/pages/${p.slug}`} className="block no-underline">
-                                    <Card interactive>
-                                        <CardBody className="flex items-center justify-between gap-4 px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <FileText size={16} className="text-leather" />
-                                                <h3 className="font-display text-lg text-ink">
-                                                    {p.title}
-                                                </h3>
-                                            </div>
-                                            <ChevronRight size={16} className="text-ink-soft" />
-                                        </CardBody>
-                                    </Card>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </section>
-            ) : null}
-        </article>
+                    {pages.length > 0 ? (
+                        <section className="rounded-[3px] bg-primer-lift p-5">
+                            <h2 className="mb-3 text-[1.5rem] font-bold">Rules and reference</h2>
+                            <ul className="cfo-ui grid gap-2">
+                                {pages.map((p) => (
+                                    <li key={p.id}>
+                                        <Link href={`/archive/pages/${p.slug}`} className="text-[1.05rem] font-semibold no-underline cfo-link-hover">
+                                            {p.title}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </section>
+                    ) : null}
+                </aside>
+            </div>
+        </>
     );
 }

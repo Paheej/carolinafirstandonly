@@ -73,19 +73,19 @@ export default async function PendingRecapsPage() {
     return (
         <div className="space-y-8">
             <nav className="text-sm">
-                <Link href="/archive" className="inline-flex items-center gap-1 text-ink-soft">
+                <Link href="/archive" className="inline-flex items-center gap-1 text-graphite-soft">
                     <ArrowLeft size={14} /> Archive
                 </Link>
             </nav>
 
             <header className="space-y-2">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-leather font-mono">
+                <div className="flex items-center gap-2 text-xs text-gold-deep cfo-ui">
                     <ShieldCheck size={14} /> Admin
                 </div>
-                <h1 className="cfo-heading-underline font-display text-4xl text-ink">
-                    Pending recaps
+                <h1 className="cfo-heading-underline font-display text-4xl text-graphite">
+                    Submissions to review
                 </h1>
-                <p className="text-ink-soft max-w-2xl">
+                <p className="text-graphite-soft max-w-2xl">
                     Review submissions before they go live. Approve to publish,
                     edit-then-approve to clean up, or reject with a note.
                 </p>
@@ -94,10 +94,10 @@ export default async function PendingRecapsPage() {
             {submissions.length === 0 ? (
                 <Card>
                     <CardBody className="px-7 py-10 text-center">
-                        <p className="font-display text-xl text-ink">
+                        <p className="font-display text-xl text-graphite">
                             Inbox zero.
                         </p>
-                        <p className="mt-1 text-sm text-ink-soft">
+                        <p className="mt-1 text-sm text-graphite-soft">
                             Nothing pending review right now.
                         </p>
                     </CardBody>

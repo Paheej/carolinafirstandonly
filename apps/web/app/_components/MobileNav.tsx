@@ -44,7 +44,7 @@ export function MobileNav({ links, user }: MobileNavProps) {
                 onClick={() => setOpen(true)}
                 aria-label="Open menu"
                 aria-expanded={open}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-sm border border-brass-dark/60 bg-parchment-dark text-ink transition-colors hover:bg-brass/30"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-[3px] border border-gold/50 text-on-mat transition-colors hover:border-gold-bright"
             >
                 <Menu size={18} />
             </button>
@@ -60,17 +60,17 @@ export function MobileNav({ links, user }: MobileNavProps) {
                         type="button"
                         aria-label="Close menu"
                         onClick={() => setOpen(false)}
-                        className="absolute inset-0 bg-ink/55 backdrop-blur-sm"
+                        className="absolute inset-0 bg-mat/55 backdrop-blur-sm"
                     />
 
-                    <div className="absolute right-0 top-0 flex h-full w-80 max-w-[88vw] flex-col border-l border-brass-dark/60 bg-parchment shadow-[-12px_0_24px_-12px_rgba(26,24,21,0.4)]">
-                        <div className="flex items-center justify-between border-b border-brass-dark/40 px-5 py-4">
-                            <span className="font-display text-lg text-ink">Menu</span>
+                    <div className="absolute right-0 top-0 flex h-full w-80 max-w-[88vw] cfo-on-mat flex-col border-l border-gold/35 bg-mat text-on-mat">
+                        <div className="flex items-center justify-between border-b border-on-mat/10 px-5 py-4">
+                            <span className="font-display text-2xl font-extrabold text-on-mat">Menu</span>
                             <button
                                 type="button"
                                 onClick={() => setOpen(false)}
                                 aria-label="Close menu"
-                                className="inline-flex h-9 w-9 items-center justify-center rounded-sm text-ink-soft hover:bg-parchment-dark"
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-[3px] text-on-mat-soft hover:bg-mat-raised"
                             >
                                 <X size={18} />
                             </button>
@@ -81,7 +81,7 @@ export function MobileNav({ links, user }: MobileNavProps) {
                                 <a
                                     key={l.href}
                                     href={l.href}
-                                    className="block border-b border-brass-dark/15 px-5 py-3 text-base text-ink hover:bg-parchment-dark"
+                                    className="block border-b border-on-mat/10 px-5 py-3 cfo-ui text-lg font-semibold text-on-mat no-underline hover:bg-mat-raised"
                                 >
                                     {l.label}
                                 </a>
@@ -89,24 +89,24 @@ export function MobileNav({ links, user }: MobileNavProps) {
                             {user?.profile?.is_admin ? (
                                 <a
                                     href="/admin"
-                                    className="block border-b border-brass-dark/15 px-5 py-3 text-base font-medium text-leather hover:bg-parchment-dark"
+                                    className="block border-b border-on-mat/10 px-5 py-3 cfo-ui text-lg font-semibold text-gold-bright no-underline hover:bg-mat-raised"
                                 >
                                     Admin
                                 </a>
                             ) : null}
                         </nav>
 
-                        <div className="space-y-3 border-t border-brass-dark/40 px-4 py-4">
+                        <div className="space-y-3 border-t border-on-mat/10 px-4 py-4">
                             {user ? (
                                 <>
                                     <a
                                         href="/profile"
-                                        className="block rounded-sm border border-brass-dark/50 bg-parchment-dark px-3 py-2.5"
+                                        className="block rounded-[3px] bg-mat-raised px-3 py-2.5 no-underline"
                                     >
-                                        <span className="block text-[10px] uppercase tracking-[0.18em] text-ink-soft/70">
+                                        <span className="block cfo-ui text-sm text-on-mat-soft">
                                             Signed in as
                                         </span>
-                                        <span className="text-sm font-medium text-ink">
+                                        <span className="cfo-ui font-semibold text-on-mat">
                                             {user.profile?.display_name ??
                                                 user.profile?.username ??
                                                 user.email}
@@ -115,8 +115,7 @@ export function MobileNav({ links, user }: MobileNavProps) {
                                     <form action="/api/auth/signout" method="post">
                                         <Button
                                             type="submit"
-                                            variant="secondary"
-                                            className="w-full"
+                                            variant="outline"                                            className="w-full"
                                         >
                                             <LogOut size={16} /> Sign out
                                         </Button>
@@ -125,13 +124,13 @@ export function MobileNav({ links, user }: MobileNavProps) {
                             ) : (
                                 <>
                                     <a href="/auth/login" className="block">
-                                        <Button variant="secondary" className="w-full">
-                                            Log in
+                                        <Button variant="outline" className="w-full">
+                                            Sign in
                                         </Button>
                                     </a>
                                     <a href="/auth/signup" className="block">
                                         <Button variant="primary" className="w-full">
-                                            Sign up
+                                            Join
                                         </Button>
                                     </a>
                                 </>

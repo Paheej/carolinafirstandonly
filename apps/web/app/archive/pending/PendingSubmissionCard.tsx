@@ -113,8 +113,8 @@ export function PendingSubmissionCard({
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
-                            <Badge variant="brass">{targetLabel}</Badge>
-                            <span className="text-xs text-ink-soft font-mono">
+                            <Badge variant="gold">{targetLabel}</Badge>
+                            <span className="text-xs text-graphite-soft cfo-ui">
                                 {new Date(submission.submitted_at).toLocaleDateString('en-US', {
                                     month: 'short',
                                     day: 'numeric',
@@ -122,14 +122,14 @@ export function PendingSubmissionCard({
                                 })}
                             </span>
                         </div>
-                        <h3 className="font-display text-2xl text-ink">
+                        <h3 className="font-display text-2xl text-graphite">
                             {mode === 'edit' ? 'Editing — ' : ''}
                             {title}
                         </h3>
                         {author ? (
-                            <p className="text-sm text-ink-soft">
+                            <p className="text-sm text-graphite-soft">
                                 by {author.display_name ?? author.username}{' '}
-                                <span className="text-ink-soft/70">
+                                <span className="text-graphite-soft/70">
                                     (@{author.username})
                                 </span>
                             </p>
@@ -165,7 +165,7 @@ export function PendingSubmissionCard({
                                 {photos.map((photo, i) => (
                                     <li
                                         key={photo.file_id ?? `${photo.url}-${i}`}
-                                        className="overflow-hidden rounded-sm border border-brass-dark/40"
+                                        className="overflow-hidden rounded-[3px] border border-graphite/15"
                                     >
                                         <img
                                             src={photo.thumbnail_url ?? photo.url}
@@ -174,7 +174,7 @@ export function PendingSubmissionCard({
                                             loading="lazy"
                                         />
                                         {photo.caption ? (
-                                            <p className="px-2 py-1 text-xs text-ink-soft">
+                                            <p className="px-2 py-1 text-xs text-graphite-soft">
                                                 {photo.caption}
                                             </p>
                                         ) : null}
@@ -208,7 +208,7 @@ export function PendingSubmissionCard({
                             <Button
                                 type="button"
                                 size="sm"
-                                variant="secondary"
+                                variant="outline"
                                 onClick={onSaveEdit}
                                 disabled={busy}
                             >
@@ -219,13 +219,13 @@ export function PendingSubmissionCard({
                 )}
 
                 {error ? (
-                    <p className="text-sm text-danger" role="alert">
+                    <p className="text-sm text-casualty" role="alert">
                         {error}
                     </p>
                 ) : null}
 
                 {showRejectInput ? (
-                    <div className="rounded-sm border border-danger/40 bg-danger/5 p-3">
+                    <div className="rounded-[3px] border border-casualty/40 bg-casualty/5 p-3">
                         <Label htmlFor={`notes-${submission.id}`} required>
                             Rejection note (sent to the author)
                         </Label>
@@ -234,7 +234,7 @@ export function PendingSubmissionCard({
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
                             rows={3}
-                            className="w-full rounded-sm border border-brass-dark/50 bg-parchment/70 px-3 py-2 text-sm focus-visible:border-brass focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
+                            className="w-full rounded-[3px] border border-graphite/15 bg-primer-lift/70 px-3 py-2 text-sm focus-visible:border-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                             placeholder="What needs to change before this can be published?"
                         />
                         <div className="mt-2 flex justify-end gap-2">

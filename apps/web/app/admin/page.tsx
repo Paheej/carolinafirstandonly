@@ -30,13 +30,13 @@ export default async function AdminIndexPage() {
     return (
         <div className="space-y-8">
             <header className="space-y-2">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-leather font-mono">
+                <div className="flex items-center gap-2 text-xs text-gold-deep cfo-ui">
                     <ShieldCheck size={14} /> Admin
                 </div>
-                <h1 className="cfo-heading-underline font-display text-4xl text-ink">
+                <h1 className="cfo-heading-underline font-display text-4xl text-graphite">
                     Admin dashboard
                 </h1>
-                <p className="text-ink-soft">
+                <p className="text-graphite-soft">
                     A growing index of admin areas. News drafts, user moderation,
                     and audit views land in subsequent phases.
                 </p>
@@ -49,18 +49,18 @@ export default async function AdminIndexPage() {
                             <CardBody className="flex h-full flex-col gap-3 px-6 py-6">
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-2">
-                                        <Inbox size={18} className="text-leather" />
-                                        <h2 className="font-display text-xl text-ink">
+                                        <Inbox size={18} className="text-gold-deep" />
+                                        <h2 className="font-display text-xl text-graphite">
                                             Pending recaps
                                         </h2>
                                     </div>
                                     {pendingRecaps > 0 ? (
-                                        <span className="inline-grid h-6 min-w-6 place-items-center rounded-full bg-brass text-[11px] font-semibold text-ink px-1.5">
+                                        <span className="inline-grid h-6 min-w-6 place-items-center rounded-full bg-gold text-[11px] font-semibold text-graphite px-1.5">
                                             {pendingRecaps}
                                         </span>
                                     ) : null}
                                 </div>
-                                <p className="text-sm text-ink-soft">
+                                <p className="text-sm text-graphite-soft">
                                     Review user-submitted battle recaps. Approve, edit
                                     then approve, or reject with a note.
                                 </p>
@@ -73,12 +73,12 @@ export default async function AdminIndexPage() {
                         <Card interactive className="h-full">
                             <CardBody className="flex h-full flex-col gap-3 px-6 py-6">
                                 <div className="flex items-center gap-2">
-                                    <BookMarked size={18} className="text-leather" />
-                                    <h2 className="font-display text-xl text-ink">
+                                    <BookMarked size={18} className="text-gold-deep" />
+                                    <h2 className="font-display text-xl text-graphite">
                                         Archive
                                     </h2>
                                 </div>
-                                <p className="text-sm text-ink-soft">
+                                <p className="text-sm text-graphite-soft">
                                     Public archive index — seasons and special events.
                                 </p>
                             </CardBody>

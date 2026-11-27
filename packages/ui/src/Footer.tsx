@@ -7,21 +7,11 @@ export interface FooterProps {
 }
 
 export function Footer({ siteName, className }: FooterProps) {
-    const year = new Date().getFullYear();
     return (
-        <footer
-            className={cn(
-                'mt-16 border-t border-brass-dark/40 bg-parchment-dark/40',
-                className,
-            )}
-        >
-            <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-ink-soft flex flex-wrap items-center justify-between gap-3">
-                <span>
-                    © {year} {siteName}. Built by the community.
-                </span>
-                <span className="text-xs text-ink-soft/70">
-                    For the Emperor. And for everyone else playing on the next table over.
-                </span>
+        <footer className={cn('cfo-on-mat mt-16 bg-mat text-on-mat-soft', className)}>
+            <div className="cfo-ui mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-8 text-[0.95rem] md:px-6">
+                <span>{siteName}. Clemmons, Winston-Salem and around.</span>
+                <span>Archive since 2021</span>
             </div>
         </footer>
     );

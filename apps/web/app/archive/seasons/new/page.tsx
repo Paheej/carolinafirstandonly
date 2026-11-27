@@ -18,15 +18,15 @@ export default async function NewSeasonPage() {
     return (
         <article className="space-y-8">
             <nav className="text-sm">
-                <Link href="/archive" className="inline-flex items-center gap-1 text-ink-soft">
+                <Link href="/archive" className="inline-flex items-center gap-1 text-graphite-soft">
                     <ArrowLeft size={14} /> Archive
                 </Link>
             </nav>
             <header>
-                <h1 className="cfo-heading-underline font-display text-3xl sm:text-4xl text-ink">
+                <h1 className="cfo-heading-underline font-display text-3xl sm:text-4xl text-graphite">
                     New season
                 </h1>
-                <p className="mt-2 text-sm text-ink-soft">
+                <p className="mt-2 text-sm text-graphite-soft">
                     Shipping a new campaign? Drop in the basics and write the overview here. Recaps and reference pages get attached later.
                 </p>
             </header>

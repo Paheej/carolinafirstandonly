@@ -131,7 +131,7 @@ export function SeasonForm({
                                 readOnly={mode === 'edit'}
                             />
                             {mode === 'edit' ? (
-                                <p className="mt-1 text-[11px] text-ink-soft">
+                                <p className="mt-1 text-[11px] text-graphite-soft">
                                     Slug is locked — changing it would break existing URLs.
                                 </p>
                             ) : null}
@@ -204,7 +204,7 @@ export function SeasonForm({
             </Card>
 
             {error ? (
-                <div className="rounded-sm border border-danger/50 bg-danger/10 px-4 py-3 text-sm text-danger">
+                <div className="rounded-[3px] border border-casualty/50 bg-casualty/10 px-4 py-3 text-sm text-casualty">
                     {error}
                 </div>
             ) : null}

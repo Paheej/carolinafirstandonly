@@ -11,13 +11,13 @@ export default async function LoginPage({ searchParams }: PageProps) {
         <div className="mx-auto max-w-sm py-8">
             <Card>
                 <CardHeader>
-                    <h1 className="cfo-heading-underline font-display text-2xl text-ink">
-                        Log in
+                    <h1 className="cfo-heading-underline font-display text-2xl text-graphite">
+                        Sign in
                     </h1>
                 </CardHeader>
                 <CardBody>
                     <AuthForm mode="login" initialError={params.error ?? null} />
-                    <p className="mt-6 text-sm text-ink-soft">
+                    <p className="mt-6 text-sm text-graphite-soft">
                         New here?{' '}
                         <a href="/auth/signup" className="underline">
                             Create an account

@@ -1,29 +1,41 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Carolina First and Only — design tokens
-   Tailwind v4 picks up these CSS variables and exposes them as utilities
-   (e.g., `bg-parchment`, `text-ink`, `border-brass`). Keep this file in
-   sync with `packages/ui/src/tokens.ts`.
+   Carolina First and Only — "war table" design tokens.
+
+   Black game-mat bands (nav, page heads, footer) over a grey primer page,
+   Wake Forest old gold for structure and objective markers. Tailwind v4
+   exposes every --color-* as utilities (bg-mat, text-graphite, border-gold…).
+   Keep in sync with packages/ui/src/tokens.ts.
+
+   Fonts are loaded by next/font in apps/web/app/layout.tsx, which sets
+   --font-archivo and --font-source-serif on <html>.
 --------------------------------------------------------------------------- */
 @theme {
-    --color-parchment: #f4ead5;
-    --color-parchment-dark: #e8dcc0;
-    --color-ink: #1a1815;
-    --color-ink-soft: #4a4640;
-    --color-forest: #2d4a2b;
-    --color-forest-dark: #1f3320;
-    --color-brass: #b08d57;
-    --color-brass-dark: #8a6d3f;
-    --color-leather: #6b4423;
-    --color-success: #3f6d3f;
-    --color-warning: #b08d57;
-    --color-danger: #8b2a2a;
+    --color-mat: #0d0d0c;
+    --color-mat-raised: #1a1a18;
+    --color-mat-line: #46453f;
+    --color-on-mat: #ecebe6;
+    --color-on-mat-soft: #a3a198;
+
+    --color-primer: #d8d7d3;
+    --color-primer-lift: #e6e5e1;
+    --color-graphite: #1b1b1a;
+    --color-graphite-soft: #55544f;
+
+    --color-gold: #9e7e38;        /* Wake Forest old gold — rules, structure */
+    --color-gold-bright: #cfab52; /* objective markers, CTAs on the mat */
+    --color-gold-deep: #6f5823;   /* gold text/links on primer (AA contrast) */
+
+    --color-casualty: #9e2a2b;
+    --color-danger: #9e2a2b;
+    --color-success: #3c6a3c;
+    --color-warning: #9e7e38;
     --color-info: #3a5a78;
 
-    --font-display: "EB Garamond", "Cormorant Garamond", Georgia, serif;
-    --font-body: Inter, system-ui, sans-serif;
-    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-display: var(--font-archivo), "Arial Narrow", "Helvetica Neue", sans-serif;
+    --font-body: var(--font-source-serif), Georgia, "Times New Roman", serif;
+    --font-mono: ui-monospace, Menlo, monospace;
 }
 
 /* ---------------------------------------------------------------------------
@@ -31,58 +43,151 @@
 --------------------------------------------------------------------------- */
 @layer base {
     html {
-        background: var(--color-parchment);
-        color: var(--color-ink);
+        background: var(--color-mat);
+        color: var(--color-graphite);
         font-family: var(--font-body);
         -webkit-font-smoothing: antialiased;
     }
 
     body {
         min-height: 100dvh;
-        background:
-            radial-gradient(ellipse at top, rgba(176, 141, 87, 0.10), transparent 60%),
-            radial-gradient(ellipse at bottom, rgba(45, 74, 43, 0.05), transparent 70%),
-            var(--color-parchment);
-        background-attachment: fixed;
-    }
-
-    body::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 0;
-        background-image:
-            radial-gradient(rgba(26, 24, 21, 0.08) 1px, transparent 1px),
-            radial-gradient(rgba(26, 24, 21, 0.05) 1px, transparent 1px);
-        background-size: 3px 3px, 7px 7px;
-        background-position: 0 0, 1px 2px;
-        mix-blend-mode: multiply;
-        opacity: 0.7;
+        background: var(--color-primer);
+        font-size: 1.0625rem;
+        line-height: 1.6;
+        overflow-x: clip;
     }
 
     h1, h2, h3, h4, h5 {
         font-family: var(--font-display);
+        font-stretch: 72%;
+        line-height: 1.05;
         letter-spacing: -0.01em;
-        color: var(--color-ink);
+        font-weight: 800;
+        text-wrap: balance;
+        color: inherit;
     }
 
     a {
-        color: var(--color-forest);
-        text-underline-offset: 2px;
-        transition: color 120ms ease;
+        color: inherit;
+        text-underline-offset: 3px;
     }
-    a:hover { color: var(--color-forest-dark); }
+
+    :focus-visible {
+        outline: 2px solid var(--color-gold);
+        outline-offset: 3px;
+    }
 
     ::selection {
-        background: rgba(176, 141, 87, 0.45);
-        color: var(--color-ink);
+        background: rgba(207, 171, 82, 0.45);
+        color: var(--color-graphite);
     }
 }
 
 /* ---------------------------------------------------------------------------
-   Buttons — full CSS so hover/active states reliably render (Tailwind v4
+   Utility-ish components
+--------------------------------------------------------------------------- */
+@layer components {
+    /* Narrow UI type: nav, buttons, labels, meta lines. */
+    .cfo-ui {
+        font-family: var(--font-display);
+        font-stretch: 85%;
+    }
+
+    .cfo-num { font-variant-numeric: tabular-nums; }
+
+    /* A black-mat band that runs edge to edge even inside the centered
+       <main>. Pages open with one (see <MatBand />). */
+    .cfo-band {
+        background: var(--color-mat);
+        color: var(--color-on-mat);
+        margin-inline: calc(50% - 50vw);
+    }
+    .cfo-main > .cfo-band:first-child { margin-top: -2rem; }
+
+    .cfo-kicker {
+        font-family: var(--font-display);
+        font-stretch: 85%;
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--color-gold-bright);
+    }
+
+    /* Short gold rule under section headings (spec: 1px brass, ~4ch). */
+    .cfo-heading-underline {
+        position: relative;
+        padding-bottom: 0.35em;
+    }
+    .cfo-heading-underline::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 3ch;
+        height: 2px;
+        background: var(--color-gold);
+    }
+
+    .cfo-link {
+        text-decoration: underline;
+        text-decoration-color: var(--color-gold);
+        text-underline-offset: 4px;
+    }
+    .cfo-link-hover:hover {
+        text-decoration: underline;
+        text-decoration-color: var(--color-gold);
+        text-underline-offset: 4px;
+    }
+
+    /* Admin chip in the nav. */
+    .cfo-admin-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.6rem;
+        border: 1px solid var(--color-gold);
+        color: var(--color-gold-bright);
+        font-family: var(--font-display);
+        font-stretch: 85%;
+        font-weight: 700;
+        font-size: 0.85rem;
+        border-radius: 3px;
+        text-decoration: none;
+    }
+    .cfo-admin-chip:hover { background: rgba(207, 171, 82, 0.12); }
+
+    /* Campaign timeline: a gold rail with one marker per entry. */
+    .cfo-timeline { border-left: 2px solid var(--color-gold); }
+    .cfo-timeline > li { position: relative; padding: 0 0 1.25rem 1.25rem; }
+    .cfo-timeline > li::before {
+        content: "";
+        position: absolute;
+        left: -7px;
+        top: 0.45rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--color-primer);
+        border: 2px solid var(--color-gold);
+    }
+    .cfo-timeline > li[data-live]::before { background: var(--color-gold); }
+
+    /* War table objective markers drop onto the board once, on load. */
+    .cfo-obj { transform-box: fill-box; transform-origin: center; }
+    @media (prefers-reduced-motion: no-preference) {
+        .cfo-obj {
+            animation: cfo-place 420ms cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+            animation-delay: calc(var(--i) * 140ms + 250ms);
+        }
+    }
+    @keyframes cfo-place {
+        from { opacity: 0; transform: translateY(-14px) scale(1.25); }
+        to { opacity: 1; transform: none; }
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   Buttons — real CSS so hover/active states reliably render (Tailwind v4
    arbitrary box-shadows with commas inside rgba() trip the parser).
+   `onMat` variants are for use on the black bands.
 --------------------------------------------------------------------------- */
 @layer components {
     .cfo-btn {
@@ -90,406 +195,163 @@
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        border-radius: 2px;
-        font-weight: 500;
-        line-height: 1;
-        transition:
-            transform 140ms ease-out,
-            box-shadow 140ms ease-out,
-            background-color 140ms ease-out,
-            border-color 140ms ease-out;
-        will-change: transform;
-    }
-    .cfo-btn:disabled {
-        cursor: not-allowed;
-        opacity: 0.5;
-    }
-    .cfo-btn:focus-visible {
-        outline: none;
-        box-shadow:
-            0 0 0 2px var(--color-parchment),
-            0 0 0 4px var(--color-brass);
-    }
-
-    .cfo-btn--primary {
-        background: var(--color-forest);
-        color: var(--color-parchment);
-        border: 1px solid var(--color-forest-dark);
-        box-shadow:
-            0 2px 0 0 var(--color-forest-dark),
-            0 4px 10px -2px rgba(31, 51, 32, 0.35);
-    }
-    .cfo-btn--primary:hover:not(:disabled) {
-        background: var(--color-forest-dark);
-        transform: translateY(-2px);
-        box-shadow:
-            0 4px 0 0 #0c1a0d,
-            0 10px 20px -4px rgba(31, 51, 32, 0.5);
-    }
-    .cfo-btn--primary:active:not(:disabled) {
-        transform: translateY(0);
-        box-shadow: 0 1px 0 0 var(--color-forest-dark);
-    }
-
-    .cfo-btn--secondary {
-        background: var(--color-parchment-dark);
-        color: var(--color-ink);
-        border: 1px solid var(--color-brass-dark);
-        box-shadow:
-            0 2px 0 0 var(--color-brass-dark),
-            0 2px 6px -2px rgba(107, 68, 35, 0.25);
-    }
-    .cfo-btn--secondary:hover:not(:disabled) {
-        background: rgba(176, 141, 87, 0.35);
-        border-color: var(--color-leather);
-        transform: translateY(-2px);
-        box-shadow:
-            0 4px 0 0 var(--color-leather),
-            0 8px 16px -4px rgba(107, 68, 35, 0.4);
-    }
-    .cfo-btn--secondary:active:not(:disabled) {
-        transform: translateY(0);
-        box-shadow: 0 1px 0 0 var(--color-brass-dark);
-    }
-
-    .cfo-btn--ghost {
-        background: transparent;
-        color: var(--color-ink);
+        border-radius: 3px;
         border: 1px solid transparent;
-    }
-    .cfo-btn--ghost:hover:not(:disabled) {
-        background: var(--color-parchment-dark);
-        border-color: rgba(138, 109, 63, 0.5);
-    }
-
-    .cfo-btn--danger {
-        background: var(--color-danger);
-        color: var(--color-parchment);
-        border: 1px solid #5a1c1c;
-        box-shadow:
-            0 2px 0 0 #5a1c1c,
-            0 4px 10px -2px rgba(139, 42, 42, 0.35);
-    }
-    .cfo-btn--danger:hover:not(:disabled) {
-        background: #a13434;
-        transform: translateY(-2px);
-        box-shadow:
-            0 4px 0 0 #5a1c1c,
-            0 10px 20px -4px rgba(139, 42, 42, 0.5);
-    }
-
-    .cfo-btn--sm { height: 2rem; padding: 0 0.75rem; font-size: 0.875rem; }
-    .cfo-btn--md { height: 2.5rem; padding: 0 1rem; font-size: 1rem; }
-    .cfo-btn--lg {
-        height: 3rem;
-        padding: 0 1.5rem;
-        font-size: 1.0625rem;
-        letter-spacing: 0.02em;
-    }
-}
-
-/* ---------------------------------------------------------------------------
-   Decorative components
---------------------------------------------------------------------------- */
-@layer components {
-    .cfo-heading-underline {
-        position: relative;
-        padding-bottom: 0.4em;
-    }
-    .cfo-heading-underline::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 4ch;
-        height: 2px;
-        background: linear-gradient(
-            to right,
-            var(--color-brass) 0%,
-            var(--color-brass-dark) 60%,
-            transparent 100%
-        );
-    }
-
-    /* Proper hex grid via SVG (Hero Patterns, CC0). Much cleaner than the
-       overlapping linear-gradients we had before. */
-    .cfo-hex-bg {
-        background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='99.19' viewBox='0 0 28 49.6'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8.5h-2v-7.18L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49.5V41l12.99-7.5H28v2.31h-.01L17 42.15v7.35h-2z' fill='%238a6d3f' fill-opacity='0.22' fill-rule='evenodd'/%3E%3C/svg%3E");
-        background-repeat: repeat;
-    }
-
-    .cfo-spotlight {
-        position: relative;
-        isolation: isolate;
-    }
-    .cfo-spotlight::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(
-            ellipse at 15% 25%,
-            rgba(244, 234, 213, 0.85) 0%,
-            rgba(244, 234, 213, 0.0) 55%
-        );
-        pointer-events: none;
-        z-index: -1;
-    }
-
-    .cfo-ribbon {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        width: 6px;
-        background: linear-gradient(
-            to bottom,
-            var(--color-brass-dark) 0%,
-            var(--color-brass) 50%,
-            var(--color-brass-dark) 100%
-        );
-        box-shadow:
-            inset -1px 0 0 rgba(0, 0, 0, 0.25),
-            2px 0 6px rgba(107, 68, 35, 0.18);
-    }
-    .cfo-ribbon::before,
-    .cfo-ribbon::after {
-        content: "";
-        position: absolute;
-        left: 6px;
-        width: 10px;
-        height: 8px;
-        background: var(--color-brass-dark);
-        clip-path: polygon(0 0, 100% 50%, 0 100%);
-        opacity: 0.85;
-    }
-    .cfo-ribbon::before { top: 18px; }
-    .cfo-ribbon::after { bottom: 18px; }
-
-    .cfo-seal {
-        display: grid;
-        place-items: center;
-        width: 64px;
-        height: 64px;
-        border-radius: 9999px;
-        background: radial-gradient(
-            circle at 35% 30%,
-            #b73838 0%,
-            #8b2a2a 55%,
-            #5a1c1c 100%
-        );
-        color: var(--color-parchment);
         font-family: var(--font-display);
-        font-size: 11px;
-        line-height: 1.05;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        box-shadow:
-            0 2px 6px rgba(0, 0, 0, 0.35),
-            inset 0 0 0 2px rgba(244, 234, 213, 0.25),
-            inset 0 -8px 14px rgba(0, 0, 0, 0.25);
-        transform: rotate(-9deg);
+        font-stretch: 85%;
+        font-weight: 700;
+        line-height: 1;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
     }
+    .cfo-btn:disabled { cursor: not-allowed; opacity: 0.5; }
 
-    /* Replaces torn-paper. Looks like a notice tacked onto the board:
-       brass-dashed top border, soft offset bottom shadow that hints at a
-       second sheet underneath. */
-    .cfo-pinned-notice {
-        position: relative;
-    }
-    .cfo-pinned-notice::after {
-        content: "";
-        position: absolute;
-        inset: 6px -6px -8px 6px;
-        z-index: -1;
-        background: var(--color-parchment-dark);
-        border: 1px solid rgba(138, 109, 63, 0.35);
-        border-radius: 2px;
-        box-shadow: 0 6px 14px -6px rgba(26, 24, 21, 0.2);
-    }
+    /* Primary: gold. Reads on both the mat and primer. */
+    .cfo-btn--primary { background: var(--color-gold-bright); color: var(--color-mat); }
+    .cfo-btn--primary:hover:not(:disabled) { background: #ddbb62; }
+    .cfo-btn--primary:active:not(:disabled) { background: var(--color-gold); }
 
-    /* Brass-bordered "chip" used for privileged nav links (Admin). */
-    .cfo-admin-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.2rem 0.6rem;
-        border: 1px solid var(--color-brass-dark);
-        background: rgba(176, 141, 87, 0.2);
-        color: var(--color-ink);
-        font-size: 0.75rem;
-        font-weight: 500;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        border-radius: 2px;
-        transition: background-color 140ms ease, transform 140ms ease;
-    }
-    .cfo-admin-chip:hover {
-        background: rgba(176, 141, 87, 0.35);
-        color: var(--color-forest-dark);
-        transform: translateY(-1px);
-    }
+    /* Secondary: black on primer. */
+    .cfo-btn--secondary { background: var(--color-graphite); color: var(--color-primer-lift); }
+    .cfo-btn--secondary:hover:not(:disabled) { background: #000; }
+
+    /* Outline: graphite on primer; gold inside .cfo-band / .cfo-on-mat. */
+    .cfo-btn--outline { background: transparent; color: var(--color-graphite); border-color: rgba(27, 27, 26, 0.3); }
+    .cfo-btn--outline:hover:not(:disabled) { border-color: var(--color-graphite); }
+    :is(.cfo-band, .cfo-on-mat) .cfo-btn--outline { color: var(--color-on-mat); border-color: rgba(207, 171, 82, 0.55); }
+    :is(.cfo-band, .cfo-on-mat) .cfo-btn--outline:hover:not(:disabled) { border-color: var(--color-gold-bright); }
+
+    .cfo-btn--ghost { background: transparent; color: inherit; }
+    .cfo-btn--ghost:hover:not(:disabled) { background: rgba(27, 27, 26, 0.07); }
+    :is(.cfo-band, .cfo-on-mat) .cfo-btn--ghost:hover:not(:disabled) { background: rgba(236, 235, 230, 0.08); }
+
+    .cfo-btn--danger { background: var(--color-casualty); color: var(--color-primer-lift); }
+    .cfo-btn--danger:hover:not(:disabled) { background: #b13233; }
+
+    .cfo-btn--sm { height: 2rem; padding: 0 0.8rem; font-size: 0.9rem; }
+    .cfo-btn--md { height: 2.5rem; padding: 0 1.1rem; font-size: 1rem; }
+    .cfo-btn--lg { height: 3rem; padding: 0 1.4rem; font-size: 1.0625rem; }
 }
 
 #__next, main, header, footer { position: relative; z-index: 1; }
 
 /* ---------------------------------------------------------------------------
-   Prose — used by <MarkdownRender />.
-   Hand-rolled rather than @tailwindcss/typography so the parchment palette,
-   EB Garamond headings, and brass underlines carry through naturally.
+   Prose — used by <MarkdownRender />. Battle reports are long reads, so
+   body copy is serif at a generous measure; headings switch to Archivo.
 --------------------------------------------------------------------------- */
 @layer components {
     .cfo-prose {
-        color: var(--color-ink);
+        color: var(--color-graphite);
         font-family: var(--font-body);
         line-height: 1.7;
-        font-size: 1rem;
+        font-size: 1.125rem;
+        max-width: 68ch;
     }
-    .cfo-prose > * + * { margin-top: 1rem; }
+    .cfo-prose > * + * { margin-top: 1.1em; }
 
-    .cfo-prose h1,
-    .cfo-prose h2,
-    .cfo-prose h3,
-    .cfo-prose h4 {
+    .cfo-prose h1, .cfo-prose h2, .cfo-prose h3, .cfo-prose h4 {
         font-family: var(--font-display);
-        color: var(--color-ink);
-        letter-spacing: -0.01em;
+        font-stretch: 75%;
+        font-weight: 800;
+        color: var(--color-graphite);
         margin-top: 1.75em;
-        line-height: 1.2;
+        line-height: 1.1;
     }
     .cfo-prose h1 { font-size: 2rem; }
-    .cfo-prose h2 { font-size: 1.6rem; }
-    .cfo-prose h3 { font-size: 1.3rem; }
-    .cfo-prose h4 { font-size: 1.1rem; }
-    .cfo-prose h2,
-    .cfo-prose h3 { position: relative; padding-bottom: 0.3em; }
-    .cfo-prose h2::after,
-    .cfo-prose h3::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 3ch;
-        height: 1px;
-        background: linear-gradient(
-            to right,
-            var(--color-brass) 0%,
-            var(--color-brass-dark) 70%,
-            transparent 100%
-        );
-    }
+    .cfo-prose h2 { font-size: 1.65rem; }
+    .cfo-prose h3 { font-size: 1.35rem; }
+    .cfo-prose h4 { font-size: 1.15rem; }
+    .cfo-prose > h1:first-child, .cfo-prose > h2:first-child { margin-top: 0; }
 
-    .cfo-prose p { color: var(--color-ink); }
-    .cfo-prose strong { color: var(--color-ink); font-weight: 600; }
-    .cfo-prose em { color: var(--color-ink-soft); }
+    .cfo-prose strong { font-weight: 650; }
+    .cfo-prose em { color: var(--color-graphite-soft); }
 
     .cfo-prose img {
         display: block;
-        max-width: min(100%, 720px);
+        max-width: 100%;
         height: auto;
-        margin: 1.5em auto;
+        margin: 1.75em 0;
         border-radius: 2px;
     }
-    .cfo-prose figure {
-        margin: 1.5em auto;
-        max-width: min(100%, 720px);
-    }
-    .cfo-prose figure img {
-        margin: 0 auto;
-    }
+    .cfo-prose figure { margin: 1.75em 0; }
+    .cfo-prose figure img { margin: 0; }
     .cfo-prose figure figcaption {
         margin-top: 0.5rem;
-        text-align: center;
-        font-size: 0.875rem;
-        font-style: italic;
-        color: var(--color-ink-soft);
+        font-family: var(--font-display);
+        font-stretch: 85%;
+        font-size: 0.9rem;
+        color: var(--color-graphite-soft);
     }
 
     .cfo-prose a {
-        color: var(--color-forest);
+        color: var(--color-gold-deep);
         text-decoration: underline;
-        text-decoration-color: rgba(45, 74, 43, 0.4);
+        text-decoration-color: var(--color-gold);
         text-underline-offset: 3px;
     }
-    .cfo-prose a:hover {
-        color: var(--color-forest-dark);
-        text-decoration-color: var(--color-forest-dark);
-    }
+    .cfo-prose a:hover { color: var(--color-graphite); }
 
-    .cfo-prose ul,
-    .cfo-prose ol {
-        padding-left: 1.4em;
-    }
+    .cfo-prose ul, .cfo-prose ol { padding-left: 1.4em; }
     .cfo-prose ul { list-style-type: disc; }
     .cfo-prose ol { list-style-type: decimal; }
     .cfo-prose li { margin-top: 0.35em; }
+    .cfo-prose li::marker { color: var(--color-gold); }
     .cfo-prose li > p { margin-top: 0; }
 
     .cfo-prose blockquote {
-        margin: 1.25em 0;
-        padding: 0.6em 1em;
-        border-left: 3px solid var(--color-brass-dark);
-        background: rgba(176, 141, 87, 0.12);
-        color: var(--color-ink-soft);
+        margin: 1.5em 0;
+        padding: 0.1em 0 0.1em 1.1em;
+        border-left: 3px solid var(--color-gold);
+        color: var(--color-graphite-soft);
         font-style: italic;
-        border-radius: 0 2px 2px 0;
+        font-size: 1.2rem;
     }
 
     .cfo-prose code {
-        background: rgba(176, 141, 87, 0.2);
-        border: 1px solid rgba(138, 109, 63, 0.3);
+        background: var(--color-primer);
         padding: 0.1em 0.35em;
         border-radius: 2px;
         font-family: var(--font-mono);
-        font-size: 0.92em;
-        color: var(--color-leather);
+        font-size: 0.88em;
     }
     .cfo-prose pre {
-        background: #1a1815;
-        color: #f4ead5;
+        background: var(--color-mat);
+        color: var(--color-on-mat);
         padding: 1em 1.25em;
-        border-radius: 2px;
+        border-radius: 3px;
         overflow-x: auto;
         font-family: var(--font-mono);
-        font-size: 0.9em;
+        font-size: 0.88em;
         line-height: 1.5;
     }
-    .cfo-prose pre code {
-        background: transparent;
-        border: none;
-        padding: 0;
-        color: inherit;
-    }
+    .cfo-prose pre code { background: transparent; padding: 0; color: inherit; }
 
     .cfo-prose hr {
         border: none;
-        border-top: 1px dashed rgba(138, 109, 63, 0.6);
+        border-top: 1px solid rgba(27, 27, 26, 0.18);
         margin: 2.5em 0;
     }
 
     .cfo-prose table {
+        display: block;
+        overflow-x: auto;
         width: 100%;
         border-collapse: collapse;
-        margin: 1.25em 0;
+        margin: 1.5em 0;
         font-size: 0.95em;
+        font-variant-numeric: tabular-nums;
     }
-    .cfo-prose th,
-    .cfo-prose td {
-        border: 1px solid rgba(138, 109, 63, 0.4);
+    .cfo-prose th, .cfo-prose td {
+        border-bottom: 1px solid rgba(27, 27, 26, 0.18);
         padding: 0.5em 0.75em;
         text-align: left;
     }
     .cfo-prose th {
-        background: rgba(176, 141, 87, 0.18);
         font-family: var(--font-display);
-        font-weight: 600;
-    }
-
-    .cfo-prose img {
-        max-width: 100%;
-        border-radius: 2px;
-        border: 1px solid rgba(138, 109, 63, 0.4);
-        box-shadow: 0 4px 14px -6px rgba(26, 24, 21, 0.25);
+        font-stretch: 85%;
+        font-weight: 700;
+        border-bottom: 2px solid var(--color-gold);
     }
 }
 
@@ -498,28 +360,28 @@
 --------------------------------------------------------------------------- */
 @layer components {
     .cfo-md-editor .w-md-editor {
-        background: transparent;
-        color: var(--color-ink);
+        background: var(--color-primer-lift);
+        color: var(--color-graphite);
         box-shadow: none;
-        border-radius: 2px;
+        border-radius: 3px;
     }
     .cfo-md-editor .w-md-editor-toolbar {
-        background: var(--color-parchment-dark);
-        border-bottom: 1px solid rgba(138, 109, 63, 0.4);
+        background: var(--color-primer);
+        border-bottom: 1px solid rgba(27, 27, 26, 0.18);
     }
-    .cfo-md-editor .w-md-editor-toolbar button { color: var(--color-ink); }
+    .cfo-md-editor .w-md-editor-toolbar button { color: var(--color-graphite); }
     .cfo-md-editor .w-md-editor-toolbar button:hover {
-        color: var(--color-forest-dark);
-        background: rgba(176, 141, 87, 0.2);
+        color: var(--color-mat);
+        background: rgba(207, 171, 82, 0.3);
     }
     .cfo-md-editor .w-md-editor-text-pre > code,
     .cfo-md-editor .w-md-editor-text-input,
     .cfo-md-editor textarea {
-        color: var(--color-ink) !important;
+        color: var(--color-graphite) !important;
         font-family: var(--font-mono) !important;
     }
     .cfo-md-editor .w-md-editor-preview {
-        background: var(--color-parchment);
-        border-left: 1px solid rgba(138, 109, 63, 0.3);
+        background: var(--color-primer-lift);
+        border-left: 1px solid rgba(27, 27, 26, 0.15);
     }
 }

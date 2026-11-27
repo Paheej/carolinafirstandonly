@@ -1,23 +1,19 @@
-import { Card, CardBody } from '@cfo/ui';
+import Link from 'next/link';
+import { PageHead, buttonClasses } from '@cfo/ui';
 
 export default function NotFound() {
     return (
-        <div className="max-w-md py-12">
-            <Card>
-                <CardBody className="space-y-3">
-                    <h1 className="cfo-heading-underline font-display text-2xl text-ink">
-                        Off the map
-                    </h1>
-                    <p className="text-sm text-ink-soft">
-                        That page hasn't been charted yet. It's either Phase-something
-                        work that hasn't shipped, or you took a wrong turn at the
-                        objective marker.
-                    </p>
-                    <a href="/" className="text-sm underline">
-                        ← Back to the home table
-                    </a>
-                </CardBody>
-            </Card>
-        </div>
+        <>
+            <PageHead
+                kicker="Page not found"
+                title="Off the board"
+                lede="There's nothing at this address. The page may have moved, or it belongs to a part of the site that isn't built yet."
+            />
+            <div className="py-12">
+                <Link href="/" className={buttonClasses('secondary')}>
+                    Back to the home page
+                </Link>
+            </div>
+        </>
     );
 }

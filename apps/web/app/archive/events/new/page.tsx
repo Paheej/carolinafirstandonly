@@ -22,15 +22,15 @@ export default async function NewEventPage() {
     return (
         <article className="space-y-8">
             <nav className="text-sm">
-                <Link href="/archive" className="inline-flex items-center gap-1 text-ink-soft">
+                <Link href="/archive" className="inline-flex items-center gap-1 text-graphite-soft">
                     <ArrowLeft size={14} /> Archive
                 </Link>
             </nav>
             <header>
-                <h1 className="cfo-heading-underline font-display text-3xl sm:text-4xl text-ink">
+                <h1 className="cfo-heading-underline font-display text-3xl sm:text-4xl text-graphite">
                     New special event
                 </h1>
-                <p className="mt-2 text-sm text-ink-soft">
+                <p className="mt-2 text-sm text-graphite-soft">
                     One-day tournaments, narrative events, and similar one-shots. Description doubles as the event invite and the recap once it's wrapped.
                 </p>
             </header>

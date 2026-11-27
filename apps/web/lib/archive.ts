@@ -177,3 +177,64 @@ export async function getRecapTargets(): Promise<RecapTargetSummary> {
         events: events ?? [],
     };
 }
+
+/** Latest published recaps that have a real write-up (skips placeholder stubs). */
+export async function getLatestRecaps(limit = 4): Promise<Recap[]> {
+    const supabase = createServerSupabase(await cookies());
+    const { data } = await supabase
+        .from('recaps')
+        .select('*')
+        .not('published_at', 'is', null)
+        .not('body_md', 'ilike', '_This page existed as a placeholder%')
+        .order('published_at', { ascending: false })
+        .limit(limit);
+    return data ?? [];
+}
+
+export interface CampaignEntry {
+    kind: 'season' | 'event';
+    slug: string;
+    name: string;
+    /** Sort key + display: ISO date when known, else year. */
+    date: string | null;
+    year: number | null;
+    description_md: string | null;
+    hero_image_url: string | null;
+    game_system: string | null;
+    game_edition: string | null;
+}
+
+/** Seasons and special events merged into one newest-first timeline. */
+export async function getCampaignTimeline(): Promise<CampaignEntry[]> {
+    const [seasons, events] = await Promise.all([getSeasons(), getArchiveEvents()]);
+    const entries: CampaignEntry[] = [
+        ...seasons.map((s) => ({
+            kind: 'season' as const,
+            slug: s.slug,
+            name: s.name,
+            date: s.starts_on,
+            year: s.year ?? (s.starts_on ? new Date(s.starts_on).getUTCFullYear() : null),
+            description_md: s.description_md,
+            hero_image_url: s.hero_image_url,
+            game_system: s.game_system,
+            game_edition: s.game_edition,
+        })),
+        ...events.map((e) => ({
+            kind: 'event' as const,
+            slug: e.slug,
+            name: e.name,
+            date: e.event_date,
+            year: e.event_date ? new Date(e.event_date).getUTCFullYear() : null,
+            description_md: e.description_md,
+            hero_image_url: e.hero_image_url,
+            game_system: e.game_system,
+            game_edition: e.game_edition,
+        })),
+    ];
+    const key = (c: CampaignEntry) => c.date ?? (c.year ? `${c.year}-00-00` : '0000');
+    return entries.sort((a, b) => key(b).localeCompare(key(a)) || b.name.localeCompare(a.name));
+}
+
+export function campaignHref(c: Pick<CampaignEntry, 'kind' | 'slug'>): string {
+    return c.kind === 'season' ? `/archive/seasons/${c.slug}` : `/archive/events/${c.slug}`;
+}

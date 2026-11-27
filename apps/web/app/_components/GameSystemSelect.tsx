@@ -48,7 +48,7 @@ export function GameSystemSelect({
                     value={systemValue}
                     onChange={(e) => handleSystemChange(e.target.value)}
                     required={required}
-                    className="h-10 w-full rounded-sm border border-brass-dark/50 bg-parchment/60 px-3 text-ink focus-visible:border-brass focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
+                    className="h-10 w-full rounded-[3px] border border-graphite/15 bg-primer-lift/60 px-3 text-graphite focus-visible:border-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                 >
                     <option value="">Choose a system…</option>
                     {systems.map((s) => (
@@ -65,7 +65,7 @@ export function GameSystemSelect({
                     value={editionValue}
                     onChange={(e) => onChange({ system: systemValue, edition: e.target.value })}
                     disabled={!selectedSystem || availableEditions.length === 0}
-                    className="h-10 w-full rounded-sm border border-brass-dark/50 bg-parchment/60 px-3 text-ink focus-visible:border-brass focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass disabled:opacity-50"
+                    className="h-10 w-full rounded-[3px] border border-graphite/15 bg-primer-lift/60 px-3 text-graphite focus-visible:border-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold disabled:opacity-50"
                 >
                     <option value="">
                         {selectedSystem && availableEditions.length === 0

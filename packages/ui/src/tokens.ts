@@ -1,28 +1,35 @@
+/** "War table" palette. Keep in sync with the @theme block in styles.css. */
 export const colors = {
-    // Backgrounds
-    parchment: '#f4ead5',
-    parchmentDark: '#e8dcc0',
-    ink: '#1a1815',
-    inkSoft: '#4a4640',
+    // The mat: nav, page-head bands, footer
+    mat: '#0d0d0c',
+    matRaised: '#1a1a18',
+    matLine: '#46453f',
+    onMat: '#ecebe6',
+    onMatSoft: '#a3a198',
 
-    // Accents
-    forest: '#2d4a2b',
-    forestDark: '#1f3320',
-    brass: '#b08d57',
-    brassDark: '#8a6d3f',
-    leather: '#6b4423',
+    // Primer: the page ground
+    primer: '#d8d7d3',
+    primerLift: '#e6e5e1',
+    graphite: '#1b1b1a',
+    graphiteSoft: '#55544f',
+
+    // Wake Forest old gold
+    gold: '#9e7e38',
+    goldBright: '#cfab52',
+    goldDeep: '#6f5823',
 
     // Semantic
-    success: '#3f6d3f',
-    warning: '#b08d57',
-    danger: '#8b2a2a',
+    casualty: '#9e2a2b',
+    danger: '#9e2a2b',
+    success: '#3c6a3c',
+    warning: '#9e7e38',
     info: '#3a5a78',
 } as const;
 
 export const fonts = {
-    display: '"EB Garamond", "Cormorant Garamond", Georgia, serif',
-    body: 'Inter, system-ui, sans-serif',
-    mono: '"JetBrains Mono", ui-monospace, monospace',
+    display: '"Archivo", "Arial Narrow", "Helvetica Neue", sans-serif',
+    body: '"Source Serif 4", Georgia, "Times New Roman", serif',
+    mono: 'ui-monospace, Menlo, monospace',
 } as const;
 
 export type ColorToken = keyof typeof colors;

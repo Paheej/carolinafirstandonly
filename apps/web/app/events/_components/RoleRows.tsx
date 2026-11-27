@@ -68,7 +68,7 @@ export function RoleRows({
                         type="number"
                         min={1}
                         inputMode="numeric"
-                        className="w-28"
+                        className="max-w-28 shrink-0"
                         placeholder="Seats"
                         value={r.max ?? ''}
                         onChange={(e) => update(i, { max: e.target.value ? Number(e.target.value) : null })}

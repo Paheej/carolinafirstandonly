@@ -34,8 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     const unread = user ? await getUnreadCount(user.id) : 0;
     const links = [
         { href: '/archive', label: 'Archive' },
-        { href: '/events', label: 'Events' },
-        { href: '/calendar', label: 'Calendar' },
+        { href: '/events', label: 'Game days' },
         { href: '/groups', label: 'Groups' },
         { href: '/news', label: 'News' },
     ];

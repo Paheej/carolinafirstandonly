@@ -64,6 +64,13 @@ export async function getGroupBySlug(slug: string): Promise<Group | null> {
 
 const ROLE_ORDER: Record<GroupRole, number> = { owner: 0, admin: 1, member: 2 };
 
+/** Slug + name for a group the viewer can see (null for private groups they aren't in). */
+export async function getGroupName(groupId: string) {
+    const supabase = await db();
+    const { data } = await supabase.from('groups').select('slug, name').eq('id', groupId).maybeSingle();
+    return data;
+}
+
 export async function getGroupMembers(groupId: string): Promise<MemberRow[]> {
     const supabase = await db();
     const { data: rows } = await supabase

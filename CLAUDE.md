@@ -61,7 +61,7 @@ Both apps consume `@cfo/database`, `@cfo/ui`, and `@cfo/shared`. The agent app i
 
 ## Design System
 
-**Aesthetic:** "The war table." Black game-mat bands (nav, page heads, footer) over a grey primer page, in Wake Forest black and old gold. Most of the group went to Wake Forest — **never use Carolina blue.** The home hero is a top-down 60x44" Strike Force board (`<WarTable />`) with rulers, deployment zones and numbered objective markers; until Events ship it features the campaigns with `seasons.status = 'active'` (currently Campaign of the Burning Star on campaign-chronicle.app and Curse of Strahd); afterwards it should feature the next game day. Seasons are campaigns; `archive_events` are one-off events (Drafted! is an event, not a campaign).
+**Aesthetic:** "The war table." Black game-mat bands (nav, page heads, footer) over a grey primer page, in Wake Forest black and old gold. Most of the group went to Wake Forest — **never use Carolina blue.** The home hero is a top-down 60x44" Strike Force board (`<WarTable />`) with rulers, deployment zones and numbered objective markers; it features the next game day the viewer can see (Phase 3), with campaigns where `seasons.status = 'active'` listed under it (currently Campaign of the Burning Star on campaign-chronicle.app and Curse of Strahd); with no game day scheduled it features those campaigns. Seasons are campaigns; `archive_events` are one-off events (Drafted! is an event, not a campaign).
 
 ### Tokens
 
@@ -649,7 +649,8 @@ apps/agent/app/
 - **Apple/iCloud:**
   - No OAuth available. User generates a private ICS subscription URL in iCloud (Calendar.app → Calendar Info → "Public Calendar") and pastes it into settings
   - Daily cron fetches the ICS, parses with `node-ical`, writes busy blocks
-- **Two-way sync deferred to Phase 2.**
+- **Outbound (Phase 3, done):** per-event Google/Outlook links and .ics download, plus a personal subscription feed at `/api/calendar/<token>.ics` (token minted in profile settings).
+- **Two-way sync deferred.**
 
 ### Notifications (in-app)
 

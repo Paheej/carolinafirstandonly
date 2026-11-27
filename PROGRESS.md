@@ -6,6 +6,25 @@ spec) before starting a new phase.
 
 ---
 
+## Phase 3 — Game days + RSVPs ⏳
+
+**Built 2026-11-27** on branch `phase-3-events`. Needs migration 0013 pushed before merging.
+
+- `0013_events.sql`: events, event_roles, event_rsvps, event_invites, user_calendar_feeds. RPCs: `rsvp` (locks the event row; capacity + per-role limits; waitlist with stable positions), `invite_to_event`, `uninvite_from_event`, `cancel_event`, `restore_event`, `rotate_calendar_feed`, `delete_calendar_feed`, `calendar_feed_events`. Waitlist promotion runs when a 'yes' leaves, capacity grows, or a role's limit changes. `ics_sequence` bumps on time/place/title/cancel changes so calendar apps take the update.
+- Notifications: new group game day (group members), RSVP yes (organizer), promoted off waitlist, invited, time/place changed, cancelled, back on.
+- Routes: `/events`, `/events?when=past`, `/events/new` (`?group=<slug>` preselects), `/events/[slug]`, `/events/[slug]/edit`, `/events/[slug]/ics`, `/api/calendar/<token>.ics` (personal subscription feed, no session needed).
+- Add to calendar: Google + Outlook template links, .ics download for Apple; subscribe-all feed in `/profile/settings#calendar` (webcal:// for Apple, Google `cid=` and Outlook `addfromweb` links).
+- Group pages list upcoming game days; group admins set default roles (group_role_templates) that prefill new game days.
+- Home hero features the next visible game day; running campaigns sit under it.
+- All times are entered and shown in Eastern (`lib/time.ts`, DST-safe two-pass offset); ICS uses UTC.
+
+Gotchas:
+- A query string after a `#fragment` is part of the fragment. Redirects to `/profile/settings#calendar` put `?notice=` before the hash.
+- Escaping in ICS: `,` `;` `\` and newlines in TEXT values; lines fold at 75 octets.
+- SQL exercised in PGlite: 43 checks (role and capacity waitlists, promotion order, re-RSVP keeps position, hidden-event invites, uninvite drops RSVP, cancel blocks RSVP, feed token isolation).
+
+---
+
 ## Phase 2 — Groups + Profiles ⏳
 
 **Built 2026-11-26** on branch `phase-2-groups` (stacked on `current-campaigns`). Needs migrations 0010–0012 pushed before merging.

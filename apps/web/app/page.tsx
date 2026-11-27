@@ -1,81 +1,89 @@
 import Link from 'next/link';
+import type { Season } from '@cfo/database/types';
 import { MatBand, WarTable, SystemPill, buttonClasses } from '@cfo/ui';
 import { getCurrentUser } from '@/lib/auth';
 import {
+    getActiveCampaigns,
     getCampaignTimeline,
+    getEventTimeline,
     getLatestRecaps,
     getSystemIconMap,
-    campaignHref,
+    type TimelineEntry,
 } from '@/lib/archive';
-import { excerpt, firstImageUrl, sizedImage } from '@/lib/markdown';
+import { excerpt, externalLabel, firstImageUrl, sizedImage } from '@/lib/markdown';
 
-function campaignDate(date: string | null, year: number | null, withDay = false) {
+function timelineDate(date: string | null, year: number | null) {
     if (date) {
-        return new Date(date).toLocaleDateString('en-US', {
-            month: 'long',
-            ...(withDay ? { day: 'numeric' } : {}),
-            year: 'numeric',
-            timeZone: 'UTC',
-        });
+        return new Date(date).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
     }
     return year ? String(year) : null;
 }
 
+function systemLabel(c: Pick<Season, 'game_system' | 'game_edition'>) {
+    if (!c.game_system) return null;
+    return c.game_edition ? `${c.game_system}, ${c.game_edition}` : c.game_system;
+}
+
 export default async function HomePage() {
-    const [user, timeline, recaps, iconMap] = await Promise.all([
+    const [user, active, campaigns, events, recaps, iconMap] = await Promise.all([
         getCurrentUser(),
+        getActiveCampaigns(),
         getCampaignTimeline(),
+        getEventTimeline(),
         getLatestRecaps(4),
         getSystemIconMap(),
     ]);
 
-    // Until events + RSVPs ship (Phase 3), the table features the newest campaign.
-    const current = timeline[0] ?? null;
-    const currentBlurb = current ? excerpt(current.description_md, 220) : null;
-
+    // Until events + RSVPs ship (Phase 3), the table features the campaigns being played now.
     return (
         <>
             {/* ---- The war table -------------------------------------------- */}
             <MatBand aria-labelledby="table-h" innerClassName="grid items-center gap-10 py-10 md:grid-cols-[5fr_7fr] md:py-14">
-                <div className="grid min-w-0 gap-5">
-                    <div className="cfo-kicker">{current ? 'Now running' : 'Carolina First and Only'}</div>
-                    <h1 id="table-h" className="text-[clamp(2.75rem,7vw,5rem)] font-[850] text-on-mat">
-                        {current?.name ?? 'Carolina First and Only'}
+                <div className="grid min-w-0 gap-6">
+                    <h1 id="table-h" className="cfo-kicker">
+                        {active.length > 0 ? 'On the table now' : 'Carolina First and Only'}
                     </h1>
-                    {current ? (
-                        <dl className="cfo-num grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-base">
-                            {campaignDate(current.date, current.year) ? (
-                                <>
-                                    <dt className="cfo-ui text-on-mat-soft">Started</dt>
-                                    <dd>{campaignDate(current.date, current.year)}</dd>
-                                </>
-                            ) : null}
-                            <dt className="cfo-ui text-on-mat-soft">Type</dt>
-                            <dd>{current.kind === 'season' ? 'Campaign season' : 'Special event'}</dd>
-                            {current.game_system ? (
-                                <>
-                                    <dt className="cfo-ui text-on-mat-soft">System</dt>
-                                    <dd>
-                                        {current.game_system}
-                                        {current.game_edition ? ` ${current.game_edition}` : ''}
-                                    </dd>
-                                </>
-                            ) : null}
-                        </dl>
-                    ) : null}
-                    {currentBlurb ? <p className="max-w-[46ch] text-on-mat-soft">{currentBlurb}</p> : null}
-                    <div className="flex flex-wrap gap-3">
-                        {current ? (
-                            <Link href={campaignHref(current)} className={buttonClasses('primary', 'lg')}>
-                                Read the campaign
-                            </Link>
-                        ) : null}
+                    {active.length > 0 ? (
+                        <ul className="grid gap-7">
+                            {active.map((c) => {
+                                const blurb = excerpt(c.description_md, 160);
+                                const system = systemLabel(c);
+                                return (
+                                    <li key={c.id} className="grid gap-2.5">
+                                        <h2 className="text-[clamp(2.25rem,5vw,3.5rem)] font-[850] leading-[0.95] text-on-mat">
+                                            {c.name}
+                                        </h2>
+                                        {system ? <p className="cfo-ui text-on-mat-soft">{system}</p> : null}
+                                        {blurb ? <p className="max-w-[46ch] text-on-mat-soft">{blurb}</p> : null}
+                                        <div className="flex flex-wrap gap-3 pt-1">
+                                            {c.external_url ? (
+                                                <a href={c.external_url} className={buttonClasses('primary')}>
+                                                    {externalLabel(c.external_url)}
+                                                </a>
+                                            ) : null}
+                                            <Link
+                                                href={`/archive/seasons/${c.slug}`}
+                                                className={buttonClasses(c.external_url ? 'outline' : 'primary')}
+                                            >
+                                                Campaign page
+                                            </Link>
+                                        </div>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    ) : (
+                        <p className="max-w-[46ch] text-on-mat-soft">
+                            Tabletop games in Clemmons and Winston-Salem: 40K campaigns, D&D, and the odd tournament day.
+                        </p>
+                    )}
+                    <div className="border-t border-mat-line pt-5">
                         {user ? (
-                            <Link href="/archive/submit" className={buttonClasses('outline', 'lg')}>
+                            <Link href="/archive/submit" className={buttonClasses('outline')}>
                                 Submit a battle report
                             </Link>
                         ) : (
-                            <Link href="/auth/signup" className={buttonClasses('outline', 'lg')}>
+                            <Link href="/auth/signup" className={buttonClasses('outline')}>
                                 Join the club
                             </Link>
                         )}
@@ -140,35 +148,55 @@ export default async function HomePage() {
                     )}
                 </section>
 
-                <section className="min-w-0" aria-labelledby="campaigns-h">
-                    <h2 id="campaigns-h" className="mb-7 text-[2.5rem] font-extrabold">
-                        Campaigns
-                    </h2>
-                    <ol className="cfo-timeline">
-                        {timeline.map((c, i) => (
-                            <li key={`${c.kind}-${c.slug}`} data-live={i === 0 ? '' : undefined}>
-                                <div className="cfo-ui cfo-num text-sm font-semibold text-graphite-soft">
-                                    {campaignDate(c.date, c.year) ?? 'Undated'}
-                                </div>
-                                <Link
-                                    href={campaignHref(c)}
-                                    className="block font-display text-[1.35rem] font-bold leading-tight no-underline [font-stretch:78%] hover:underline hover:decoration-gold"
-                                >
-                                    {c.name}
-                                </Link>
-                                {c.game_system ? (
-                                    <SystemPill
-                                        className="mt-1.5"
-                                        system={c.game_system}
-                                        edition={c.game_edition}
-                                        icon={iconMap[c.game_system] ?? null}
-                                    />
-                                ) : null}
-                            </li>
-                        ))}
-                    </ol>
-                </section>
+                <div className="grid min-w-0 content-start gap-12">
+                    <Timeline id="campaigns-h" title="Campaigns" entries={campaigns} iconMap={iconMap} />
+                    <Timeline id="events-h" title="Events" entries={events} iconMap={iconMap} />
+                </div>
             </div>
         </>
+    );
+}
+
+function Timeline({
+    id,
+    title,
+    entries,
+    iconMap,
+}: {
+    id: string;
+    title: string;
+    entries: TimelineEntry[];
+    iconMap: Record<string, string>;
+}) {
+    if (entries.length === 0) return null;
+    return (
+        <section aria-labelledby={id}>
+            <h2 id={id} className="mb-7 text-[2.5rem] font-extrabold">
+                {title}
+            </h2>
+            <ol className="cfo-timeline">
+                {entries.map((c) => (
+                    <li key={c.slug} data-live={c.active ? '' : undefined}>
+                        <div className="cfo-ui cfo-num text-sm font-semibold text-graphite-soft">
+                            {c.active ? 'Running now' : (timelineDate(c.date, c.year) ?? 'Undated')}
+                        </div>
+                        <Link
+                            href={c.href}
+                            className="block font-display text-[1.35rem] font-bold leading-tight no-underline [font-stretch:78%] hover:underline hover:decoration-gold"
+                        >
+                            {c.name}
+                        </Link>
+                        {c.game_system ? (
+                            <SystemPill
+                                className="mt-1.5"
+                                system={c.game_system}
+                                edition={c.game_edition}
+                                icon={iconMap[c.game_system] ?? null}
+                            />
+                        ) : null}
+                    </li>
+                ))}
+            </ol>
+        </section>
     );
 }

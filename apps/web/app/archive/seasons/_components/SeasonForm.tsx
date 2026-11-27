@@ -10,6 +10,7 @@ import {
     Input,
     Label,
     MarkdownEditor,
+    Select,
 } from '@cfo/ui';
 import { Save } from 'lucide-react';
 import type { GameSystem, GameEdition } from '@cfo/database/types';
@@ -34,6 +35,8 @@ export interface SeasonFormValues {
     game_edition: string;
     hero_image_url: string;
     description_md: string;
+    status: 'active' | 'completed';
+    external_url: string;
 }
 
 export interface SeasonFormProps {
@@ -55,6 +58,8 @@ const blank: SeasonFormValues = {
     game_edition: '',
     hero_image_url: '',
     description_md: '',
+    status: 'completed',
+    external_url: '',
 };
 
 export function SeasonForm({
@@ -178,6 +183,33 @@ export function SeasonForm({
                                 type="date"
                                 value={values.ends_on}
                                 onChange={(e) => set('ends_on', e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-[1fr_2fr]">
+                        <div>
+                            <Label htmlFor="status">Status</Label>
+                            <Select
+                                id="status"
+                                value={values.status}
+                                onChange={(e) => set('status', e.target.value as SeasonFormValues['status'])}
+                            >
+                                <option value="active">Running now</option>
+                                <option value="completed">Finished</option>
+                            </Select>
+                            <p className="mt-1 text-[11px] text-graphite-soft">
+                                Running campaigns are featured on the home page.
+                            </p>
+                        </div>
+                        <div>
+                            <Label htmlFor="external_url">Tracked elsewhere (link)</Label>
+                            <Input
+                                id="external_url"
+                                type="url"
+                                value={values.external_url}
+                                onChange={(e) => set('external_url', e.target.value)}
+                                placeholder="https://campaign-chronicle.app"
                             />
                         </div>
                     </div>

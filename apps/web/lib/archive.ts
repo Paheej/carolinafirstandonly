@@ -191,50 +191,63 @@ export async function getLatestRecaps(limit = 4): Promise<Recap[]> {
     return data ?? [];
 }
 
-export interface CampaignEntry {
-    kind: 'season' | 'event';
+/** Campaigns being played now, featured on the home page. */
+export async function getActiveCampaigns(): Promise<Season[]> {
+    const supabase = createServerSupabase(await cookies());
+    const { data } = await supabase
+        .from('seasons')
+        .select('*')
+        .eq('status', 'active')
+        .order('display_order', { ascending: true });
+    return data ?? [];
+}
+
+export interface TimelineEntry {
     slug: string;
     name: string;
-    /** Sort key + display: ISO date when known, else year. */
+    href: string;
+    /** Display: ISO date when known, else year. */
     date: string | null;
     year: number | null;
-    description_md: string | null;
-    hero_image_url: string | null;
+    active: boolean;
     game_system: string | null;
     game_edition: string | null;
 }
 
-/** Seasons and special events merged into one newest-first timeline. */
-export async function getCampaignTimeline(): Promise<CampaignEntry[]> {
-    const [seasons, events] = await Promise.all([getSeasons(), getArchiveEvents()]);
-    const entries: CampaignEntry[] = [
-        ...seasons.map((s) => ({
-            kind: 'season' as const,
+const sortKey = (c: TimelineEntry) => c.date ?? (c.year ? `${c.year}-00-00` : '0000');
+const newestFirst = (a: TimelineEntry, b: TimelineEntry) =>
+    Number(b.active) - Number(a.active) || sortKey(b).localeCompare(sortKey(a)) || b.name.localeCompare(a.name);
+
+/** Campaigns (seasons), running ones first, then newest first. */
+export async function getCampaignTimeline(): Promise<TimelineEntry[]> {
+    const seasons = await getSeasons();
+    return seasons
+        .map((s) => ({
             slug: s.slug,
             name: s.name,
+            href: `/archive/seasons/${s.slug}`,
             date: s.starts_on,
             year: s.year ?? (s.starts_on ? new Date(s.starts_on).getUTCFullYear() : null),
-            description_md: s.description_md,
-            hero_image_url: s.hero_image_url,
+            active: s.status === 'active',
             game_system: s.game_system,
             game_edition: s.game_edition,
-        })),
-        ...events.map((e) => ({
-            kind: 'event' as const,
-            slug: e.slug,
-            name: e.name,
-            date: e.event_date,
-            year: e.event_date ? new Date(e.event_date).getUTCFullYear() : null,
-            description_md: e.description_md,
-            hero_image_url: e.hero_image_url,
-            game_system: e.game_system,
-            game_edition: e.game_edition,
-        })),
-    ];
-    const key = (c: CampaignEntry) => c.date ?? (c.year ? `${c.year}-00-00` : '0000');
-    return entries.sort((a, b) => key(b).localeCompare(key(a)) || b.name.localeCompare(a.name));
+        }))
+        .sort(newestFirst);
 }
 
-export function campaignHref(c: Pick<CampaignEntry, 'kind' | 'slug'>): string {
-    return c.kind === 'season' ? `/archive/seasons/${c.slug}` : `/archive/events/${c.slug}`;
+/** Special events (one-off days like Drafted!), newest first. */
+export async function getEventTimeline(): Promise<TimelineEntry[]> {
+    const events = await getArchiveEvents();
+    return events
+        .map((e) => ({
+            slug: e.slug,
+            name: e.name,
+            href: `/archive/events/${e.slug}`,
+            date: e.event_date,
+            year: e.event_date ? new Date(e.event_date).getUTCFullYear() : null,
+            active: false,
+            game_system: e.game_system,
+            game_edition: e.game_edition,
+        }))
+        .sort(newestFirst);
 }

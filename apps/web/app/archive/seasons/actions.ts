@@ -41,6 +41,8 @@ function rowFromValues(v: SeasonFormValues) {
         game_edition: v.game_edition || null,
         hero_image_url: v.hero_image_url.trim() || null,
         description_md: v.description_md.trim() || null,
+        status: v.status === 'active' ? ('active' as const) : ('completed' as const),
+        external_url: v.external_url.trim() || null,
     };
 }
 

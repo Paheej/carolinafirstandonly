@@ -39,6 +39,8 @@ export default async function EditSeasonPage({ params }: PageProps) {
         game_edition: season.game_edition ?? '',
         hero_image_url: season.hero_image_url ?? '',
         description_md: season.description_md ?? '',
+        status: season.status,
+        external_url: season.external_url ?? '',
     };
 
     return (

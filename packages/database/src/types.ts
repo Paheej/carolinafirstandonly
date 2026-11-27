@@ -109,6 +109,8 @@ export interface Database {
                     display_order: number;
                     game_system: string | null;
                     game_edition: string | null;
+                    status: 'active' | 'completed';
+                    external_url: string | null;
                     created_at: string;
                     updated_at: string;
                 };
@@ -123,6 +125,8 @@ export interface Database {
                     display_order?: number;
                     game_system?: string | null;
                     game_edition?: string | null;
+                    status?: 'active' | 'completed';
+                    external_url?: string | null;
                 };
                 Update: Partial<Database['public']['Tables']['seasons']['Insert']>;
                 Relationships: [];

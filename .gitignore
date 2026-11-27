@@ -40,3 +40,6 @@ next-env.d.ts
 
 # Vercel
 .vercel
+
+# Apple Sign in with Apple private keys
+*.p8

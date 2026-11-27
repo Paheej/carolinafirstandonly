@@ -9,7 +9,7 @@ export async function getMyCalendars(): Promise<MyCalendar[]> {
     const supabase = createServerSupabase(await cookies());
     const { data } = await supabase
         .from('calendar_connections')
-        .select('id, provider, label, source_host, enabled, last_synced_at, last_error, block_count, created_at')
+        .select('id, provider, label, account, enabled, last_synced_at, last_error, block_count, created_at')
         .order('created_at');
     return data ?? [];
 }

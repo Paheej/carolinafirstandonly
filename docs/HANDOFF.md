@@ -30,7 +30,12 @@ _Last updated 2026-11-27._
 
 **Built (PR `phase-4-calendar-sync`):**
 
-- **Connections use calendar links, not OAuth.** iCloud ("Public Calendar" link), Google ("Secret address in iCal format") and Outlook ("Publish a calendar", busy-only) all give a private ICS link. That covers all three without Google's sensitive-scope review or an Azure app. `provider` also allows `google`/`outlook` for OAuth later.
+- **Connect buttons for Google and Outlook (OAuth).** The owner rejected pasting links as the main path, so iCloud is the only provider that uses a link: Apple offers no calendar OAuth. It sits under "Using an iPhone calendar?".
+  - Google scopes: `calendar.freebusy` and `calendar.calendarlist.readonly`, so the site never sees event details. It uses the existing sign-in OAuth client (`GOOGLE_CLIENT_ID`/`SECRET`, now also in Vercel).
+  - Outlook scope: `Calendars.ReadBasic` plus `offline_access`, and it reads only start, end and showAs. Microsoft rotates refresh tokens, and the sync saves the new one.
+  - Routes: `/api/calendar-connect/[provider]/start` and `/callback`, using PKCE and a state cookie that is checked against the signed-in user. Code: `apps/web/lib/calendar-oauth.ts`.
+  - Callback URLs to register, for each of `https://carolinafirstandonly.vercel.app`, `https://new.carolinafirstandonly.com` and `http://localhost:3000`: `<origin>/api/calendar-connect/google/callback` and `<origin>/api/calendar-connect/outlook/callback`.
+  - A button only shows once its provider's client ID and secret are set.
 - **Migration `0014_calendar_sync.sql`.** This differs from the spec's table sketch:
   - One `encrypted_secret` column holds the link or a future refresh token, encrypted with AES-256-GCM (`TOKEN_ENCRYPTION_KEY`).
   - Each member can connect up to 5 calendars.
@@ -49,8 +54,15 @@ _Last updated 2026-11-27._
 
 **Still to do:**
 
-- Live test with a real iCloud/Google link on the preview, then merge.
-- Optional later: Google/Outlook OAuth (see the original plan in git history). Only worth it if members find copying links too fiddly.
+- **Google Cloud console** (project `carolina-first-and-only`):
+  - Enable the Google Calendar API.
+  - Add the callback URLs to the OAuth client.
+  - Add the two calendar scopes under Data Access.
+  - These are sensitive scopes. Until Google verifies them, people see a "Google hasn't verified this app" screen (Advanced → continue), and at most 100 people can connect. Verification needs a demo video and the owner's OK to submit.
+- **Microsoft:**
+  - Register an Azure app (Entra ID → App registrations) for "personal Microsoft accounts and any org directory", with the Outlook callback URLs above.
+  - Add a client secret, then set `MICROSOFT_CLIENT_ID`/`MICROSOFT_CLIENT_SECRET` locally and in Vercel. Client secrets expire, so set a reminder.
+- Push migration 0014 (with the owner's OK), live-test on localhost and the preview, then merge.
 
 ## Later phases
 

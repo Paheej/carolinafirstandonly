@@ -20,7 +20,7 @@ create table public.calendar_connections (
     user_id uuid not null references public.profiles(id) on delete cascade,
     provider text not null default 'ics' check (provider in ('ics', 'google', 'outlook')),
     label text not null check (char_length(label) between 1 and 60),
-    source_host text,                    -- e.g. "p42-caldav.icloud.com", for display only
+    account text,                        -- account email, or the ICS host; display only
     encrypted_secret text not null,      -- AES-GCM: ICS link or OAuth refresh token
     enabled boolean default true not null,
     last_synced_at timestamptz,

@@ -1,7 +1,8 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import { createServiceSupabase } from '@cfo/database/server';
 import type { CalendarConnection, Json } from '@cfo/database/types';
-import { busyBlocksFromIcs } from './ics-busy';
+import { busyBlocksFromIcs, type Block } from './ics-busy';
+import { OAuthSyncError, oauthBusyBlocks } from './calendar-oauth';
 
 /**
  * Busy-time sync. Server only.
@@ -47,7 +48,9 @@ export function hostAllowed(host: string) {
     return ALLOWED_HOSTS.some((re) => re.test(host.toLowerCase()));
 }
 
-export function providerName(host: string | null) {
+export function providerName(provider: CalendarConnection['provider'], host: string | null) {
+    if (provider === 'google') return 'Google Calendar';
+    if (provider === 'outlook') return 'Outlook';
     if (!host) return 'Calendar';
     if (/icloud\.com$/.test(host)) return 'iCloud';
     if (/google\.com$/.test(host)) return 'Google';
@@ -110,21 +113,30 @@ export class SyncError extends Error {}
 export async function syncConnection(conn: Pick<CalendarConnection, 'id' | 'provider' | 'encrypted_secret'>): Promise<{ ok: true; blocks: number } | { ok: false; error: string }> {
     const admin = createServiceSupabase();
     try {
-        if (conn.provider !== 'ics') throw new SyncError('This kind of calendar connection isn’t supported yet.');
-        const link = normalizeCalendarLink(decryptSecret(conn.encrypted_secret));
-        if ('error' in link) throw new SyncError(link.error);
-        const blocks = busyBlocksFromIcs(await fetchIcs(link.url));
+        let blocks: Block[];
+        if (conn.provider === 'ics') {
+            const link = normalizeCalendarLink(decryptSecret(conn.encrypted_secret));
+            if ('error' in link) throw new SyncError(link.error);
+            blocks = busyBlocksFromIcs(await fetchIcs(link.url));
+        } else {
+            const r = await oauthBusyBlocks(conn.provider, decryptSecret(conn.encrypted_secret));
+            blocks = r.blocks;
+            // Microsoft rotates refresh tokens; keep the newest one.
+            if (r.refreshToken) {
+                await admin.from('calendar_connections').update({ encrypted_secret: encryptSecret(r.refreshToken) }).eq('id', conn.id);
+            }
+        }
         const { data, error } = await admin.rpc('replace_busy_blocks', { p_connection: conn.id, p_blocks: blocks as unknown as Json });
         if (error) throw new Error(error.message);
         return { ok: true, blocks: data ?? blocks.length };
     } catch (e) {
         const message =
-            e instanceof SyncError
+            e instanceof SyncError || e instanceof OAuthSyncError
                 ? e.message
                 : e instanceof Error && e.name === 'TimeoutError'
                   ? 'The calendar site took too long to answer. We’ll try again tomorrow.'
                   : 'Something went wrong reading that calendar. We’ll try again tomorrow.';
-        if (!(e instanceof SyncError)) console.error('[calendar-sync]', conn.id, e);
+        if (!(e instanceof SyncError || e instanceof OAuthSyncError)) console.error('[calendar-sync]', conn.id, e);
         await admin.from('calendar_connections').update({ last_error: message }).eq('id', conn.id);
         return { ok: false, error: message };
     }
@@ -133,7 +145,7 @@ export async function syncConnection(conn: Pick<CalendarConnection, 'id' | 'prov
 /** Daily cron: every enabled connection, a few at a time. */
 export async function syncAll(): Promise<{ total: number; ok: number; failed: number }> {
     const admin = createServiceSupabase();
-    const { data, error } = await admin.from('calendar_connections').select('id, provider, encrypted_secret').eq('enabled', true).eq('provider', 'ics');
+    const { data, error } = await admin.from('calendar_connections').select('id, provider, encrypted_secret').eq('enabled', true);
     if (error) throw new Error(error.message);
     const queue = [...(data ?? [])];
     let ok = 0;

@@ -528,7 +528,7 @@ export interface Database {
                     user_id: string;
                     provider: 'ics' | 'google' | 'outlook';
                     label: string;
-                    source_host: string | null;
+                    account: string | null;
                     encrypted_secret: string;
                     enabled: boolean;
                     last_synced_at: string | null;
@@ -540,7 +540,7 @@ export interface Database {
                     user_id: string;
                     provider?: 'ics' | 'google' | 'outlook';
                     label: string;
-                    source_host?: string | null;
+                    account?: string | null;
                     encrypted_secret: string;
                     enabled?: boolean;
                     last_synced_at?: string | null;

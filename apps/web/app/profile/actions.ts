@@ -61,11 +61,11 @@ export async function connectCalendar(fd: FormData) {
     const link = normalizeCalendarLink(typeof raw === 'string' ? raw : '');
     if ('error' in link) backCal('error', link.error);
     const labelIn = fd.get('label');
-    const label = (typeof labelIn === 'string' && labelIn.trim().slice(0, 60)) || providerName(link.url.hostname);
+    const label = (typeof labelIn === 'string' && labelIn.trim().slice(0, 60)) || providerName('ics', link.url.hostname);
 
     const { data, error } = await supabase
         .from('calendar_connections')
-        .insert({ user_id: user.id, label, source_host: link.url.hostname, encrypted_secret: encryptSecret(link.url.toString()) })
+        .insert({ user_id: user.id, label, account: link.url.hostname, encrypted_secret: encryptSecret(link.url.toString()) })
         .select('id, provider, encrypted_secret')
         .single();
     if (error || !data) backCal('error', error?.message ?? 'Could not save that calendar.');

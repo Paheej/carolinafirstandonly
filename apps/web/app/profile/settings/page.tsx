@@ -11,6 +11,7 @@ import { getMyFeedToken } from '@/lib/events';
 import { headers } from 'next/headers';
 import { getMyCalendars } from '@/lib/calendars';
 import { BusyCalendars } from './BusyCalendars';
+import { oauthConfigured } from '@/lib/calendar-oauth';
 
 export const metadata: Metadata = { title: 'Profile settings' };
 
@@ -133,7 +134,7 @@ export default async function ProfileSettingsPage({
                     </form>
                 )}
             </section>
-            <BusyCalendars calendars={calendars} />
+            <BusyCalendars calendars={calendars} providers={{ google: oauthConfigured('google'), outlook: oauthConfigured('outlook') }} />
         </>
     );
 }

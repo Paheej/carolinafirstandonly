@@ -27,3 +27,9 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
         profile: profile ?? null,
     };
 }
+
+/** Only same-site paths, so ?next= can't bounce people to another site. */
+export function safeNext(v: string | string[] | undefined | null): string {
+    const s = Array.isArray(v) ? v[0] : v;
+    return s && /^\/(?![/\\])/.test(s) ? s : '/';
+}

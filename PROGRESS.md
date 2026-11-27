@@ -6,6 +6,23 @@ spec) before starting a new phase.
 
 ---
 
+## Phase 2 — Groups + Profiles ⏳
+
+**Built 2026-11-26** on branch `phase-2-groups` (stacked on `current-campaigns`). Needs migrations 0010–0012 pushed before merging.
+
+- `0010_current_campaigns.sql`: `seasons.status` (`active`/`completed`) + `external_url`; seeds Campaign of the Burning Star (campaign-chronicle.app) and Curse of Strahd as active. Home hero features active campaigns; sidebar splits Campaigns and Events.
+- `0011_groups.sql`: groups, group_members, group_join_requests, group_invites (direct + link), group_pinned_posts, group_role_templates. Membership changes only via RPCs: `join_group`, `cancel_join_request`, `decide_join_request`, `invite_member`, `decline_invite`, `create_invite_link`, `revoke_invite`, `redeem_invite_link`, `invite_link_preview`, `leave_group`, `set_member_role`, `remove_member`. Each notifies the people involved.
+- `0012_profile_guard.sql`: **security fix**. `profiles_update_own` let users set their own `is_admin`; a trigger now pins `is_admin`/`banned_until` for non-admins. Unique index on `lower(username)`.
+- Routes: `/groups`, `/groups/new`, `/groups/[slug]`, `/groups/[slug]/manage` (requests, invites, links, members/roles, pinned posts, settings, delete), `/groups/invite/[token]`, `/profile/[username]`, `/profile/settings`, `/profile/notifications`. Nav has a bell with the unread count.
+- Auth honours a same-site `?next=` through email, OAuth and the callback (open redirects blocked).
+- Mutations are plain form actions that redirect back with `?notice=`/`?error=`; Postgres `raise exception` text is written to be shown to people.
+
+Gotchas:
+- RLS `select` policies that look the row up through a helper function fail on `INSERT ... RETURNING`: the new row isn't in the helper's snapshot. `groups_read` checks `visibility`/`created_by` on the row first.
+- SQL was exercised in PGlite with stubbed `auth.uid()` (no Docker here): 40 checks across join/request/invite/link/role/remove/leave and RLS denial cases.
+
+---
+
 ## Redesign — "war table" ✅
 
 **Shipped 2026-11-26** on branch `redesign-war-table`. Prototype: https://claude.ai/artifact/Ern83beTk54LiViYAJJ1CE

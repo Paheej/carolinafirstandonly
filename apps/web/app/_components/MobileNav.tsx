@@ -13,9 +13,10 @@ interface MobileNavLink {
 interface MobileNavProps {
     links: MobileNavLink[];
     user: CurrentUser | null;
+    unread?: number;
 }
 
-export function MobileNav({ links, user }: MobileNavProps) {
+export function MobileNav({ links, user, unread = 0 }: MobileNavProps) {
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
@@ -86,6 +87,17 @@ export function MobileNav({ links, user }: MobileNavProps) {
                                     {l.label}
                                 </a>
                             ))}
+                            {user ? (
+                                <a
+                                    href="/profile/notifications"
+                                    className="flex items-center justify-between border-b border-on-mat/10 px-5 py-3 cfo-ui text-lg font-semibold text-on-mat no-underline hover:bg-mat-raised"
+                                >
+                                    Notifications
+                                    {unread > 0 ? (
+                                        <span className="cfo-num rounded-full bg-gold-bright px-2 text-sm font-bold text-graphite">{unread}</span>
+                                    ) : null}
+                                </a>
+                            ) : null}
                             {user?.profile?.is_admin ? (
                                 <a
                                     href="/admin"
@@ -115,7 +127,8 @@ export function MobileNav({ links, user }: MobileNavProps) {
                                     <form action="/api/auth/signout" method="post">
                                         <Button
                                             type="submit"
-                                            variant="outline"                                            className="w-full"
+                                            variant="outline"
+                                            className="w-full"
                                         >
                                             <LogOut size={16} /> Sign out
                                         </Button>

@@ -10,9 +10,12 @@ type Mode = 'login' | 'signup';
 interface AuthFormProps {
     mode: Mode;
     initialError?: string | null;
+    /** Where to land after signing in. Must be a same-site path. */
+    next?: string;
 }
 
-export function AuthForm({ mode, initialError }: AuthFormProps) {
+export function AuthForm({ mode, initialError, next = '/' }: AuthFormProps) {
+    const callback = () => `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -31,7 +34,7 @@ export function AuthForm({ mode, initialError }: AuthFormProps) {
                     email,
                     password,
                     options: {
-                        emailRedirectTo: `${window.location.origin}/auth/callback`,
+                        emailRedirectTo: callback(),
                     },
                 });
                 if (signupError) {
@@ -53,7 +56,7 @@ export function AuthForm({ mode, initialError }: AuthFormProps) {
                     setError(loginError.message);
                     return;
                 }
-                router.push('/');
+                router.push(next);
                 router.refresh();
             }
         });
@@ -65,7 +68,7 @@ export function AuthForm({ mode, initialError }: AuthFormProps) {
         const { error: oauthError } = await supabase.auth.signInWithOAuth({
             provider,
             options: {
-                redirectTo: `${window.location.origin}/auth/callback`,
+                redirectTo: callback(),
             },
         });
         if (oauthError) setError(oauthError.message);

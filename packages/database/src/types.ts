@@ -280,6 +280,161 @@ export interface Database {
                 };
                 Relationships: [];
             };
+            groups: {
+                Row: {
+                    id: string;
+                    slug: string;
+                    name: string;
+                    description_md: string | null;
+                    systems: string[];
+                    visibility: 'public' | 'private';
+                    join_policy: 'open' | 'request' | 'invite';
+                    banner_url: string | null;
+                    accent_color: string | null;
+                    created_by: string | null;
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    slug: string;
+                    name: string;
+                    description_md?: string | null;
+                    systems?: string[];
+                    visibility?: 'public' | 'private';
+                    join_policy?: 'open' | 'request' | 'invite';
+                    banner_url?: string | null;
+                    accent_color?: string | null;
+                    created_by?: string | null;
+                };
+                Update: Partial<Database['public']['Tables']['groups']['Insert']>;
+                Relationships: [];
+            };
+            group_members: {
+                Row: {
+                    group_id: string;
+                    user_id: string;
+                    role: 'owner' | 'admin' | 'member';
+                    joined_at: string;
+                };
+                Insert: {
+                    group_id: string;
+                    user_id: string;
+                    role?: 'owner' | 'admin' | 'member';
+                };
+                Update: Partial<Database['public']['Tables']['group_members']['Insert']>;
+                Relationships: [
+                    {
+                        foreignKeyName: 'group_members_user_id_fkey';
+                        columns: ['user_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'profiles';
+                        referencedColumns: ['id'];
+                    },
+                    {
+                        foreignKeyName: 'group_members_group_id_fkey';
+                        columns: ['group_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'groups';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
+            group_join_requests: {
+                Row: {
+                    id: string;
+                    group_id: string;
+                    user_id: string;
+                    message: string | null;
+                    status: 'pending' | 'approved' | 'declined' | 'cancelled';
+                    decided_by: string | null;
+                    decided_at: string | null;
+                    created_at: string;
+                };
+                Insert: {
+                    group_id: string;
+                    user_id: string;
+                    message?: string | null;
+                };
+                Update: Partial<Database['public']['Tables']['group_join_requests']['Insert']>;
+                Relationships: [
+                    {
+                        foreignKeyName: 'group_join_requests_user_id_fkey';
+                        columns: ['user_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'profiles';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
+            group_invites: {
+                Row: {
+                    id: string;
+                    group_id: string;
+                    kind: 'direct' | 'link';
+                    invited_user_id: string | null;
+                    token: string | null;
+                    status: 'pending' | 'accepted' | 'declined' | 'revoked';
+                    uses: number;
+                    max_uses: number | null;
+                    expires_at: string | null;
+                    created_by: string | null;
+                    created_at: string;
+                };
+                Insert: {
+                    group_id: string;
+                    kind: 'direct' | 'link';
+                    invited_user_id?: string | null;
+                    token?: string | null;
+                };
+                Update: Partial<Database['public']['Tables']['group_invites']['Insert']>;
+                Relationships: [
+                    {
+                        foreignKeyName: 'group_invites_invited_user_id_fkey';
+                        columns: ['invited_user_id'];
+                        isOneToOne: false;
+                        referencedRelation: 'profiles';
+                        referencedColumns: ['id'];
+                    },
+                ];
+            };
+            group_pinned_posts: {
+                Row: {
+                    id: string;
+                    group_id: string;
+                    author_id: string | null;
+                    title: string;
+                    body_md: string;
+                    position: number;
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    group_id: string;
+                    author_id?: string | null;
+                    title: string;
+                    body_md: string;
+                    position?: number;
+                };
+                Update: Partial<Database['public']['Tables']['group_pinned_posts']['Insert']>;
+                Relationships: [];
+            };
+            group_role_templates: {
+                Row: {
+                    id: string;
+                    group_id: string;
+                    role_name: string;
+                    default_max: number | null;
+                    position: number;
+                };
+                Insert: {
+                    group_id: string;
+                    role_name: string;
+                    default_max?: number | null;
+                    position?: number;
+                };
+                Update: Partial<Database['public']['Tables']['group_role_templates']['Insert']>;
+                Relationships: [];
+            };
         };
         Views: Record<string, never>;
         Functions: {
@@ -291,6 +446,18 @@ export interface Database {
                 Args: { input: string };
                 Returns: string;
             };
+            join_group: { Args: { p_group: string; p_message?: string | null }; Returns: string };
+            cancel_join_request: { Args: { p_group: string }; Returns: undefined };
+            decide_join_request: { Args: { p_request: string; p_approve: boolean }; Returns: undefined };
+            invite_member: { Args: { p_group: string; p_username: string }; Returns: undefined };
+            decline_invite: { Args: { p_group: string }; Returns: undefined };
+            create_invite_link: { Args: { p_group: string; p_days?: number | null; p_max_uses?: number | null }; Returns: string };
+            revoke_invite: { Args: { p_invite: string }; Returns: undefined };
+            invite_link_preview: { Args: { p_token: string }; Returns: { group_name: string; group_slug: string; is_valid: boolean }[] };
+            redeem_invite_link: { Args: { p_token: string }; Returns: string };
+            leave_group: { Args: { p_group: string }; Returns: undefined };
+            set_member_role: { Args: { p_group: string; p_user: string; p_role: string }; Returns: undefined };
+            remove_member: { Args: { p_group: string; p_user: string }; Returns: undefined };
         };
         Enums: Record<string, never>;
         CompositeTypes: Record<string, never>;
@@ -307,3 +474,9 @@ export type RecapSubmission = Database['public']['Tables']['recap_submissions'][
 export type ArchivePage = Database['public']['Tables']['archive_pages']['Row'];
 export type GameSystem = Database['public']['Tables']['game_systems']['Row'];
 export type GameEdition = Database['public']['Tables']['game_editions']['Row'];
+export type Group = Database['public']['Tables']['groups']['Row'];
+export type GroupMember = Database['public']['Tables']['group_members']['Row'];
+export type GroupJoinRequest = Database['public']['Tables']['group_join_requests']['Row'];
+export type GroupInvite = Database['public']['Tables']['group_invites']['Row'];
+export type GroupPinnedPost = Database['public']['Tables']['group_pinned_posts']['Row'];
+export type GroupRole = GroupMember['role'];

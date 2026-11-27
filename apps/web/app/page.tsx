@@ -11,6 +11,8 @@ import {
     type TimelineEntry,
 } from '@/lib/archive';
 import { excerpt, externalLabel, firstImageUrl, sizedImage } from '@/lib/markdown';
+import { getNextGameDay } from '@/lib/events';
+import { fmtDay, fmtTimeRange } from '@/lib/time';
 
 function timelineDate(date: string | null, year: number | null) {
     if (date) {
@@ -25,8 +27,9 @@ function systemLabel(c: Pick<Season, 'game_system' | 'game_edition'>) {
 }
 
 export default async function HomePage() {
-    const [user, active, campaigns, events, recaps, iconMap] = await Promise.all([
-        getCurrentUser(),
+    const user = await getCurrentUser();
+    const [next, active, campaigns, events, recaps, iconMap] = await Promise.all([
+        getNextGameDay(user?.id ?? null),
         getActiveCampaigns(),
         getCampaignTimeline(),
         getEventTimeline(),
@@ -34,16 +37,69 @@ export default async function HomePage() {
         getSystemIconMap(),
     ]);
 
-    // Until events + RSVPs ship (Phase 3), the table features the campaigns being played now.
+    // The table features the next game day; running campaigns sit underneath it.
     return (
         <>
             {/* ---- The war table -------------------------------------------- */}
             <MatBand aria-labelledby="table-h" innerClassName="grid items-center gap-10 py-10 md:grid-cols-[5fr_7fr] md:py-14">
                 <div className="grid min-w-0 gap-6">
-                    <h1 id="table-h" className="cfo-kicker">
-                        {active.length > 0 ? 'On the table now' : 'Carolina First and Only'}
-                    </h1>
-                    {active.length > 0 ? (
+                    {next ? (
+                        <div className="grid gap-3">
+                            <p className="cfo-kicker">Next game day</p>
+                            <h1 id="table-h" className="text-[clamp(2.5rem,6vw,4.5rem)] font-[850] leading-[0.95] text-on-mat">
+                                {next.title}
+                            </h1>
+                            <dl className="cfo-num grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-base">
+                                <dt className="cfo-ui text-on-mat-soft">When</dt>
+                                <dd>
+                                    {fmtDay(next.starts_at)}, {fmtTimeRange(next.starts_at, next.ends_at)}
+                                </dd>
+                                {next.location ? (
+                                    <>
+                                        <dt className="cfo-ui text-on-mat-soft">Where</dt>
+                                        <dd>{next.location}</dd>
+                                    </>
+                                ) : null}
+                                <dt className="cfo-ui text-on-mat-soft">Going</dt>
+                                <dd>
+                                    {next.going}
+                                    {next.capacity ? ` of ${next.capacity}` : ''}
+                                    {next.my_status === 'yes' ? ', including you' : ''}
+                                </dd>
+                            </dl>
+                            <div className="flex flex-wrap gap-3 pt-1">
+                                <Link href={`/events/${next.slug}`} className={buttonClasses('primary', 'lg')}>
+                                    {next.my_status ? 'See who’s coming' : 'RSVP'}
+                                </Link>
+                                <Link href="/events" className={buttonClasses('outline', 'lg')}>
+                                    All game days
+                                </Link>
+                            </div>
+                        </div>
+                    ) : (
+                        <h1 id="table-h" className="cfo-kicker">
+                            {active.length > 0 ? 'On the table now' : 'Carolina First and Only'}
+                        </h1>
+                    )}
+                    {next && active.length > 0 ? (
+                        <div className="border-t border-mat-line pt-5">
+                            <h2 className="cfo-kicker mb-2">On the table now</h2>
+                            <ul className="cfo-ui grid gap-1.5">
+                                {active.map((c) => (
+                                    <li key={c.id} className="flex flex-wrap items-baseline gap-x-3">
+                                        <Link href={`/archive/seasons/${c.slug}`} className="text-[1.15rem] font-semibold text-on-mat no-underline hover:underline hover:decoration-gold-bright">
+                                            {c.name}
+                                        </Link>
+                                        {c.external_url ? (
+                                            <a href={c.external_url} className="text-on-mat-soft underline-offset-4 hover:text-on-mat hover:underline">
+                                                {externalLabel(c.external_url)}
+                                            </a>
+                                        ) : null}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : active.length > 0 ? (
                         <ul className="grid gap-7">
                             {active.map((c) => {
                                 const blurb = excerpt(c.description_md, 160);
@@ -72,22 +128,24 @@ export default async function HomePage() {
                                 );
                             })}
                         </ul>
-                    ) : (
+                    ) : !next ? (
                         <p className="max-w-[46ch] text-on-mat-soft">
                             Tabletop games in Clemmons and Winston-Salem: 40K campaigns, D&D, and the odd tournament day.
                         </p>
+                    ) : null}
+                    {next ? null : (
+                        <div className="border-t border-mat-line pt-5">
+                            {user ? (
+                                <Link href="/events/new" className={buttonClasses('outline')}>
+                                    Plan a game day
+                                </Link>
+                            ) : (
+                                <Link href="/auth/signup" className={buttonClasses('outline')}>
+                                    Join the club
+                                </Link>
+                            )}
+                        </div>
                     )}
-                    <div className="border-t border-mat-line pt-5">
-                        {user ? (
-                            <Link href="/archive/submit" className={buttonClasses('outline')}>
-                                Submit a battle report
-                            </Link>
-                        ) : (
-                            <Link href="/auth/signup" className={buttonClasses('outline')}>
-                                Join the club
-                            </Link>
-                        )}
-                    </div>
                 </div>
                 <div className="min-w-0">
                     <WarTable />

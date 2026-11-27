@@ -6,6 +6,8 @@ import { Settings } from 'lucide-react';
 import { getCurrentUser } from '@/lib/auth';
 import { getGroupBySlug, getGroupMembers, getPinnedPosts, getViewerState, memberName } from '@/lib/groups';
 import { excerpt } from '@/lib/markdown';
+import { listEvents } from '@/lib/events';
+import { EventList } from '@/app/events/_components/EventList';
 import { cancelRequest, declineInvite, joinGroup, leaveGroup } from '../actions';
 import { Notice, first } from '../_components/Notice';
 import { POLICY_LABEL } from '../_components/GroupFields';
@@ -28,10 +30,11 @@ export default async function GroupPage({ params, searchParams }: PageProps) {
     const group = await getGroupBySlug(slug);
     if (!group) notFound();
 
-    const [members, posts, viewer] = await Promise.all([
+    const [members, posts, viewer, events] = await Promise.all([
         getGroupMembers(group.id),
         getPinnedPosts(group.id),
         getViewerState(group.id, user?.id ?? null),
+        listEvents(user?.id ?? null, { groupId: group.id, limit: 8 }),
     ]);
     const canManage = viewer.role === 'owner' || viewer.role === 'admin' || !!user?.profile?.is_admin;
     const hidden = { group_id: group.id, slug: group.slug };
@@ -68,6 +71,22 @@ export default async function GroupPage({ params, searchParams }: PageProps) {
                     ) : (
                         <p className="text-graphite-soft">No description yet.</p>
                     )}
+
+                    <section aria-labelledby="days-h" className="grid gap-4">
+                        <div className="flex flex-wrap items-baseline justify-between gap-3">
+                            <h2 id="days-h" className="text-[2rem] font-extrabold">Game days</h2>
+                            {viewer.role ? (
+                                <Link href={`/events/new?group=${group.slug}`} className={buttonClasses('outline', 'sm')}>
+                                    Plan a game day
+                                </Link>
+                            ) : null}
+                        </div>
+                        {events.length ? (
+                            <EventList events={events} showMonths={false} />
+                        ) : (
+                            <p className="text-graphite-soft">Nothing scheduled.</p>
+                        )}
+                    </section>
 
                     {posts.length > 0 ? (
                         <section aria-labelledby="pinned-h" className="grid gap-6">

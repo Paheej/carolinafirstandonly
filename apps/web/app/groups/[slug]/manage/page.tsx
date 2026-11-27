@@ -26,6 +26,9 @@ import {
     updateGroup,
 } from '../../actions';
 import { GroupFields } from '../../_components/GroupFields';
+import { getRoleTemplates } from '@/lib/events';
+import { saveRoleTemplates } from '@/app/events/actions';
+import { RoleRows } from '@/app/events/_components/RoleRows';
 import { Notice, first } from '../../_components/Notice';
 
 interface PageProps {
@@ -50,12 +53,13 @@ export default async function ManageGroupPage({ params, searchParams }: PageProp
     const isOwner = viewer.role === 'owner' || siteAdmin;
     if (!isOwner && viewer.role !== 'admin') notFound();
 
-    const [members, posts, queue, systems, h] = await Promise.all([
+    const [members, posts, queue, systems, h, templates] = await Promise.all([
         getGroupMembers(group.id),
         getPinnedPosts(group.id),
         getGroupAdminQueue(group.id),
         getGameSystems(),
         headers(),
+        getRoleTemplates(group.id),
     ]);
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? `https://${h.get('host')}`;
     const hidden = { group_id: group.id, slug: group.slug };
@@ -225,6 +229,18 @@ export default async function ManageGroupPage({ params, searchParams }: PageProp
                             </div>
                         </form>
                     </div>
+                </Section>
+
+                {/* ---- Default roles ---- */}
+                <Section id="roles" title="Default roles for game days">
+                    <form action={saveRoleTemplates} className="grid max-w-2xl gap-4">
+                        <Hidden values={hidden} />
+                        <RoleRows initial={templates.map((t) => ({ role_name: t.role_name, max: t.default_max }))} />
+                        <p className="text-sm text-graphite-soft">New game days in this group start with these roles. Organizers can change them per game day.</p>
+                        <div>
+                            <Button type="submit" variant="secondary">Save roles</Button>
+                        </div>
+                    </form>
                 </Section>
 
                 {/* ---- Settings ---- */}

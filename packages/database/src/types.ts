@@ -435,6 +435,93 @@ export interface Database {
                 Update: Partial<Database['public']['Tables']['group_role_templates']['Insert']>;
                 Relationships: [];
             };
+            events: {
+                Row: {
+                    id: string;
+                    slug: string;
+                    title: string;
+                    description_md: string | null;
+                    group_id: string | null;
+                    starts_at: string;
+                    ends_at: string;
+                    location: string | null;
+                    visibility: 'public' | 'group' | 'hidden';
+                    capacity: number | null;
+                    created_by: string | null;
+                    cancelled_at: string | null;
+                    ics_sequence: number;
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    slug: string;
+                    title: string;
+                    description_md?: string | null;
+                    group_id?: string | null;
+                    starts_at: string;
+                    ends_at: string;
+                    location?: string | null;
+                    visibility?: 'public' | 'group' | 'hidden';
+                    capacity?: number | null;
+                    created_by?: string | null;
+                };
+                Update: Partial<Database['public']['Tables']['events']['Insert']>;
+                Relationships: [];
+            };
+            event_roles: {
+                Row: {
+                    id: string;
+                    event_id: string;
+                    role_name: string;
+                    max_count: number | null;
+                    position: number;
+                };
+                Insert: {
+                    id?: string;
+                    event_id: string;
+                    role_name: string;
+                    max_count?: number | null;
+                    position?: number;
+                };
+                Update: Partial<Database['public']['Tables']['event_roles']['Insert']>;
+                Relationships: [];
+            };
+            event_rsvps: {
+                Row: {
+                    event_id: string;
+                    user_id: string;
+                    status: 'yes' | 'no' | 'maybe' | 'waitlist';
+                    role_id: string | null;
+                    waitlist_position: number | null;
+                    note: string | null;
+                    rsvped_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    event_id: string;
+                    user_id: string;
+                    status: 'yes' | 'no' | 'maybe' | 'waitlist';
+                };
+                Update: Partial<Database['public']['Tables']['event_rsvps']['Insert']>;
+                Relationships: [];
+            };
+            event_invites: {
+                Row: {
+                    event_id: string;
+                    user_id: string;
+                    invited_by: string | null;
+                    created_at: string;
+                };
+                Insert: { event_id: string; user_id: string };
+                Update: Partial<Database['public']['Tables']['event_invites']['Insert']>;
+                Relationships: [];
+            };
+            user_calendar_feeds: {
+                Row: { user_id: string; token: string; created_at: string };
+                Insert: { user_id: string; token: string };
+                Update: Partial<Database['public']['Tables']['user_calendar_feeds']['Insert']>;
+                Relationships: [];
+            };
         };
         Views: Record<string, never>;
         Functions: {
@@ -458,6 +545,30 @@ export interface Database {
             leave_group: { Args: { p_group: string }; Returns: undefined };
             set_member_role: { Args: { p_group: string; p_user: string; p_role: string }; Returns: undefined };
             remove_member: { Args: { p_group: string; p_user: string }; Returns: undefined };
+            rsvp: { Args: { p_event: string; p_status: string; p_role?: string | null; p_note?: string | null }; Returns: string };
+            invite_to_event: { Args: { p_event: string; p_username: string }; Returns: undefined };
+            uninvite_from_event: { Args: { p_event: string; p_user: string }; Returns: undefined };
+            can_manage_event: { Args: { eid: string; uid: string }; Returns: boolean };
+            cancel_event: { Args: { p_event: string }; Returns: undefined };
+            restore_event: { Args: { p_event: string }; Returns: undefined };
+            rotate_calendar_feed: { Args: Record<string, never>; Returns: string };
+            delete_calendar_feed: { Args: Record<string, never>; Returns: undefined };
+            calendar_feed_events: {
+                Args: { p_token: string };
+                Returns: {
+                    id: string;
+                    slug: string;
+                    title: string;
+                    description_md: string | null;
+                    location: string | null;
+                    starts_at: string;
+                    ends_at: string;
+                    cancelled_at: string | null;
+                    ics_sequence: number;
+                    updated_at: string;
+                    my_status: string | null;
+                }[];
+            };
         };
         Enums: Record<string, never>;
         CompositeTypes: Record<string, never>;
@@ -480,3 +591,7 @@ export type GroupJoinRequest = Database['public']['Tables']['group_join_requests
 export type GroupInvite = Database['public']['Tables']['group_invites']['Row'];
 export type GroupPinnedPost = Database['public']['Tables']['group_pinned_posts']['Row'];
 export type GroupRole = GroupMember['role'];
+export type GameDay = Database['public']['Tables']['events']['Row'];
+export type EventRole = Database['public']['Tables']['event_roles']['Row'];
+export type EventRsvp = Database['public']['Tables']['event_rsvps']['Row'];
+export type GroupRoleTemplate = Database['public']['Tables']['group_role_templates']['Row'];

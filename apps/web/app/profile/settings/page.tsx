@@ -6,6 +6,9 @@ import { getCurrentUser } from '@/lib/auth';
 import { getGameSystems } from '@/lib/archive';
 import { Notice, first } from '@/app/groups/_components/Notice';
 import { updateProfile } from '../actions';
+import { deleteFeed, rotateFeed } from '@/app/events/actions';
+import { getMyFeedToken } from '@/lib/events';
+import { headers } from 'next/headers';
 
 export const metadata: Metadata = { title: 'Profile settings' };
 
@@ -16,7 +19,9 @@ export default async function ProfileSettingsPage({
 }) {
     const user = await getCurrentUser();
     if (!user) redirect('/auth/login?next=/profile/settings');
-    const [sp, systems] = await Promise.all([searchParams, getGameSystems()]);
+    const [sp, systems, token, h] = await Promise.all([searchParams, getGameSystems(), getMyFeedToken(user.id), headers()]);
+    const origin = process.env.NEXT_PUBLIC_SITE_URL ?? `https://${h.get('host')}`;
+    const feedUrl = token ? `${origin}/api/calendar/${token}.ics` : null;
     const p = user.profile;
 
     return (
@@ -65,6 +70,61 @@ export default async function ProfileSettingsPage({
                     <Button type="submit">Save profile</Button>
                 </div>
             </form>
+
+            <section id="calendar" aria-labelledby="calendar-h" className="grid max-w-2xl gap-4 border-t border-graphite/15 py-10">
+                <h2 id="calendar-h" className="text-[2rem] font-extrabold">Your game days in your calendar</h2>
+                <p>
+                    Subscribe once and every game day you&apos;re going to (or might go to) shows up in Google, Apple or
+                    Outlook Calendar, and moves or disappears when it changes or is cancelled.
+                </p>
+                {feedUrl ? (
+                    <>
+                        <div>
+                            <Label htmlFor="feed">Your private calendar link</Label>
+                            <Input id="feed" readOnly value={feedUrl} className="cfo-num text-sm" />
+                            <p className="mt-1 text-sm text-graphite-soft">
+                                Anyone with this link can see your game days, so keep it to yourself. Make a new one if it leaks.
+                            </p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                            <a href={feedUrl.replace(/^https?:/, 'webcal:')} className={buttonClasses('primary')}>
+                                Open in Apple Calendar
+                            </a>
+                            <a
+                                href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(feedUrl.replace(/^https?:/, 'webcal:'))}`}
+                                className={buttonClasses('outline')}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Add to Google Calendar
+                            </a>
+                            <a
+                                href={`https://outlook.live.com/calendar/0/addfromweb?url=${encodeURIComponent(feedUrl)}&name=${encodeURIComponent('CF&O game days')}`}
+                                className={buttonClasses('outline')}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Add to Outlook
+                            </a>
+                        </div>
+                        <p className="text-sm text-graphite-soft">
+                            Google and Outlook check subscribed calendars every few hours, so changes can take a while to show up there.
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            <form action={rotateFeed}>
+                                <Button type="submit" variant="ghost" size="sm">Make a new link</Button>
+                            </form>
+                            <form action={deleteFeed}>
+                                <Button type="submit" variant="ghost" size="sm">Turn off the link</Button>
+                            </form>
+                        </div>
+                    </>
+                ) : (
+                    <form action={rotateFeed}>
+                        <Button type="submit">Make my calendar link</Button>
+                    </form>
+                )}
+            </section>
         </>
     );
 }

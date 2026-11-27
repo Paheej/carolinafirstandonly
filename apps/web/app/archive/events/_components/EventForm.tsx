@@ -136,7 +136,7 @@ export function EventForm({
                                 readOnly={mode === 'edit'}
                             />
                             {mode === 'edit' ? (
-                                <p className="mt-1 text-[11px] text-ink-soft">
+                                <p className="mt-1 text-[11px] text-graphite-soft">
                                     Slug is locked — changing it would break existing URLs.
                                 </p>
                             ) : null}
@@ -169,7 +169,7 @@ export function EventForm({
                                 id="season_id"
                                 value={values.season_id}
                                 onChange={(e) => set('season_id', e.target.value)}
-                                className="h-10 w-full rounded-sm border border-brass-dark/50 bg-parchment/60 px-3 text-ink focus-visible:border-brass focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
+                                className="h-10 w-full rounded-[3px] border border-graphite/15 bg-primer-lift/60 px-3 text-graphite focus-visible:border-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                             >
                                 <option value="">— not linked —</option>
                                 {seasons.map((s) => (
@@ -201,7 +201,7 @@ export function EventForm({
             </Card>
 
             {error ? (
-                <div className="rounded-sm border border-danger/50 bg-danger/10 px-4 py-3 text-sm text-danger">
+                <div className="rounded-[3px] border border-casualty/50 bg-casualty/10 px-4 py-3 text-sm text-casualty">
                     {error}
                 </div>
             ) : null}

@@ -18,46 +18,34 @@ export interface NavBarProps {
     className?: string;
 }
 
-export function NavBar({
-    siteName,
-    homeHref = '/',
-    links,
-    rightSlot,
-    mobileMenu,
-    className,
-}: NavBarProps) {
+export function NavBar({ siteName, homeHref = '/', links, rightSlot, mobileMenu, className }: NavBarProps) {
     return (
         <header
             className={cn(
-                'sticky top-0 z-30 border-b border-brass-dark/40 bg-parchment/90 backdrop-blur',
+                'cfo-on-mat sticky top-0 z-30 border-b border-gold/35 bg-mat text-on-mat',
                 className,
             )}
         >
             <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 md:gap-8 md:px-6">
-                <a
-                    href={homeHref}
-                    className="group flex shrink-0 flex-col leading-none"
-                >
-                    <span className="font-display text-lg text-ink transition-colors group-hover:text-forest-dark">
+                <a href={homeHref} className="flex shrink-0 items-baseline gap-2 no-underline font-display">
+                    <b className="text-[1.6rem] font-black leading-none text-gold-bright [font-stretch:62%]">
+                        CF&amp;O
+                    </b>
+                    <span className="hidden text-[0.95rem] font-medium text-on-mat-soft [font-stretch:75%] sm:inline">
                         {siteName}
                     </span>
-                    <span className="mt-1 block h-px w-12 bg-brass transition-all group-hover:w-16 group-hover:bg-brass-dark" />
                 </a>
 
-                <nav className="hidden md:flex items-center gap-1">
+                <nav className="cfo-ui hidden items-center gap-5 md:flex" aria-label="Main">
                     {links.map((l) => (
                         <a
                             key={l.href}
                             href={l.href}
-                            className={cn(
-                                'inline-flex items-center gap-1.5 rounded-sm px-3 py-2',
-                                'text-sm font-medium text-ink-soft',
-                                'transition-colors hover:bg-parchment-dark hover:text-forest-dark',
-                            )}
+                            className="inline-flex items-center gap-1.5 border-b-2 border-transparent py-1 text-[0.95rem] font-semibold text-on-mat-soft no-underline transition-colors hover:border-gold hover:text-on-mat"
                         >
                             {l.label}
                             {l.badge && l.badge > 0 ? (
-                                <span className="rounded-full bg-brass/30 px-1.5 py-0.5 text-[10px] text-ink">
+                                <span className="cfo-num rounded-full bg-gold-bright px-1.5 text-[0.7rem] font-bold text-mat">
                                     {l.badge}
                                 </span>
                             ) : null}
@@ -65,10 +53,7 @@ export function NavBar({
                     ))}
                 </nav>
 
-                <div className="ml-auto hidden md:flex items-center gap-3">
-                    {rightSlot}
-                </div>
-
+                <div className="ml-auto hidden items-center gap-3 md:flex">{rightSlot}</div>
                 <div className="ml-auto md:hidden">{mobileMenu}</div>
             </div>
         </header>

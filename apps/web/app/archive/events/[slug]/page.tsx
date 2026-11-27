@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { Card, CardBody, MarkdownRender, Button, SystemPill } from '@cfo/ui';
-import { ArrowLeft, Calendar, Pencil } from 'lucide-react';
+import { stripLeadingTitle } from '@/lib/markdown';
+import { MarkdownRender, PageHead, SystemPill, buttonClasses } from '@cfo/ui';
+import { Pencil } from 'lucide-react';
 import { getArchiveEventBySlug, getSystemIconMap } from '@/lib/archive';
 import { getCurrentUser } from '@/lib/auth';
 
@@ -28,53 +29,52 @@ export default async function ArchiveEventPage({ params }: PageProps) {
     ]);
     const isAdmin = user?.profile?.is_admin ?? false;
 
+    const when = event.event_date
+        ? new Date(event.event_date).toLocaleDateString('en-US', {
+              month: 'long',
+              day: 'numeric',
+              year: 'numeric',
+              timeZone: 'UTC',
+          })
+        : null;
+
     return (
-        <article className="space-y-10">
-            <nav className="text-sm">
-                <Link href="/archive" className="inline-flex items-center gap-1 text-ink-soft">
-                    <ArrowLeft size={14} /> Archive
-                </Link>
-            </nav>
-
-            <header className="space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                    <SystemPill
-                        system={event.game_system}
-                        edition={event.game_edition}
-                        icon={event.game_system ? iconMap[event.game_system] : null}
-                    />
-                    {event.event_date ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-ink-soft">
-                            <Calendar size={12} />
-                            {new Date(event.event_date).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                            })}
-                        </span>
-                    ) : null}
-                </div>
-                <div className="flex items-start justify-between gap-3">
-                    <h1 className="cfo-heading-underline font-display text-4xl sm:text-5xl text-ink">
-                        {event.name}
-                    </h1>
-                    {isAdmin ? (
-                        <Link href={`/archive/events/${event.slug}/edit`} className="no-underline shrink-0">
-                            <Button size="sm" variant="secondary">
-                                <Pencil size={14} /> Edit
-                            </Button>
+        <>
+            <PageHead
+                kicker={
+                    <Link href="/archive" className="no-underline hover:underline">
+                        Archive
+                    </Link>
+                }
+                title={event.name}
+                actions={
+                    isAdmin ? (
+                        <Link href={`/archive/events/${event.slug}/edit`} className={buttonClasses('outline', 'sm')}>
+                            <Pencil size={14} /> Edit event
                         </Link>
+                    ) : null
+                }
+            >
+                <div className="cfo-ui cfo-num mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-on-mat-soft">
+                    {event.game_system ? (
+                        <SystemPill
+                            system={event.game_system}
+                            edition={event.game_edition}
+                            icon={iconMap[event.game_system] ?? null}
+                        />
                     ) : null}
+                    {when ? <span>{when}</span> : null}
+                    <span>Special event</span>
                 </div>
-            </header>
+            </PageHead>
 
-            {event.description_md ? (
-                <Card>
-                    <CardBody className="px-7 py-7">
-                        <MarkdownRender source={event.description_md} />
-                    </CardBody>
-                </Card>
-            ) : null}
-        </article>
+            <div className="py-12">
+                {event.description_md ? (
+                    <MarkdownRender source={stripLeadingTitle(event.description_md, event.name)} />
+                ) : (
+                    <p className="text-graphite-soft">No write-up for this event yet.</p>
+                )}
+            </div>
+        </>
     );
 }

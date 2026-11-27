@@ -21,7 +21,7 @@ export interface MarkdownEditorProps {
 }
 
 /**
- * Wraps @uiw/react-md-editor in a parchment-themed container. Force the
+ * Wraps @uiw/react-md-editor in a primer-themed container. Force the
  * data-color-mode attribute on the wrapper so the editor's dark/light token
  * set follows our palette rather than the user OS preference.
  */
@@ -37,8 +37,8 @@ export function MarkdownEditor({
         <div
             data-color-mode="light"
             className={cn(
-                'cfo-md-editor rounded-sm border border-brass-dark/50 bg-parchment/70',
-                'focus-within:border-brass focus-within:ring-2 focus-within:ring-brass/60',
+                'cfo-md-editor rounded-[3px] border border-graphite/25 bg-primer-lift',
+                'focus-within:border-gold focus-within:ring-2 focus-within:ring-gold/40',
                 className,
             )}
         >

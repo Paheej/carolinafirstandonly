@@ -88,7 +88,7 @@ export function SubmitRecapForm({ seasons, events }: SubmitRecapFormProps) {
                             id="target"
                             value={targetKey}
                             onChange={(e) => setTargetKey(e.target.value)}
-                            className="h-10 w-full rounded-sm border border-brass-dark/50 bg-parchment/60 px-3 text-ink focus-visible:border-brass focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass"
+                            className="h-10 w-full rounded-[3px] border border-graphite/15 bg-primer-lift/60 px-3 text-graphite focus-visible:border-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                             required
                         >
                             <option value="">Choose a season or event…</option>
@@ -144,14 +144,14 @@ export function SubmitRecapForm({ seasons, events }: SubmitRecapFormProps) {
             </Card>
 
             {error ? (
-                <div className="rounded-sm border border-danger/50 bg-danger/10 px-4 py-3 text-sm text-danger">
+                <div className="rounded-[3px] border border-casualty/50 bg-casualty/10 px-4 py-3 text-sm text-casualty">
                     {error}
                 </div>
             ) : null}
 
             <Card>
                 <CardFooter className="flex items-center justify-between gap-3">
-                    <p className="text-xs text-ink-soft">
+                    <p className="text-xs text-graphite-soft">
                         Submissions go through admin review before they appear on the public archive.
                     </p>
                     <Button type="submit" disabled={submitting}>

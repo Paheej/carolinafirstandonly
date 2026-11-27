@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import { Card, CardBody, Badge, MarkdownRender } from '@cfo/ui';
-import { ArrowLeft, Calendar } from 'lucide-react';
+import { stripLeadingTitle } from '@/lib/markdown';
+import { MarkdownRender, PageHead } from '@cfo/ui';
 import { createServerSupabase } from '@cfo/database/server';
 import { getRecapBySlug } from '@/lib/archive';
 
@@ -61,79 +61,72 @@ export default async function RecapPage({ params }: PageProps) {
             : Promise.resolve(null),
     ]);
 
-    const backHref = season
-        ? `/archive/seasons/${season.slug}`
+    const parent = season
+        ? { href: `/archive/seasons/${season.slug}`, name: season.name }
         : event
-        ? `/archive/events/${event.slug}`
-        : '/archive';
-    const backLabel = season?.name ?? event?.name ?? 'Archive';
+        ? { href: `/archive/events/${event.slug}`, name: event.name }
+        : null;
+    const published = new Date(recap.published_at).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+    });
 
     return (
-        <article className="mx-auto max-w-3xl space-y-8">
-            <nav className="text-sm">
-                <Link href={backHref} className="inline-flex items-center gap-1 text-ink-soft">
-                    <ArrowLeft size={14} /> {backLabel}
-                </Link>
-            </nav>
-
-            <header className="space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                    {season ? <Badge variant="forest">{season.name}</Badge> : null}
-                    {event ? <Badge variant="leather">{event.name}</Badge> : null}
-                    {recap.published_at ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-ink-soft">
-                            <Calendar size={12} />
-                            {new Date(recap.published_at).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                            })}
-                        </span>
-                    ) : null}
-                </div>
-                <h1 className="cfo-heading-underline font-display text-4xl sm:text-5xl text-ink">
-                    {recap.title}
-                </h1>
+        <>
+            <PageHead
+                kicker={
+                    <span className="flex flex-wrap gap-x-2">
+                        <Link href="/archive" className="no-underline hover:underline">
+                            Archive
+                        </Link>
+                        {parent ? (
+                            <>
+                                <span aria-hidden="true">/</span>
+                                <Link href={parent.href} className="no-underline hover:underline">
+                                    {parent.name}
+                                </Link>
+                            </>
+                        ) : null}
+                    </span>
+                }
+                title={recap.title}
+            >
                 {author ? (
-                    <p className="text-sm text-ink-soft">By {author}</p>
+                    <p className="cfo-ui mt-4 text-on-mat-soft">
+                        Written by {author}. Published {published}.
+                    </p>
                 ) : null}
-            </header>
+            </PageHead>
 
-            <Card>
-                <CardBody className="px-7 py-7">
-                    <MarkdownRender source={recap.body_md} />
-                </CardBody>
-            </Card>
+            <article className="py-12">
+                <MarkdownRender source={stripLeadingTitle(recap.body_md, recap.title)} />
 
-            {recap.photos.length > 0 ? (
-                <section className="space-y-3">
-                    <h2 className="cfo-heading-underline font-display text-2xl">
-                        Photos
-                    </h2>
-                    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        {recap.photos.map((photo, i) => (
-                            <li
-                                key={photo.file_id ?? `${photo.url}-${i}`}
-                                className="overflow-hidden rounded-sm border border-brass-dark/40 bg-parchment"
-                            >
-                                <a href={photo.url} target="_blank" rel="noopener noreferrer">
-                                    <img
-                                        src={photo.url}
-                                        alt={photo.caption ?? ''}
-                                        className="block w-full"
-                                        loading="lazy"
-                                    />
-                                </a>
-                                {photo.caption ? (
-                                    <p className="px-3 py-2 text-sm text-ink-soft">
-                                        {photo.caption}
-                                    </p>
-                                ) : null}
-                            </li>
-                        ))}
-                    </ul>
-                </section>
-            ) : null}
-        </article>
+                {recap.photos.length > 0 ? (
+                    <section className="mt-12 border-t border-graphite/15 pt-10" aria-labelledby="photos-h">
+                        <h2 id="photos-h" className="mb-5 text-[2rem] font-extrabold">
+                            Photos
+                        </h2>
+                        <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            {recap.photos.map((photo, i) => (
+                                <li key={photo.file_id ?? `${photo.url}-${i}`}>
+                                    <a href={photo.url} target="_blank" rel="noopener noreferrer">
+                                        <img
+                                            src={photo.url}
+                                            alt={photo.caption ?? ''}
+                                            className="block w-full rounded-[2px]"
+                                            loading="lazy"
+                                        />
+                                    </a>
+                                    {photo.caption ? (
+                                        <p className="cfo-ui mt-2 text-sm text-graphite-soft">{photo.caption}</p>
+                                    ) : null}
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                ) : null}
+            </article>
+        </>
     );
 }

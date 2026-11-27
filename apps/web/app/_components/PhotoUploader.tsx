@@ -124,13 +124,13 @@ export function PhotoUploader({
     return (
         <div className="space-y-3">
             <div className="flex items-center justify-between gap-3">
-                <span className="text-xs uppercase tracking-[0.12em] text-ink-soft">
+                <span className="text-xs text-graphite-soft">
                     {photos.length} / {MAX_PHOTOS} photos · max {MAX_MB}MB each
                 </span>
                 <Button
                     type="button"
                     size="sm"
-                    variant="secondary"
+                    variant="outline"
                     disabled={uploading || photos.length >= MAX_PHOTOS}
                     onClick={() => inputRef.current?.click()}
                 >
@@ -155,13 +155,13 @@ export function PhotoUploader({
             </div>
 
             {error ? (
-                <p className="text-sm text-danger" role="alert">
+                <p className="text-sm text-casualty" role="alert">
                     {error}
                 </p>
             ) : null}
 
             {photos.length === 0 ? (
-                <div className="rounded-sm border border-dashed border-brass-dark/50 bg-parchment/40 px-4 py-8 text-center text-sm text-ink-soft">
+                <div className="rounded-[3px] border border-dashed border-graphite/15 bg-primer-lift/40 px-4 py-8 text-center text-sm text-graphite-soft">
                     No photos yet. Battle reports go down better with miniatures
                     in the frame.
                 </div>
@@ -170,9 +170,9 @@ export function PhotoUploader({
                     {photos.map((photo, i) => (
                         <li
                             key={photo.file_id ?? photo.url}
-                            className="relative overflow-hidden rounded-sm border border-brass-dark/40 bg-parchment"
+                            className="relative overflow-hidden rounded-[3px] border border-graphite/15 bg-primer-lift"
                         >
-                            <div className="aspect-[4/3] w-full bg-parchment-dark/50">
+                            <div className="aspect-[4/3] w-full bg-primer/50">
                                 <img
                                     src={photo.thumbnail_url ?? photo.url}
                                     alt={photo.caption || ''}
@@ -185,13 +185,13 @@ export function PhotoUploader({
                                     value={photo.caption ?? ''}
                                     onChange={(e) => updateCaption(i, e.target.value)}
                                     placeholder="Caption (optional)"
-                                    className="w-full rounded-sm border border-brass-dark/40 bg-parchment/70 px-2 py-1 text-sm placeholder:text-ink-soft/60 focus-visible:border-brass focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brass"
+                                    className="w-full rounded-[3px] border border-graphite/15 bg-primer-lift/70 px-2 py-1 text-sm placeholder:text-graphite-soft/60 focus-visible:border-gold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold"
                                 />
                             </div>
                             <button
                                 type="button"
                                 onClick={() => remove(i)}
-                                className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-sm bg-ink/80 text-parchment shadow hover:bg-danger"
+                                className="absolute right-1 top-1 grid h-7 w-7 place-items-center rounded-[3px] bg-mat/80 text-on-mat shadow hover:bg-casualty"
                                 aria-label={`Remove photo ${i + 1}`}
                             >
                                 <X size={14} />

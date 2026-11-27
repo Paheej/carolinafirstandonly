@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { Card, CardBody, Badge, MarkdownRender } from '@cfo/ui';
-import { ArrowLeft } from 'lucide-react';
+import { stripLeadingTitle } from '@/lib/markdown';
+import { MarkdownRender, PageHead } from '@cfo/ui';
 import { getArchivePageBySlug } from '@/lib/archive';
 
 interface PageProps {
@@ -22,27 +22,22 @@ export default async function ArchivePagePage({ params }: PageProps) {
     if (!page) notFound();
 
     return (
-        <article className="space-y-10">
-            <nav className="text-sm">
-                <Link href="/archive" className="inline-flex items-center gap-1 text-ink-soft">
-                    <ArrowLeft size={14} /> Archive
-                </Link>
-            </nav>
-
-            <header className="space-y-4">
-                {page.category ? (
-                    <Badge variant="forest">{page.category.replace(/-/g, ' ')}</Badge>
-                ) : null}
-                <h1 className="cfo-heading-underline font-display text-4xl sm:text-5xl text-ink">
-                    {page.title}
-                </h1>
-            </header>
-
-            <Card>
-                <CardBody className="px-7 py-7">
-                    <MarkdownRender source={page.body_md} />
-                </CardBody>
-            </Card>
-        </article>
+        <>
+            <PageHead
+                kicker={
+                    <span className="flex flex-wrap gap-x-2">
+                        <Link href="/archive" className="no-underline hover:underline">
+                            Archive
+                        </Link>
+                        <span aria-hidden="true">/</span>
+                        <span className="capitalize">{page.category ? page.category.replace(/-/g, ' ') : 'Reference'}</span>
+                    </span>
+                }
+                title={page.title}
+            />
+            <article className="py-12">
+                <MarkdownRender source={stripLeadingTitle(page.body_md, page.title)} />
+            </article>
+        </>
     );
 }

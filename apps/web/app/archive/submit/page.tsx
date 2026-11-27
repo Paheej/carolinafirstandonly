@@ -19,19 +19,19 @@ export default async function SubmitRecapPage() {
     return (
         <div className="mx-auto max-w-3xl space-y-8">
             <nav className="text-sm">
-                <Link href="/archive" className="inline-flex items-center gap-1 text-ink-soft">
+                <Link href="/archive" className="inline-flex items-center gap-1 text-graphite-soft">
                     <ArrowLeft size={14} /> Archive
                 </Link>
             </nav>
 
             <header className="space-y-2">
-                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-leather font-mono">
+                <div className="flex items-center gap-2 text-xs text-gold-deep cfo-ui">
                     <PenSquare size={14} /> Submit
                 </div>
-                <h1 className="cfo-heading-underline font-display text-4xl text-ink">
-                    Submit a recap
+                <h1 className="cfo-heading-underline font-display text-4xl text-graphite">
+                    Submit a battle report
                 </h1>
-                <p className="text-ink-soft max-w-2xl">
+                <p className="text-graphite-soft max-w-2xl">
                     Pick a season or special event, write up what happened in
                     markdown, and add any photos you took. Admins approve
                     submissions before they go live on the archive.

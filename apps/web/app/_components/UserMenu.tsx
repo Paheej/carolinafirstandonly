@@ -1,26 +1,21 @@
-import { Button } from '@cfo/ui';
+import { buttonClasses } from '@cfo/ui';
 import type { CurrentUser } from '@/lib/auth';
 
 export function UserMenu({ user }: { user: CurrentUser | null }) {
     if (!user) {
         return (
             <div className="flex items-center gap-2">
-                <a href="/auth/login">
-                    <Button variant="ghost" size="sm">
-                        Log in
-                    </Button>
+                <a href="/auth/login" className={buttonClasses('ghost', 'sm')}>
+                    Sign in
                 </a>
-                <a href="/auth/signup">
-                    <Button variant="primary" size="sm">
-                        Sign up
-                    </Button>
+                <a href="/auth/signup" className={buttonClasses('primary', 'sm')}>
+                    Join
                 </a>
             </div>
         );
     }
 
-    const label =
-        user.profile?.display_name ?? user.profile?.username ?? user.email ?? 'You';
+    const label = user.profile?.display_name ?? user.profile?.username ?? user.email ?? 'You';
 
     return (
         <div className="flex items-center gap-2">
@@ -31,14 +26,14 @@ export function UserMenu({ user }: { user: CurrentUser | null }) {
             ) : null}
             <a
                 href="/profile"
-                className="inline-flex items-center gap-2 rounded-sm px-2.5 py-1.5 text-sm font-medium text-ink-soft transition-colors hover:bg-parchment-dark hover:text-forest-dark"
+                className="cfo-ui rounded-[3px] px-2.5 py-1.5 text-[0.95rem] font-semibold text-on-mat-soft no-underline hover:text-on-mat"
             >
                 {label}
             </a>
             <form action="/api/auth/signout" method="post">
-                <Button variant="secondary" size="sm" type="submit">
+                <button type="submit" className={buttonClasses('outline', 'sm')}>
                     Sign out
-                </Button>
+                </button>
             </form>
         </div>
     );

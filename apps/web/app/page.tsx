@@ -1,298 +1,174 @@
-import { Card, CardBody, Button, Badge } from '@cfo/ui';
-import { SITE_NAME } from '@cfo/shared';
-import {
-    BookMarked,
-    Newspaper,
-    Users,
-    ChevronRight,
-    ExternalLink,
-    Swords,
-    Shield,
-} from 'lucide-react';
+import Link from 'next/link';
+import { MatBand, WarTable, SystemPill, buttonClasses } from '@cfo/ui';
 import { getCurrentUser } from '@/lib/auth';
+import {
+    getCampaignTimeline,
+    getLatestRecaps,
+    getSystemIconMap,
+    campaignHref,
+} from '@/lib/archive';
+import { excerpt, firstImageUrl, sizedImage } from '@/lib/markdown';
+
+function campaignDate(date: string | null, year: number | null, withDay = false) {
+    if (date) {
+        return new Date(date).toLocaleDateString('en-US', {
+            month: 'long',
+            ...(withDay ? { day: 'numeric' } : {}),
+            year: 'numeric',
+            timeZone: 'UTC',
+        });
+    }
+    return year ? String(year) : null;
+}
 
 export default async function HomePage() {
-    const user = await getCurrentUser();
+    const [user, timeline, recaps, iconMap] = await Promise.all([
+        getCurrentUser(),
+        getCampaignTimeline(),
+        getLatestRecaps(4),
+        getSystemIconMap(),
+    ]);
+
+    // Until events + RSVPs ship (Phase 3), the table features the newest campaign.
+    const current = timeline[0] ?? null;
+    const currentBlurb = current ? excerpt(current.description_md, 220) : null;
 
     return (
-        <div className="space-y-14">
-            {/* ----- HERO -------------------------------------------------- */}
-            <section
-                className={[
-                    'cfo-hex-bg cfo-spotlight',
-                    'relative overflow-hidden rounded-sm',
-                    'border border-brass-dark/50',
-                    'bg-gradient-to-br from-parchment-dark/70 via-parchment/40 to-parchment-dark/30',
-                    'shadow-[0_2px_0_rgba(176,141,87,0.5),0_10px_30px_-10px_rgba(26,24,21,0.25)]',
-                    'px-7 py-14 sm:px-16 sm:py-24',
-                ].join(' ')}
-            >
-                <span className="cfo-ribbon" aria-hidden="true" />
-
-                <div className="relative max-w-2xl">
-                    <div className="flex flex-wrap items-center gap-3">
-                        <Badge variant="brass">Charlotte · NC</Badge>
-                        <span className="h-px w-12 bg-brass-dark/60" />
-                        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-ink-soft/80">
-                            Est. 2023 · for the hobby
-                        </span>
-                    </div>
-
-                    <h1 className="cfo-heading-underline mt-5 font-display text-5xl sm:text-6xl text-ink leading-[1.05]">
-                        {SITE_NAME}
+        <>
+            {/* ---- The war table -------------------------------------------- */}
+            <MatBand aria-labelledby="table-h" innerClassName="grid items-center gap-10 py-10 md:grid-cols-[5fr_7fr] md:py-14">
+                <div className="grid min-w-0 gap-5">
+                    <div className="cfo-kicker">{current ? 'Now running' : 'Carolina First and Only'}</div>
+                    <h1 id="table-h" className="text-[clamp(2.75rem,7vw,5rem)] font-[850] text-on-mat">
+                        {current?.name ?? 'Carolina First and Only'}
                     </h1>
-
-                    <p className="mt-7 text-lg sm:text-xl text-ink-soft leading-relaxed max-w-xl">
-                        A community of painters, generals, and storytellers. 40K runs
-                        the table — D&amp;D, Warhammer Fantasy, Warhammer RPG, board
-                        games, and whatever else you brought all get a seat.
-                    </p>
-
-                    <div className="mt-9 flex flex-wrap gap-3">
+                    {current ? (
+                        <dl className="cfo-num grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-base">
+                            {campaignDate(current.date, current.year) ? (
+                                <>
+                                    <dt className="cfo-ui text-on-mat-soft">Started</dt>
+                                    <dd>{campaignDate(current.date, current.year)}</dd>
+                                </>
+                            ) : null}
+                            <dt className="cfo-ui text-on-mat-soft">Type</dt>
+                            <dd>{current.kind === 'season' ? 'Campaign season' : 'Special event'}</dd>
+                            {current.game_system ? (
+                                <>
+                                    <dt className="cfo-ui text-on-mat-soft">System</dt>
+                                    <dd>
+                                        {current.game_system}
+                                        {current.game_edition ? ` ${current.game_edition}` : ''}
+                                    </dd>
+                                </>
+                            ) : null}
+                        </dl>
+                    ) : null}
+                    {currentBlurb ? <p className="max-w-[46ch] text-on-mat-soft">{currentBlurb}</p> : null}
+                    <div className="flex flex-wrap gap-3">
+                        {current ? (
+                            <Link href={campaignHref(current)} className={buttonClasses('primary', 'lg')}>
+                                Read the campaign
+                            </Link>
+                        ) : null}
                         {user ? (
-                            <>
-                                <a href="/events">
-                                    <Button size="lg">
-                                        Upcoming events <ChevronRight size={18} />
-                                    </Button>
-                                </a>
-                                <a href="/groups">
-                                    <Button size="lg" variant="secondary">
-                                        Find your group
-                                    </Button>
-                                </a>
-                            </>
+                            <Link href="/archive/submit" className={buttonClasses('outline', 'lg')}>
+                                Submit a battle report
+                            </Link>
                         ) : (
-                            <>
-                                <a href="/auth/signup">
-                                    <Button size="lg">
-                                        Join the warband <ChevronRight size={18} />
-                                    </Button>
-                                </a>
-                                <a href="/archive">
-                                    <Button size="lg" variant="secondary">
-                                        Browse the archive
-                                    </Button>
-                                </a>
-                            </>
+                            <Link href="/auth/signup" className={buttonClasses('outline', 'lg')}>
+                                Join the club
+                            </Link>
                         )}
                     </div>
                 </div>
-            </section>
-
-            {/* ----- THREE PILLARS ---------------------------------------- */}
-            <section>
-                <div className="mb-6 flex items-baseline justify-between">
-                    <h2 className="cfo-heading-underline font-display text-2xl">
-                        What's in the campaign book
-                    </h2>
-                    <span className="hidden sm:inline text-xs uppercase tracking-[0.18em] text-ink-soft/70 font-mono">
-                        Three pillars
-                    </span>
-                </div>
-
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-                    <FeatureCard
-                        href="/archive"
-                        icon={<BookMarked size={20} />}
-                        title="Archive"
-                        body="Three seasons of crusade play and our special-event battles, preserved with recaps and photos. Submit your own when the dust settles."
-                    />
-                    <FeatureCard
-                        href="/news"
-                        icon={<Newspaper size={20} />}
-                        title="News"
-                        body="What the hobby is talking about this week — curated daily from the sources you'd otherwise have to scroll through yourself."
-                    />
-                    <FeatureCard
-                        href="/groups"
-                        icon={<Users size={20} />}
-                        title="Coordination"
-                        body="Groups, events, RSVPs, and shared availability — so the hardest part of game night is choosing what to bring."
-                    />
-                </div>
-            </section>
-
-            {/* ----- CURRENT CAMPAIGNS ----------------------------------- */}
-            <section>
-                <div className="mb-6 flex items-baseline justify-between">
-                    <h2 className="cfo-heading-underline font-display text-2xl">
-                        Current campaigns
-                    </h2>
-                    <span className="hidden sm:inline text-xs uppercase tracking-[0.18em] text-ink-soft/70 font-mono">
-                        Live · upcoming
-                    </span>
-                </div>
-
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                    <CampaignCard
-                        href="https://campaign-chronicle.app"
-                        external
-                        systemLabel="Warhammer 40,000"
-                        systemVariant="forest"
-                        icon={<Swords size={20} />}
-                        title="40K Crusade — Campaign Chronicle"
-                        body="Our active 40K crusade lives on campaign-chronicle.app — narrative arcs, roster updates, and battle results tracked between game nights."
-                        linkLabel="campaign-chronicle.app"
-                    />
-                    <CampaignCard
-                        placeholder
-                        systemLabel="Warhammer Fantasy"
-                        systemVariant="leather"
-                        icon={<Shield size={20} />}
-                        title="Old World campaign"
-                        body="A dedicated Fantasy campaign hub is the next build after this site ships. We'll wire it into the archive and event system when it lands."
-                    />
-                </div>
-            </section>
-
-            {/* ----- PHASE 1 NOTICE --------------------------------------- */}
-            <section className="cfo-pinned-notice relative">
-                <div
-                    className="relative rounded-sm border-x border-b border-t-2 border-brass-dark/60 bg-parchment px-7 py-7 pr-28"
-                    style={{ borderTopStyle: 'dashed' }}
-                >
-                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-leather font-mono">
-                        <span className="inline-block h-px w-6 bg-leather/70" />
-                        Builder's note
-                    </div>
-                    <h3 className="mt-2 font-display text-2xl text-ink">
-                        Phase&nbsp;1 — Archive
-                    </h3>
-                    <p className="mt-2 text-sm sm:text-base text-ink-soft max-w-2xl">
-                        Seasons, special events, recap submissions, and the
-                        admin review queue are live. News, groups, events, and
-                        the AI agent land in subsequent phases.
+                <div className="min-w-0">
+                    <WarTable />
+                    <p className="cfo-ui mt-2.5 text-sm text-on-mat-soft">
+                        A Strike Force board, 60 by 44 inches. Objective 1 sits dead center; the dashed ring is 6
+                        inches.
                     </p>
-
-                    <span
-                        className="cfo-seal absolute top-5 right-6"
-                        aria-hidden="true"
-                        title="Phase 1"
-                    >
-                        <span>
-                            Phase
-                            <br />
-                            <strong className="text-base font-display tracking-normal">
-                                1
-                            </strong>
-                        </span>
-                    </span>
                 </div>
-            </section>
-        </div>
-    );
-}
+            </MatBand>
 
-function FeatureCard({
-    href,
-    icon,
-    title,
-    body,
-}: {
-    href: string;
-    icon: React.ReactNode;
-    title: string;
-    body: string;
-}) {
-    return (
-        <a href={href} className="block no-underline">
-            <Card interactive className="h-full">
-                <CardBody className="flex h-full flex-col gap-4 px-7 py-7">
-                    <div className="flex items-center gap-3">
-                        <span className="grid h-10 w-10 place-items-center rounded-sm border border-brass-dark/60 bg-brass/20 text-leather">
-                            {icon}
-                        </span>
-                        <h3 className="font-display text-xl text-ink">{title}</h3>
+            {/* ---- Reports + campaigns ------------------------------------- */}
+            <div className="grid gap-12 py-14 md:grid-cols-[8fr_4fr]">
+                <section className="min-w-0" aria-labelledby="reports-h">
+                    <div className="mb-7 flex flex-wrap items-baseline justify-between gap-4">
+                        <h2 id="reports-h" className="text-[2.5rem] font-extrabold">
+                            Battle reports
+                        </h2>
+                        <Link href="/archive" className="cfo-ui cfo-link font-semibold">
+                            The full archive
+                        </Link>
                     </div>
-                    <p className="text-sm text-ink-soft leading-relaxed">{body}</p>
-                    <span className="mt-auto inline-flex items-center gap-1 text-xs font-medium uppercase tracking-[0.14em] text-forest">
-                        Enter
-                        <ChevronRight size={14} />
-                    </span>
-                </CardBody>
-            </Card>
-        </a>
-    );
-}
-
-function CampaignCard({
-    href,
-    external,
-    placeholder,
-    systemLabel,
-    systemVariant,
-    icon,
-    title,
-    body,
-    linkLabel,
-}: {
-    href?: string;
-    external?: boolean;
-    placeholder?: boolean;
-    systemLabel: string;
-    systemVariant: 'forest' | 'leather' | 'brass';
-    icon: React.ReactNode;
-    title: string;
-    body: string;
-    linkLabel?: string;
-}) {
-    const inner = (
-        <Card
-            interactive={!placeholder}
-            className={[
-                'h-full',
-                placeholder ? 'border-dashed opacity-90' : '',
-            ].join(' ')}
-        >
-            <CardBody className="flex h-full flex-col gap-4 px-7 py-7">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                    <Badge variant={systemVariant}>{systemLabel}</Badge>
-                    {placeholder ? (
-                        <Badge variant="default">Coming next</Badge>
-                    ) : linkLabel ? (
-                        <span className="inline-flex items-center gap-1 font-mono text-[11px] text-ink-soft">
-                            {linkLabel} <ExternalLink size={11} />
-                        </span>
-                    ) : null}
-                </div>
-
-                <div className="flex items-center gap-3">
-                    <span className="grid h-10 w-10 place-items-center rounded-sm border border-brass-dark/60 bg-brass/20 text-leather">
-                        {icon}
-                    </span>
-                    <h3 className="font-display text-xl text-ink">{title}</h3>
-                </div>
-
-                <p className="text-sm text-ink-soft leading-relaxed">{body}</p>
-
-                <span className="mt-auto inline-flex items-center gap-1 text-xs font-medium uppercase tracking-[0.14em] text-forest">
-                    {placeholder ? (
-                        <span className="text-ink-soft/70">Stay tuned</span>
+                    {recaps.length === 0 ? (
+                        <p className="text-graphite-soft">No battle reports yet.</p>
                     ) : (
-                        <>
-                            Open <ExternalLink size={12} />
-                        </>
+                        <ul>
+                            {recaps.map((r) => {
+                                const img = r.photos[0]?.url ?? firstImageUrl(r.body_md);
+                                const blurb = excerpt(r.body_md, 160);
+                                return (
+                                    <li key={r.id} className="border-b border-graphite/15 first:pt-0">
+                                        <Link
+                                            href={`/archive/recaps/${r.slug}`}
+                                            className="group grid gap-5 py-5 no-underline sm:grid-cols-[9rem_minmax(0,1fr)]"
+                                        >
+                                            {img ? (
+                                                <img
+                                                    src={sizedImage(img, 400)}
+                                                    alt=""
+                                                    loading="lazy"
+                                                    className="aspect-video w-full rounded-[2px] bg-mat-raised object-cover sm:aspect-[4/3]"
+                                                />
+                                            ) : (
+                                                <div aria-hidden="true" className="hidden aspect-[4/3] rounded-[2px] bg-mat-raised sm:block" />
+                                            )}
+                                            <div className="min-w-0">
+                                                <h3 className="text-[1.75rem] font-bold decoration-gold underline-offset-4 group-hover:underline">
+                                                    {r.title}
+                                                </h3>
+                                                {blurb ? (
+                                                    <p className="mt-1.5 max-w-[60ch] text-base text-graphite-soft">{blurb}</p>
+                                                ) : null}
+                                            </div>
+                                        </Link>
+                                    </li>
+                                );
+                            })}
+                        </ul>
                     )}
-                </span>
-            </CardBody>
-        </Card>
-    );
+                </section>
 
-    if (placeholder || !href) return <div>{inner}</div>;
-
-    return external ? (
-        <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block no-underline"
-        >
-            {inner}
-        </a>
-    ) : (
-        <a href={href} className="block no-underline">
-            {inner}
-        </a>
+                <section className="min-w-0" aria-labelledby="campaigns-h">
+                    <h2 id="campaigns-h" className="mb-7 text-[2.5rem] font-extrabold">
+                        Campaigns
+                    </h2>
+                    <ol className="cfo-timeline">
+                        {timeline.map((c, i) => (
+                            <li key={`${c.kind}-${c.slug}`} data-live={i === 0 ? '' : undefined}>
+                                <div className="cfo-ui cfo-num text-sm font-semibold text-graphite-soft">
+                                    {campaignDate(c.date, c.year) ?? 'Undated'}
+                                </div>
+                                <Link
+                                    href={campaignHref(c)}
+                                    className="block font-display text-[1.35rem] font-bold leading-tight no-underline [font-stretch:78%] hover:underline hover:decoration-gold"
+                                >
+                                    {c.name}
+                                </Link>
+                                {c.game_system ? (
+                                    <SystemPill
+                                        className="mt-1.5"
+                                        system={c.game_system}
+                                        edition={c.game_edition}
+                                        icon={iconMap[c.game_system] ?? null}
+                                    />
+                                ) : null}
+                            </li>
+                        ))}
+                    </ol>
+                </section>
+            </div>
+        </>
     );
 }

@@ -6,12 +6,26 @@ spec) before starting a new phase.
 
 ---
 
+## Redesign — "war table" ✅
+
+**Shipped 2026-11-26** on branch `redesign-war-table`. Prototype: https://claude.ai/artifact/Ern83beTk54LiViYAJJ1CE
+
+- New tokens + fonts (Archivo / Source Serif 4 via `next/font`), see `CLAUDE.md` → Design System.
+- New `@cfo/ui` pieces: `MatBand`, `PageHead`, `EmptyState`, `WarTable`, `Select`, `buttonClasses()`; `Button` gained `outline`.
+- Every page moved off the parchment palette (mechanical class rename), and the public pages were rebuilt: home (war table hero + battle reports + campaign timeline), archive index, season, event, recap, reference page, 404.
+- `lib/markdown.ts`: `firstImageUrl`, `excerpt`, `sizedImage` (ImageKit `tr=w-`), `stripLeadingTitle` (seeded bodies repeat their title as `# H1`).
+- `lib/archive.ts`: `getLatestRecaps`, `getCampaignTimeline`, `campaignHref`.
+- Nav now lists Events / Calendar / Groups / News; those routes 404 until their phases ship.
+
+Gotchas:
+- `.cfo-band` breaks out with `margin-inline: calc(50% - 50vw)` and `body { overflow-x: clip }`. Do **not** also pad it — the inner wrapper supplies the max-width + gutter, or bands indent 24px past the nav.
+- Migrated recaps have `author_id = null` and `published_at` = migration date, so the recap page only shows the published date when there's an author.
+
+---
+
 ## Phase 1 content migration ⏳
 
-**Branch:** `phase-1-content-migration` (PR open against `main`).
-
-Migrations `0005` + `0006` need to be pushed to Supabase before the
-content shows up in deployed builds.
+**Merged** (PR #5). Migrations 0001–0009 are all applied on the hosted project (verified 2026-11-26).
 
 ### What it ships
 
@@ -24,7 +38,7 @@ content shows up in deployed builds.
 | `tools/migrate-google-site/src/takeout.ts` — reads Google Sites Takeout HTML pages from disk, uploads images to ImageKit with positional naming, emits a manifest mapping each slug to its cleaned markdown + image URLs. | ✅ in repo |
 | `tools/migrate-google-site/src/rewrite-links.ts` — rewrites `[text](Page Name.html)` style takeout links to live `/archive/...` routes. | ✅ in repo |
 | `tools/migrate-google-site/src/build-migration.ts` — emits `0006_seed_archive_content.sql` from the takeout output + the hand-curated Showdown markdown. | ✅ in repo |
-| Migrations pushed to Supabase | ❌ pending `supabase db push` |
+| Migrations pushed to Supabase | ✅ |
 
 ### How to push the migrations
 

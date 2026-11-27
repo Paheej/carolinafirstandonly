@@ -61,50 +61,38 @@ Both apps consume `@cfo/database`, `@cfo/ui`, and `@cfo/shared`. The agent app i
 
 ## Design System
 
-**Aesthetic:** "Modern tavern meets wargaming table." Broader hobby vibe — not strictly grimdark, includes D&D and other systems.
+**Aesthetic:** "The war table." Black game-mat bands (nav, page heads, footer) over a grey primer page, in Wake Forest black and old gold. Most of the group went to Wake Forest — **never use Carolina blue.** The home hero is a top-down 60x44" Strike Force board (`<WarTable />`) with rulers, deployment zones and numbered objective markers; until Events ship it features the newest campaign, afterwards it should feature the next game day.
 
 ### Tokens
 
-```ts
-// packages/ui/src/tokens.ts
-export const colors = {
-  // Backgrounds
-  parchment: '#f4ead5',         // light bg
-  parchmentDark: '#e8dcc0',     // hover/secondary bg
-  ink: '#1a1815',               // primary text
-  inkSoft: '#4a4640',           // secondary text
+Source of truth: the `@theme` block in `packages/ui/src/styles.css` (mirrored in `tokens.ts`).
 
-  // Accents
-  forest: '#2d4a2b',            // primary brand
-  forestDark: '#1f3320',
-  brass: '#b08d57',             // accent / CTAs
-  brassDark: '#8a6d3f',
-  leather: '#6b4423',           // tertiary accent
+| Token | Hex | Role |
+|---|---|---|
+| `mat` | `#0d0d0c` | Black felt: nav, `MatBand`/`PageHead`, footer |
+| `mat-raised` | `#1a1a18` | Panels/terrain on the mat |
+| `on-mat` / `on-mat-soft` | `#ecebe6` / `#a3a198` | Text on the mat |
+| `primer` / `primer-lift` | `#d8d7d3` / `#e6e5e1` | Page ground / raised panels |
+| `graphite` / `graphite-soft` | `#1b1b1a` / `#55544f` | Text on primer |
+| `gold` | `#9e7e38` | Wake Forest old gold: rules, structure |
+| `gold-bright` | `#cfab52` | Objective markers, primary buttons |
+| `gold-deep` | `#6f5823` | Gold text/links on primer (AA contrast) |
+| `casualty` (= `danger`) | `#9e2a2b` | Errors, destructive actions, 40K accent |
 
-  // Semantic
-  success: '#3f6d3f',
-  warning: '#b08d57',
-  danger: '#8b2a2a',
-  info: '#3a5a78',
-};
+Fonts (loaded with `next/font` in `apps/web/app/layout.tsx`): **Archivo** with the width axis, set condensed (`font-stretch` 62–85%) for headings, nav, buttons and labels (`.cfo-ui`); **Source Serif 4** for body and battle-report prose.
 
-export const fonts = {
-  display: '"EB Garamond", "Cormorant Garamond", Georgia, serif',
-  body: 'Inter, system-ui, sans-serif',
-  mono: '"JetBrains Mono", ui-monospace, monospace',
-};
-```
-
-### Visual Cues
-- Subtle parchment/paper texture on backgrounds (use a low-opacity SVG or CSS gradient noise)
-- Hex-grid background pattern for hero sections (subtle, low contrast)
-- Brass underline accents on headings (1px solid, 4ch wide)
-- Group pages can apply a subtle accent color override based on their primary system (40K → blood red highlight; D&D → arcane purple highlight; etc.) — shared scaffolding, different accent
+### Rules
+- Pages open with `<PageHead>` (or a `<MatBand>`), which breaks out of the centered `<main>` full-bleed.
+- Lists of things are ruled lists, not grids of identical cards. `Card` is for the rare panel that needs to stand apart.
+- No all-caps tracked labels, no monospace labels, no middle-dot meta strings.
+- Buttons: `primary` (gold), `secondary` (black), `outline` (quiet; turns gold inside a mat band), `ghost`, `danger`. For links styled as buttons use `buttonClasses()`.
+- Motion: only the objective markers dropping onto the war table on load (respects reduced motion).
+- Group pages can override the accent per primary system (40K uses `casualty` red).
 
 ### Component primitives needed in `packages/ui`
 - `Button` (variants: primary, secondary, ghost, danger)
 - `Card`, `CardHeader`, `CardBody`, `CardFooter`
-- `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`
+- `Input`, `Textarea`, `Select` (done), `Checkbox`, `Radio`
 - `Badge` (variants per category/system)
 - `Avatar`
 - `Modal` / `Dialog`
@@ -112,7 +100,7 @@ export const fonts = {
 - `MarkdownEditor` (wraps `@uiw/react-md-editor` with our styling)
 - `MarkdownRender` (wraps `react-markdown` with our prose styles)
 - `NavBar`, `Footer`
-- `EmptyState`
+- `EmptyState`, `MatBand`, `PageHead`, `WarTable` (done)
 - `Skeleton` for loading states
 
 ---

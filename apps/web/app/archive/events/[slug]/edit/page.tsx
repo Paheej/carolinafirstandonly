@@ -45,12 +45,12 @@ export default async function EditEventPage({ params }: PageProps) {
     return (
         <article className="space-y-8">
             <nav className="text-sm">
-                <Link href={`/archive/events/${event.slug}`} className="inline-flex items-center gap-1 text-ink-soft">
+                <Link href={`/archive/events/${event.slug}`} className="inline-flex items-center gap-1 text-graphite-soft">
                     <ArrowLeft size={14} /> {event.name}
                 </Link>
             </nav>
             <header>
-                <h1 className="cfo-heading-underline font-display text-3xl sm:text-4xl text-ink">
+                <h1 className="cfo-heading-underline font-display text-3xl sm:text-4xl text-graphite">
                     Edit {event.name}
                 </h1>
             </header>

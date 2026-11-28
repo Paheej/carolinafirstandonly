@@ -26,3 +26,6 @@ export { WarTable } from './WarTable';
 export type { WarTableProps } from './WarTable';
 export { DungeonMap } from './DungeonMap';
 export type { DungeonMapProps } from './DungeonMap';
+export { systemIconComponent } from './SystemPill';
+export { GroupCrest } from './GroupCrest';
+export type { GroupCrestProps } from './GroupCrest';

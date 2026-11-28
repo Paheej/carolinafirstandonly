@@ -245,7 +245,7 @@
 #__next, main, header, footer { position: relative; z-index: 1; }
 
 /* ---------------------------------------------------------------------------
-   Prose — used by <MarkdownRender />. Battle reports are long reads, so
+   Prose — used by <MarkdownRender />. Recaps are long reads, so
    body copy is serif at a generous measure; headings switch to Archivo.
 --------------------------------------------------------------------------- */
 @layer components {

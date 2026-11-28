@@ -162,7 +162,7 @@ export function PhotoUploader({
 
             {photos.length === 0 ? (
                 <div className="rounded-[3px] border border-dashed border-graphite/15 bg-primer-lift/40 px-4 py-8 text-center text-sm text-graphite-soft">
-                    No photos yet. Battle reports go down better with miniatures
+                    No photos yet. Recaps go down better with miniatures
                     in the frame.
                 </div>
             ) : (

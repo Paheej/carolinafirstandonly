@@ -13,19 +13,20 @@ async function db() {
 }
 
 export interface EventListItem extends GameDay {
-    group: Pick<Group, 'id' | 'slug' | 'name'> | null;
+    group: Pick<Group, 'id' | 'slug' | 'name' | 'systems'> | null;
     going: number;
     my_status: EventRsvp['status'] | null;
 }
 
 export async function listEvents(
     viewerId: string | null,
-    opts: { groupId?: string; past?: boolean; limit?: number } = {},
+    opts: { groupId?: string; past?: boolean; limit?: number; range?: { from: string; to: string } } = {},
 ): Promise<EventListItem[]> {
     const supabase = await db();
     const now = new Date().toISOString();
     let q = supabase.from('events').select('*');
-    q = opts.past ? q.lt('ends_at', now).order('starts_at', { ascending: false }) : q.gte('ends_at', now).order('starts_at');
+    if (opts.range) q = q.lt('starts_at', opts.range.to).gt('ends_at', opts.range.from).order('starts_at');
+    else q = opts.past ? q.lt('ends_at', now).order('starts_at', { ascending: false }) : q.gte('ends_at', now).order('starts_at');
     if (opts.groupId) q = q.eq('group_id', opts.groupId);
     if (opts.limit) q = q.limit(opts.limit);
     const { data: events } = await q;
@@ -36,8 +37,8 @@ export async function listEvents(
     const [{ data: rsvps }, { data: groups }] = await Promise.all([
         supabase.from('event_rsvps').select('event_id, user_id, status').in('event_id', ids),
         groupIds.length
-            ? supabase.from('groups').select('id, slug, name').in('id', groupIds)
-            : Promise.resolve({ data: [] as Pick<Group, 'id' | 'slug' | 'name'>[] }),
+            ? supabase.from('groups').select('id, slug, name, systems').in('id', groupIds)
+            : Promise.resolve({ data: [] as Pick<Group, 'id' | 'slug' | 'name' | 'systems'>[] }),
     ]);
     const groupMap = new Map((groups ?? []).map((g) => [g.id, g]));
     return events.map((e) => {

@@ -42,7 +42,7 @@ export default function PrivacyPage() {
                 </p>
                 <h3>What you post and do</h3>
                 <ul>
-                    <li>Battle reports you submit, including text and photos.</li>
+                    <li>Recaps you submit, including text and photos.</li>
                     <li>Groups you create, join or ask to join, your role in them, and invites you send or receive.</li>
                     <li>Pinned posts you write in a group.</li>
                     <li>Notifications we show you on the site (for example, &ldquo;your request was approved&rdquo;).</li>
@@ -68,7 +68,7 @@ export default function PrivacyPage() {
                 <h2>How we use it</h2>
                 <ul>
                     <li>To sign you in and keep your account secure.</li>
-                    <li>To show your profile, battle reports and group membership to other members.</li>
+                    <li>To show your profile, recaps and group membership to other members.</li>
                     <li>To let group admins approve requests and send invites, and to notify you about them.</li>
                     <li>To help organize game days, including availability if you connect a calendar.</li>
                 </ul>
@@ -95,7 +95,7 @@ export default function PrivacyPage() {
                 <ul>
                     <li><strong>Supabase</strong>, which hosts our database and handles sign-in.</li>
                     <li><strong>Vercel</strong>, which hosts the website.</li>
-                    <li><strong>ImageKit</strong>, which stores and resizes photos in battle reports.</li>
+                    <li><strong>ImageKit</strong>, which stores and resizes photos in recaps.</li>
                     <li><strong>Google, Discord and Apple</strong>, only when you choose to sign in with them.</li>
                 </ul>
                 <p>
@@ -105,9 +105,9 @@ export default function PrivacyPage() {
 
                 <h2>How long we keep it</h2>
                 <p>
-                    We keep your account data while your account exists. Battle reports become part of the
+                    We keep your account data while your account exists. Recaps become part of the
                     club&apos;s archive. If you delete your account, we remove your profile, memberships,
-                    invites, notifications and any calendar data. We also either delete your battle reports or
+                    invites, notifications and any calendar data. We also either delete your recaps or
                     keep them with your name removed, whichever you prefer.
                 </p>
 

@@ -55,8 +55,17 @@ export default async function ProfileSettingsPage({
                     </div>
                     <div>
                         <Label htmlFor="username" required>Username</Label>
-                        <Input id="username" name="username" required pattern="@?[a-z0-9_]{3,30}" defaultValue={p?.username ?? ''} />
-                        <p className="mt-1 text-sm text-graphite-soft">Group admins invite you by this.</p>
+                        <Input
+                            id="username"
+                            name="username"
+                            required
+                            pattern="@?[A-Za-z0-9_]{3,30}"
+                            title="3 to 30 letters, numbers or underscores, no spaces"
+                            autoCapitalize="none"
+                            autoComplete="username"
+                            defaultValue={p?.username ?? ''}
+                        />
+                        <p className="mt-1 text-sm text-graphite-soft">Letters, numbers and underscores. Group admins invite you by this.</p>
                     </div>
                 </div>
                 <div>

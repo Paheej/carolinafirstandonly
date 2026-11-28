@@ -100,7 +100,7 @@ export default async function SeasonPage({ params }: PageProps) {
 
                 <aside className="grid content-start gap-8">
                     <section className="rounded-[3px] bg-primer-lift p-5">
-                        <h2 className="mb-3 text-[1.5rem] font-bold">Battle reports</h2>
+                        <h2 className="mb-3 text-[1.5rem] font-bold">Recaps</h2>
                         {recaps.length === 0 ? (
                             <p className="text-base text-graphite-soft">
                                 None yet. Played a game in this campaign?{' '}
@@ -122,7 +122,7 @@ export default async function SeasonPage({ params }: PageProps) {
                         )}
                         {user ? (
                             <Link href="/archive/submit" className={buttonClasses('secondary', 'sm', 'mt-4')}>
-                                <PenSquare size={14} /> Submit a battle report
+                                <PenSquare size={14} /> Submit a recap
                             </Link>
                         ) : null}
                     </section>
@@ -134,7 +134,8 @@ export default async function SeasonPage({ params }: PageProps) {
                                 {pages.map((p) => (
                                     <li key={p.id}>
                                         <Link href={`/archive/pages/${p.slug}`} className="text-[1.05rem] font-semibold no-underline cfo-link-hover">
-                                            {p.title}
+                                            {/* "Season II — House Rules" reads as "House Rules" on Season II's own page. */}
+                                            {p.title.replace(/^Season [IVX\d]+\s*[—–-]\s*/, '')}
                                         </Link>
                                     </li>
                                 ))}

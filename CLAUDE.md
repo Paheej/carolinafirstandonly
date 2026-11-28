@@ -90,6 +90,10 @@ Fonts (loaded with `next/font` in `apps/web/app/layout.tsx`): **Archivo** with t
 - Buttons: `primary` (gold), `secondary` (black), `outline` (quiet; turns gold inside a mat band), `ghost`, `danger`. For links styled as buttons use `buttonClasses()`.
 - Motion: only the objective markers/room keys dropping onto the board, and the hero's campaign fade (both off for reduced motion).
 - Group pages can override the accent per primary system (40K uses `casualty` red).
+- Groups have a crest (`<GroupCrest />`, via `lib/crest.ts`): a black shield showing the first system's icon, with a red rim for the 40K family (40k, Net Epic Armageddon, Battlefleet Gothic) and gold otherwise. Use it wherever a group is named: the directory, the group header, game-day lists, the game-day page and the calendar.
+- Game systems (0016): Warhammer 40k with editions **3rd Edition** and **Current Edition** only; **Net Epic Armageddon** and **Battlefleet Gothic** with no editions. Fantasy, LotR, WFRP and D&D are unchanged.
+- Archive index: Campaigns split into "Running now" and "Completed" (newest first). Special events are newest first. Reference pages live on their season's page. The site says "recap", never "battle report".
+- Game days: `/events` has List and Calendar views (`?view=calendar&month=YYYY-MM`). The calendar is a month grid; with a group picked, a gold bar per upcoming day shows members free in the chosen slot (afternoon, evening or all day), via `/api/availability`.
 
 ### Component primitives needed in `packages/ui`
 - `Button` (variants: primary, secondary, ghost, danger)
@@ -102,7 +106,7 @@ Fonts (loaded with `next/font` in `apps/web/app/layout.tsx`): **Archivo** with t
 - `MarkdownEditor` (wraps `@uiw/react-md-editor` with our styling)
 - `MarkdownRender` (wraps `react-markdown` with our prose styles)
 - `NavBar`, `Footer`
-- `EmptyState`, `MatBand`, `PageHead`, `WarTable`, `DungeonMap` (done)
+- `EmptyState`, `MatBand`, `PageHead`, `WarTable`, `DungeonMap`, `GroupCrest` (done)
 - `Skeleton` for loading states
 
 ---

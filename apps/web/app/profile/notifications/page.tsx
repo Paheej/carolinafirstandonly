@@ -32,7 +32,7 @@ export default async function NotificationsPage() {
             />
             <div className="max-w-3xl py-10">
                 {items.length === 0 ? (
-                    <EmptyState title="Nothing yet" body="Join requests, invites and battle report reviews show up here." />
+                    <EmptyState title="Nothing yet" body="Join requests, invites and recap reviews show up here." />
                 ) : (
                     <ul className="border-t border-graphite/15">
                         {items.map((n) => (

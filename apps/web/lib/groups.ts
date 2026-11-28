@@ -67,7 +67,7 @@ const ROLE_ORDER: Record<GroupRole, number> = { owner: 0, admin: 1, member: 2 };
 /** Slug + name for a group the viewer can see (null for private groups they aren't in). */
 export async function getGroupName(groupId: string) {
     const supabase = await db();
-    const { data } = await supabase.from('groups').select('slug, name').eq('id', groupId).maybeSingle();
+    const { data } = await supabase.from('groups').select('slug, name, systems').eq('id', groupId).maybeSingle();
     return data;
 }
 

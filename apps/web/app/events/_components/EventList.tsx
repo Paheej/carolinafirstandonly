@@ -1,11 +1,21 @@
 import Link from 'next/link';
+import { GroupCrest } from '@cfo/ui';
+import { crestFor } from '@/lib/crest';
 import type { EventListItem } from '@/lib/events';
 import { fmtShortDay, fmtTimeRange, monthKey, utcToZonedParts } from '@/lib/time';
 
 const STATUS_LABEL = { yes: "You're going", maybe: 'You said maybe', waitlist: "You're on the waitlist", no: "You can't make it" } as const;
 
 /** Ruled list of game days, grouped under month headings. */
-export function EventList({ events, showMonths = true }: { events: EventListItem[]; showMonths?: boolean }) {
+export function EventList({
+    events,
+    showMonths = true,
+    iconMap = {},
+}: {
+    events: EventListItem[];
+    showMonths?: boolean;
+    iconMap?: Record<string, string>;
+}) {
     const months: [string, EventListItem[]][] = [];
     for (const e of events) {
         const k = monthKey(e.starts_at);
@@ -47,7 +57,12 @@ export function EventList({ events, showMonths = true }: { events: EventListItem
                                             <span className="sr-only">{fmtShortDay(e.starts_at)}, </span>
                                             {fmtTimeRange(e.starts_at, e.ends_at)}
                                             {e.location ? `, ${e.location}` : ''}
-                                            {e.group ? <span className="text-gold-deep"> {e.group.name}</span> : null}
+                                            {e.group ? (
+                                                <span className="ml-1 inline-flex items-center gap-1.5 align-middle text-gold-deep">
+                                                    <GroupCrest size={18} {...crestFor(e.group.systems, iconMap)} />
+                                                    {e.group.name}
+                                                </span>
+                                            ) : null}
                                         </p>
                                     </Link>
                                 </li>

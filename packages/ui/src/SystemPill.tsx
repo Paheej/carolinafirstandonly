@@ -10,6 +10,7 @@ import {
     Flame,
     Crosshair,
     Mountain,
+    Rocket,
     type LucideIcon,
 } from 'lucide-react';
 import { Badge } from './Badge';
@@ -30,9 +31,15 @@ const ICONS: Record<string, LucideIcon> = {
     Flame,
     Crosshair,
     Mountain,
+    Rocket,
 };
 
 export const ALLOWED_SYSTEM_ICONS = Object.keys(ICONS);
+
+/** The Lucide component for a `game_systems.icon` name, if it's an allowed one. */
+export function systemIconComponent(icon: string | null | undefined): LucideIcon | undefined {
+    return icon ? ICONS[icon] : undefined;
+}
 
 export interface SystemPillProps {
     system: string | null;

@@ -178,6 +178,14 @@
             animation-delay: calc(var(--i) * 140ms + 250ms);
         }
     }
+    /* Hero campaign switch: a quick fade, off for reduced motion. */
+    @media (prefers-reduced-motion: no-preference) {
+        .cfo-fade { animation: cfo-fade 320ms ease-out both; }
+    }
+    @keyframes cfo-fade {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
     @keyframes cfo-place {
         from { opacity: 0; transform: translateY(-14px) scale(1.25); }
         to { opacity: 1; transform: none; }
@@ -237,7 +245,7 @@
 #__next, main, header, footer { position: relative; z-index: 1; }
 
 /* ---------------------------------------------------------------------------
-   Prose — used by <MarkdownRender />. Battle reports are long reads, so
+   Prose — used by <MarkdownRender />. Recaps are long reads, so
    body copy is serif at a generous measure; headings switch to Archivo.
 --------------------------------------------------------------------------- */
 @layer components {

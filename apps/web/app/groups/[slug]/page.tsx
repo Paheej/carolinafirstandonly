@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { Button, MarkdownRender, PageHead, Textarea, buttonClasses } from '@cfo/ui';
+import { Button, GroupCrest, MarkdownRender, PageHead, Textarea, buttonClasses } from '@cfo/ui';
+import { getSystemIconMap } from '@/lib/archive';
+import { crestFor } from '@/lib/crest';
 import { Settings } from 'lucide-react';
 import { getCurrentUser } from '@/lib/auth';
 import { getGroupBySlug, getGroupMembers, getPinnedPosts, getViewerState, memberName } from '@/lib/groups';
@@ -30,11 +32,12 @@ export default async function GroupPage({ params, searchParams }: PageProps) {
     const group = await getGroupBySlug(slug);
     if (!group) notFound();
 
-    const [members, posts, viewer, events] = await Promise.all([
+    const [members, posts, viewer, events, iconMap] = await Promise.all([
         getGroupMembers(group.id),
         getPinnedPosts(group.id),
         getViewerState(group.id, user?.id ?? null),
         listEvents(user?.id ?? null, { groupId: group.id, limit: 8 }),
+        getSystemIconMap(),
     ]);
     const canManage = viewer.role === 'owner' || viewer.role === 'admin' || !!user?.profile?.is_admin;
     const hidden = { group_id: group.id, slug: group.slug };
@@ -43,7 +46,12 @@ export default async function GroupPage({ params, searchParams }: PageProps) {
         <>
             <PageHead
                 kicker={<Link href="/groups" className="no-underline hover:underline">Groups</Link>}
-                title={group.name}
+                title={
+                    <span className="flex items-center gap-4 sm:gap-5">
+                        <GroupCrest size={56} className="mt-1" {...crestFor(group.systems, iconMap)} />
+                        <span className="min-w-0">{group.name}</span>
+                    </span>
+                }
                 actions={
                     canManage ? (
                         <Link href={`/groups/${group.slug}/manage`} className={buttonClasses('outline', 'sm')}>
@@ -82,7 +90,7 @@ export default async function GroupPage({ params, searchParams }: PageProps) {
                             ) : null}
                         </div>
                         {events.length ? (
-                            <EventList events={events} showMonths={false} />
+                            <EventList events={events} showMonths={false} iconMap={iconMap} />
                         ) : (
                             <p className="text-graphite-soft">Nothing scheduled.</p>
                         )}

@@ -29,7 +29,7 @@ export default async function SubmitRecapPage() {
                     <PenSquare size={14} /> Submit
                 </div>
                 <h1 className="cfo-heading-underline font-display text-4xl text-graphite">
-                    Submit a battle report
+                    Submit a recap
                 </h1>
                 <p className="text-graphite-soft max-w-2xl">
                     Pick a season or special event, write up what happened in

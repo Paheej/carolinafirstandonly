@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { Button, Input, Label, MarkdownRender, PageHead, Select, buttonClasses } from '@cfo/ui';
+import { Button, GroupCrest, Input, Label, MarkdownRender, PageHead, Select, buttonClasses } from '@cfo/ui';
+import { getSystemIconMap } from '@/lib/archive';
+import { crestFor } from '@/lib/crest';
 import { CalendarPlus, Download, MapPin, Pencil } from 'lucide-react';
 import { getCurrentUser } from '@/lib/auth';
 import { getEventBySlug, getEventDetail, getEventInvites, type RsvpRow } from '@/lib/events';
@@ -63,9 +65,10 @@ export default async function EventPage({ params, searchParams }: PageProps) {
     if (!event) notFound();
 
     const detail = await getEventDetail(event.id, user?.id ?? null);
-    const [invites, group] = await Promise.all([
+    const [invites, group, iconMap] = await Promise.all([
         detail.canManage ? getEventInvites(event.id) : Promise.resolve([]),
         event.group_id ? getGroupName(event.group_id) : Promise.resolve(null),
+        getSystemIconMap(),
     ]);
     const origin = process.env.NEXT_PUBLIC_SITE_URL ?? `https://${h.get('host')}`;
     const url = `${origin}/events/${event.slug}`;
@@ -95,7 +98,10 @@ export default async function EventPage({ params, searchParams }: PageProps) {
             <PageHead
                 kicker={
                     group ? (
-                        <Link href={`/groups/${group.slug}`} className="no-underline hover:underline">{group.name}</Link>
+                        <Link href={`/groups/${group.slug}`} className="inline-flex items-center gap-2 no-underline hover:underline">
+                            <GroupCrest size={20} {...crestFor(group.systems, iconMap)} />
+                            {group.name}
+                        </Link>
                     ) : (
                         <Link href="/events" className="no-underline hover:underline">Game days</Link>
                     )

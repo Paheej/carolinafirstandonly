@@ -21,9 +21,10 @@ export async function updateProfile(fd: FormData) {
         const v = fd.get(k);
         return typeof v === 'string' ? v.trim() : '';
     };
-    const username = str('username').toLowerCase().replace(/^@/, '');
-    if (!/^[a-z0-9_]{3,30}$/.test(username)) {
-        back('error', 'Usernames are 3 to 30 characters: lowercase letters, numbers and underscores.');
+    // Saved as typed ("Paheej"); invites, lookups and uniqueness ignore case.
+    const username = str('username').replace(/^@/, '');
+    if (!/^[A-Za-z0-9_]{3,30}$/.test(username)) {
+        back('error', 'Usernames are 3 to 30 characters: letters, numbers and underscores, no spaces.');
     }
     const { error } = await supabase
         .from('profiles')
@@ -34,7 +35,7 @@ export async function updateProfile(fd: FormData) {
             preferred_systems: fd.getAll('systems').filter((v): v is string => typeof v === 'string'),
         })
         .eq('id', user.id);
-    if (error) back('error', error.code === '23505' ? `@${username} is taken.` : error.message);
+    if (error) back('error', error.code === '23505' ? `@${username} is taken. Try another.` : error.message);
     revalidatePath('/', 'layout');
     back('notice', 'Profile saved.');
 }

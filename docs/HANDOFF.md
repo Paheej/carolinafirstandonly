@@ -2,19 +2,59 @@
 
 Read this first in a new session, then `docs/RUNBOOK.md` (how to do things) and `PROGRESS.md` (what each phase shipped, plus gotchas). `CLAUDE.md` is the original spec.
 
-_Last updated 2026-11-27._
+_Last updated 2026-11-28._
+
+## Start here (next session)
+
+**Next step: Phase 5, News and voting** (`CLAUDE.md` → Build Order and Feature Specs → News).
+
+1. **Confirm the news categories with the owner before seeding them** (Open Item 5). The assumed list is `official_news, tactics, painting, lore, community, industry, battle_report`. The site says "recap", never "battle report", so ask whether `battle_report` should be `recap`.
+2. Then write migration `0022_news.sql` (`news_categories`, `news_posts`, `news_votes`, the vote-count/hot-score trigger), with `pnpm test:sql` checks.
+3. Build `/news` (Hot, Top and New), `/news/[slug]`, and the admin composer at `/news/admin/new`.
+4. Anonymous voting: FingerprintJS, HMAC with `FINGERPRINT_HMAC_SECRET`, and a rate limit. **The secret isn't set yet**: it's empty in `.env.local` and missing from Vercel. Generate one (`openssl rand -hex 32`) and add it to both, the way `TOKEN_ENCRYPTION_KEY` was added.
+5. Load the `frontend-design:frontend-design` skill before building the pages. Follow `CLAUDE.md` → Design System.
+
+The owner sends "nits" in batches between phases. Do each batch on one branch and one PR, check it in Chrome, then ask before merging. They usually say yes.
 
 ## State
 
 | Area | State |
 |---|---|
-| Phases 0–3 | Shipped and live. Archive, war-table redesign, groups and profiles, game days with RSVPs, waitlists and calendar feeds. |
-| Phase 4 | Shipped (PR #13). Connect Google Calendar (OAuth), iCloud via share link, daily cron, "Who's free" strip on the event form. Outlook is out of scope. |
-| Migrations | 0001–0014 applied on the hosted Supabase project. |
+| Phases 0–4 | Shipped and live. Archive, war-table redesign, groups and profiles, game days (RSVPs, waitlists, calendar feeds), and calendar busy-time sync with "Who's free". |
+| Polish since Phase 4 (PRs #14–#17) | Listed in "Recent changes" below. |
+| Migrations | **0001–0021 applied** on the hosted Supabase project. The next one is `0022`. |
 | Production | `main` auto-deploys to https://carolinafirstandonly.vercel.app and https://new.carolinafirstandonly.com |
 | Bare domain | `carolinafirstandonly.com` still serves the old Google Sites page. Cutover is a Phase 7 task (see the RUNBOOK). |
 | Sign-in | Google works, and its branding is verified and published. Discord has an app and is configured, but a sign-in hasn't been confirmed end to end. Apple is waiting on the owner's Apple Developer approval. Email/password works. |
-| Tests | `pnpm test:sql` (78 database checks, also run in CI), `pnpm typecheck`, `pnpm --filter @cfo/web build`. |
+| Tests | `pnpm test:sql` (90 database checks, also run in CI), `pnpm typecheck`, `pnpm --filter @cfo/web build`, `pnpm shots --base <url> <paths>`. |
+| Old Google Site | **Fully migrated.** Seasons I–III (with Season III's 9 reference pages), the Old World Campaign (6 pages and 9 recaps), and the events. Only the index pages (Home, 40k Seasons, Events) were skipped. |
+
+## Recent changes (2026-11-27 to 28, PRs #14–#17)
+
+- **Home hero (`apps/web/app/_components/CampaignHero.tsx`):**
+  - The next game day and each running campaign take turns as slides, game day first, auto-advancing every 9 s.
+  - Each slide gets its system's board: `<DungeonMap />` for D&D, `<WarTable />` otherwise.
+  - Group-only game days appear only for members.
+- **Archive index:** Campaigns are split into "Running now" and "Completed" (newest first). Special events are newest first. Reference pages live on their season's page.
+- **Archive detail pages:** the photo page head (`PageHead image=… tone="light"`). The gold badge is solid on dark bands, and pages with no photo get a light band.
+- **Wording:** the site says "recap" everywhere, never "battle report". Seasons are named "40k - Season I/II/III".
+- **Games:**
+  - 40K keeps its numbered editions (1st–11th). The owner reversed a brief "3rd/Current" consolidation.
+  - Net Epic Armageddon and Battlefleet Gothic are separate systems.
+  - Seasons and events can list **several games** (`games` jsonb, 0021). Burning Star is 40K 11th and 3rd, Epic and BFG. Drafted! is Warhammer Fantasy 5th.
+  - Admin forms have "Add another game".
+- **Groups** get a crest (`<GroupCrest />` via `lib/crest.ts`) everywhere a group is named.
+- **Game days:** `/events` has List and Calendar views. The month grid shows a "who's free" bar per day for a chosen group and time slot.
+- **Usernames** keep the case they're typed in ("Paheej"). Lookups ignore case.
+- **Content import tools:** `tools/migrate-google-site/` (`takeout.ts`, `build-old-world.mjs`, `build-season-3.mjs`). The Takeout export is at `~/Downloads/Takeout/Drive/sites/Copy of www.carolinafirstandonly.com/DRAFT`.
+
+## Owner decisions to remember
+
+- Never use Carolina blue. The palette is Wake Forest black and old gold.
+- Outlook calendar sync is out of scope. The Google calendar scopes stay **unverified on purpose**, since the owner accepted the warning screen and the 100-user cap.
+- The owner doesn't want "paste a link" as a main path: iCloud is the only link-based connection.
+- Keep numbered 40K editions.
+- Old World Campaign: the status "completed" and its placement were assumptions, and the winner is unknown. Ask if the owner wants it changed.
 
 ## Waiting on the owner
 
@@ -55,4 +95,4 @@ _Last updated 2026-11-27._
 
 ## Later phases
 
-5 News and voting, 6 the AI news agent, 7 polish and the DNS cutover. See `CLAUDE.md` → Build Order.
+5 News and voting (next), 6 the AI news agent, 7 polish and the DNS cutover. See `CLAUDE.md` → Build Order.

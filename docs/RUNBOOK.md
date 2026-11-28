@@ -88,6 +88,14 @@ supabase db push --workdir packages/database --yes </dev/null    # apply
 - **Writes that bypass RLS** use the same pattern with `SUPABASE_SERVICE_ROLE_KEY` in both the `apikey` and `Authorization: Bearer` headers. Ask the owner first.
 - **Enabled auth providers:** `curl "$NEXT_PUBLIC_SUPABASE_URL/auth/v1/settings" -H "apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY"`.
 
+**Claude Code safety checks (seen 2026-11-28):**
+
+- `supabase db push` for a migration that **changes the schema** or **deletes data** gets blocked by auto mode unless the owner has said yes to that specific change in chat. Ask first, naming what the migration does. A plain data update the owner explicitly asked for usually goes through.
+- Foreground `sleep` is blocked. To wait for CI or a deploy, use an until-loop that ends on a condition: `until gh pr checks N | grep -q "^build.*pass"; do sleep 15; done`, or `until curl -s URL | grep -q TEXT; do sleep 10; done`.
+- A Bash heredoc containing complex regexes can be refused as unreadable. Write the script with the Write tool, then run it.
+
+**Content imports from the old Google Site:** run `takeout.ts` with a manifest. It uploads images to ImageKit using `IMAGEKIT_PRIVATE_KEY` from `.env.local`. Then a `build-*.mjs` script writes the migration. Rewrite internal `.html` links to `/archive/...` routes, including links wrapped around images (`[![](img)](x.html)`). The original `rewrite-links.ts` missed those.
+
 **Patterns and pitfalls from Phases 2–3:**
 
 - **Membership, RSVPs, invites:** these change only through `security definer` RPCs. The tables have no insert policies for users.
@@ -127,6 +135,7 @@ supabase db push --workdir packages/database --yes </dev/null    # apply
 | Homebrew | Installed Google Chrome |
 | Playwright `chromium-headless-shell` | Screenshots. First run on a new machine: `npx playwright install chromium-headless-shell` |
 | PGlite (`@electric-sql/pglite`) | Database tests without Docker. No Docker or `psql` on this machine. |
+| `tsx` (in `tools/migrate-google-site`) | Running the Takeout import scripts |
 
 **Fewer permission prompts.** Claude can't loosen its own permissions. The owner can run `/fewer-permission-prompts` in Claude Code, or add allow rules in `.claude/settings.local.json` for the routine commands:
 

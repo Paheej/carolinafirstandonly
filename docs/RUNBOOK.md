@@ -19,7 +19,7 @@ How to get things done on this project without the owner doing it by hand. Read 
 | Service | Identifier |
 |---|---|
 | GitHub | `Paheej/carolinafirstandonly`. The `gh` CLI is logged in. |
-| Vercel | Team `paheejs-projects`, project `carolinafirstandonly`. The `vercel` CLI is logged in, and `apps/web` is linked. |
+| Vercel | Team `paheejs-projects`, project `carolinafirstandonly`. The `vercel` CLI is logged in, and the repo root is linked (run `vercel env` commands from there). |
 | Supabase | Project ref `ffzmongphrwovudnrhwv` (dashboard name "Carolina_1st"). The `supabase` CLI is logged in. |
 | Cloudflare | DNS and email for `carolinafirstandonly.com`. Dashboard: `dash.cloudflare.com/09d17bfef0b0ec52087b37d2c4dd530e/carolinafirstandonly.com` |
 | Google Cloud | Project `carolina-first-and-only`: one OAuth client ("CFO Website") for sign-in and Connect Google Calendar, the Google Calendar API (enabled), the calendar scopes under Data Access (sensitive, unverified on purpose), and the Google Auth Platform branding (verified and published). |
@@ -111,7 +111,7 @@ supabase db push --workdir packages/database --yes </dev/null    # apply
 
 ## News agent (Phase 6)
 
-- **Env:** `ANTHROPIC_API_KEY` (required), `YOUTUBE_API_KEY` (optional; without it YouTube comes from the public feed, which 503s now and then), `AGENT_MONTHLY_BUDGET_USD` (default 20), `AGENT_MODEL` (default `claude-sonnet-5-5`). Set them in every Vercel environment and in `apps/web/.env.local`.
+- **Env:** `ANTHROPIC_API_KEY` (required), `YOUTUBE_API_KEY` (set 2026-11-28: key "CFO news agent (YouTube)" in Google Cloud, restricted to YouTube Data API v3; without it YouTube comes from the public feed, which 503s now and then), `AGENT_MONTHLY_BUDGET_USD` (default 20), `AGENT_MODEL` (default `claude-sonnet-5-5`). Set them in every Vercel environment and in `apps/web/.env.local`.
 - **Run it by hand:** press "Run the agent now" on `/news/admin/drafts`, or
   `curl -H "Authorization: Bearer $CRON_SECRET" https://carolinafirstandonly.vercel.app/api/cron/news-agent`
 - **What it did:** `/news/admin/drafts` → Recent runs (counts, cost, problems per source). Each source's last error shows on `/news/admin/sources`.

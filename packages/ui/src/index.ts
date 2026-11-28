@@ -24,3 +24,5 @@ export { MatBand, PageHead, EmptyState } from './MatBand';
 export type { MatBandProps, PageHeadProps } from './MatBand';
 export { WarTable } from './WarTable';
 export type { WarTableProps } from './WarTable';
+export { DungeonMap } from './DungeonMap';
+export type { DungeonMapProps } from './DungeonMap';

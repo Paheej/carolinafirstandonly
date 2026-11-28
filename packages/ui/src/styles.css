@@ -178,6 +178,14 @@
             animation-delay: calc(var(--i) * 140ms + 250ms);
         }
     }
+    /* Hero campaign switch: a quick fade, off for reduced motion. */
+    @media (prefers-reduced-motion: no-preference) {
+        .cfo-fade { animation: cfo-fade 320ms ease-out both; }
+    }
+    @keyframes cfo-fade {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
     @keyframes cfo-place {
         from { opacity: 0; transform: translateY(-14px) scale(1.25); }
         to { opacity: 1; transform: none; }

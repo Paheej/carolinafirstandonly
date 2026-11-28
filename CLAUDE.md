@@ -63,7 +63,7 @@ Both apps consume `@cfo/database`, `@cfo/ui`, and `@cfo/shared`. The agent app i
 
 ## Design System
 
-**Aesthetic:** "The war table." Black game-mat bands (nav, page heads, footer) over a grey primer page, in Wake Forest black and old gold. Most of the group went to Wake Forest — **never use Carolina blue.** The home hero is a top-down 60x44" Strike Force board (`<WarTable />`) with rulers, deployment zones and numbered objective markers; it features the next game day the viewer can see (Phase 3), with campaigns where `seasons.status = 'active'` listed under it (currently Campaign of the Burning Star on campaign-chronicle.app and Curse of Strahd); with no game day scheduled it features those campaigns. Seasons are campaigns; `archive_events` are one-off events (Drafted! is an event, not a campaign).
+**Aesthetic:** "The war table." Black game-mat bands (nav, page heads, footer) over a grey primer page, in Wake Forest black and old gold. Most of the group went to Wake Forest — **never use Carolina blue.** The home hero is a top-down 60x44" Strike Force board (`<WarTable />`) with rulers, deployment zones and numbered objective markers; it features the next game day the viewer can see (Phase 3), with campaigns where `seasons.status = 'active'` listed under it (currently Campaign of the Burning Star on campaign-chronicle.app and Curse of Strahd). With no game day scheduled, the running campaigns take turns (`CampaignHero`): tabs to pick one, and auto-advance every 9 s that pauses on hover or focus, stops after a pick, and is off for reduced motion. Each campaign gets its system's board: `<WarTable />` for 40K, `<DungeonMap />` (5-foot squares, numbered room keys) for D&D. 40K seasons are named "40k - Season I/II/III"; the year shows separately. The home page section for recaps is titled "Recaps". Seasons are campaigns; `archive_events` are one-off events (Drafted! is an event, not a campaign).
 
 ### Tokens
 
@@ -88,7 +88,7 @@ Fonts (loaded with `next/font` in `apps/web/app/layout.tsx`): **Archivo** with t
 - Lists of things are ruled lists, not grids of identical cards. `Card` is for the rare panel that needs to stand apart.
 - No all-caps tracked labels, no monospace labels, no middle-dot meta strings.
 - Buttons: `primary` (gold), `secondary` (black), `outline` (quiet; turns gold inside a mat band), `ghost`, `danger`. For links styled as buttons use `buttonClasses()`.
-- Motion: only the objective markers dropping onto the war table on load (respects reduced motion).
+- Motion: only the objective markers/room keys dropping onto the board, and the hero's campaign fade (both off for reduced motion).
 - Group pages can override the accent per primary system (40K uses `casualty` red).
 
 ### Component primitives needed in `packages/ui`
@@ -102,7 +102,7 @@ Fonts (loaded with `next/font` in `apps/web/app/layout.tsx`): **Archivo** with t
 - `MarkdownEditor` (wraps `@uiw/react-md-editor` with our styling)
 - `MarkdownRender` (wraps `react-markdown` with our prose styles)
 - `NavBar`, `Footer`
-- `EmptyState`, `MatBand`, `PageHead`, `WarTable` (done)
+- `EmptyState`, `MatBand`, `PageHead`, `WarTable`, `DungeonMap` (done)
 - `Skeleton` for loading states
 
 ---

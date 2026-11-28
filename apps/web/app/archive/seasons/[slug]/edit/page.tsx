@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { getCurrentUser } from '@/lib/auth';
 import {
     getSeasonBySlug,
+    gamesOf,
     getGameSystems,
     getGameEditions,
 } from '@/lib/archive';
@@ -35,8 +36,7 @@ export default async function EditSeasonPage({ params }: PageProps) {
         year: season.year ? String(season.year) : '',
         starts_on: season.starts_on ?? '',
         ends_on: season.ends_on ?? '',
-        game_system: season.game_system ?? '',
-        game_edition: season.game_edition ?? '',
+        games: gamesOf(season).map((g) => ({ system: g.system, edition: g.edition ?? '' })),
         hero_image_url: season.hero_image_url ?? '',
         description_md: season.description_md ?? '',
         status: season.status,

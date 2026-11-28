@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Season } from '@cfo/database/types';
-import { MatBand, WarTable, SystemPill, buttonClasses } from '@cfo/ui';
+import { MatBand, WarTable, buttonClasses } from '@cfo/ui';
 import { CampaignHero, type HeroSlide } from './_components/CampaignHero';
 import { getCurrentUser } from '@/lib/auth';
 import {
@@ -8,9 +8,12 @@ import {
     getCampaignTimeline,
     getEventTimeline,
     getLatestRecaps,
+    gamesLabel,
+    gamesOf,
     getSystemIconMap,
     type TimelineEntry,
 } from '@/lib/archive';
+import { SystemPills } from './_components/SystemPills';
 import { excerpt, externalLabel, firstImageUrl, sizedImage } from '@/lib/markdown';
 import { getNextGameDay } from '@/lib/events';
 import { fmtDay, fmtTimeRange } from '@/lib/time';
@@ -22,9 +25,8 @@ function timelineDate(date: string | null, year: number | null) {
     return year ? String(year) : null;
 }
 
-function systemLabel(c: Pick<Season, 'game_system' | 'game_edition'>) {
-    if (!c.game_system) return null;
-    return c.game_edition ? `${c.game_system}, ${c.game_edition}` : c.game_system;
+function systemLabel(c: Season) {
+    return gamesLabel(gamesOf(c));
 }
 
 export default async function HomePage() {
@@ -227,14 +229,7 @@ function Timeline({
                         >
                             {c.name}
                         </Link>
-                        {c.game_system ? (
-                            <SystemPill
-                                className="mt-1.5"
-                                system={c.game_system}
-                                edition={c.game_edition}
-                                icon={iconMap[c.game_system] ?? null}
-                            />
-                        ) : null}
+                        <SystemPills className="mt-1.5" games={c.games} iconMap={iconMap} />
                     </li>
                 ))}
             </ol>

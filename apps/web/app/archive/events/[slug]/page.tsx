@@ -2,9 +2,10 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { firstImageUrl, sizedImage, stripLeadingTitle } from '@/lib/markdown';
-import { MarkdownRender, PageHead, SystemPill, buttonClasses } from '@cfo/ui';
+import { MarkdownRender, PageHead, buttonClasses } from '@cfo/ui';
+import { SystemPills } from '@/app/_components/SystemPills';
 import { Pencil } from 'lucide-react';
-import { getArchiveEventBySlug, getSystemIconMap } from '@/lib/archive';
+import { getArchiveEventBySlug, gamesOf, getSystemIconMap } from '@/lib/archive';
 import { getCurrentUser } from '@/lib/auth';
 
 interface PageProps {
@@ -58,13 +59,7 @@ export default async function ArchiveEventPage({ params }: PageProps) {
                 }
             >
                 <div className="cfo-ui cfo-num mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-on-mat-soft">
-                    {event.game_system ? (
-                        <SystemPill
-                            system={event.game_system}
-                            edition={event.game_edition}
-                            icon={iconMap[event.game_system] ?? null}
-                        />
-                    ) : null}
+                    <SystemPills games={gamesOf(event)} iconMap={iconMap} />
                     {when ? <span>{when}</span> : null}
                     <span>Special event</span>
                 </div>

@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import { getCurrentUser } from '@/lib/auth';
 import {
     getArchiveEventBySlug,
+    gamesOf,
     getGameSystems,
     getGameEditions,
     getSeasons,
@@ -35,8 +36,7 @@ export default async function EditEventPage({ params }: PageProps) {
         slug: event.slug,
         name: event.name,
         event_date: event.event_date ?? '',
-        game_system: event.game_system ?? '',
-        game_edition: event.game_edition ?? '',
+        games: gamesOf(event).map((g) => ({ system: g.system, edition: g.edition ?? '' })),
         season_id: event.season_id ?? '',
         hero_image_url: event.hero_image_url ?? '',
         description_md: event.description_md ?? '',

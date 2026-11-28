@@ -2,12 +2,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { firstImageUrl, sizedImage, stripLeadingTitle } from '@/lib/markdown';
-import { MarkdownRender, PageHead, SystemPill, buttonClasses } from '@cfo/ui';
+import { MarkdownRender, PageHead, buttonClasses } from '@cfo/ui';
+import { SystemPills } from '@/app/_components/SystemPills';
 import { ExternalLink, PenSquare, Pencil } from 'lucide-react';
 import {
     getSeasonBySlug,
     getPublishedRecapsForSeason,
     getArchivePagesForSeason,
+    gamesOf,
     getSystemIconMap,
 } from '@/lib/archive';
 import { getCurrentUser } from '@/lib/auth';
@@ -77,13 +79,7 @@ export default async function SeasonPage({ params }: PageProps) {
             >
                 <div className="cfo-ui cfo-num mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-on-mat-soft">
                     {season.status === 'active' ? <span className="font-semibold text-gold-bright">Running now</span> : null}
-                    {season.game_system ? (
-                        <SystemPill
-                            system={season.game_system}
-                            edition={season.game_edition}
-                            icon={iconMap[season.game_system] ?? null}
-                        />
-                    ) : null}
+                    <SystemPills games={gamesOf(season)} iconMap={iconMap} />
                     {range ?? (season.year ? <span>{season.year}</span> : null)}
                     <span>
                         {recaps.length} {recaps.length === 1 ? 'recap' : 'recaps'}

@@ -24,6 +24,12 @@ export interface RecapPhoto {
     height?: number;
 }
 
+/** One game a season or event used, by display name (matches game_systems / game_editions). */
+export interface GameRef {
+    system: string;
+    edition: string | null;
+}
+
 export interface Database {
     public: {
         Tables: {
@@ -109,6 +115,8 @@ export interface Database {
                     display_order: number;
                     game_system: string | null;
                     game_edition: string | null;
+                    /** Every game played, first = main (0021). */
+                    games: GameRef[];
                     status: 'active' | 'completed';
                     external_url: string | null;
                     created_at: string;
@@ -125,6 +133,7 @@ export interface Database {
                     display_order?: number;
                     game_system?: string | null;
                     game_edition?: string | null;
+                    games?: GameRef[];
                     status?: 'active' | 'completed';
                     external_url?: string | null;
                 };
@@ -143,6 +152,8 @@ export interface Database {
                     display_order: number;
                     game_system: string | null;
                     game_edition: string | null;
+                    /** Every game played, first = main (0021). */
+                    games: GameRef[];
                     created_at: string;
                     updated_at: string;
                 };
@@ -156,6 +167,7 @@ export interface Database {
                     display_order?: number;
                     game_system?: string | null;
                     game_edition?: string | null;
+                    games?: GameRef[];
                 };
                 Update: Partial<Database['public']['Tables']['archive_events']['Insert']>;
                 Relationships: [];

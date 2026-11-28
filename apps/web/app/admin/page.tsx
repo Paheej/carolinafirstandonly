@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import type { Metadata } from 'next';
 import { Card, CardBody } from '@cfo/ui';
-import { ShieldCheck, BookMarked, Inbox } from 'lucide-react';
+import { ShieldCheck, BookMarked, Inbox, Newspaper } from 'lucide-react';
 import { createServerSupabase } from '@cfo/database/server';
 import { getCurrentUser } from '@/lib/auth';
 
@@ -20,12 +20,21 @@ async function countPendingRecaps(): Promise<number> {
     return count ?? 0;
 }
 
+async function countNewsDrafts(): Promise<number> {
+    const supabase = createServerSupabase(await cookies());
+    const { count } = await supabase
+        .from('news_posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'draft');
+    return count ?? 0;
+}
+
 export default async function AdminIndexPage() {
     const user = await getCurrentUser();
     if (!user) redirect('/auth/login?next=/admin');
     if (!user.profile?.is_admin) redirect('/');
 
-    const pendingRecaps = await countPendingRecaps();
+    const [pendingRecaps, newsDrafts] = await Promise.all([countPendingRecaps(), countNewsDrafts()]);
 
     return (
         <div className="space-y-8">
@@ -37,8 +46,8 @@ export default async function AdminIndexPage() {
                     Admin dashboard
                 </h1>
                 <p className="text-graphite-soft">
-                    A growing index of admin areas. News drafts, user moderation,
-                    and audit views land in subsequent phases.
+                    A growing index of admin areas. User moderation and audit
+                    views land in later phases.
                 </p>
             </header>
 
@@ -80,6 +89,31 @@ export default async function AdminIndexPage() {
                                 </div>
                                 <p className="text-sm text-graphite-soft">
                                     Public archive index — seasons and special events.
+                                </p>
+                            </CardBody>
+                        </Card>
+                    </Link>
+                </li>
+                <li>
+                    <Link href="/news/admin" className="block no-underline">
+                        <Card interactive className="h-full">
+                            <CardBody className="flex h-full flex-col gap-3 px-6 py-6">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2">
+                                        <Newspaper size={18} className="text-gold-deep" />
+                                        <h2 className="font-display text-xl text-graphite">
+                                            News posts
+                                        </h2>
+                                    </div>
+                                    {newsDrafts > 0 ? (
+                                        <span className="inline-grid h-6 min-w-6 place-items-center rounded-full bg-gold text-[11px] font-semibold text-graphite px-1.5">
+                                            {newsDrafts}
+                                        </span>
+                                    ) : null}
+                                </div>
+                                <p className="text-sm text-graphite-soft">
+                                    Write, publish and archive news. The number is how
+                                    many drafts are waiting.
                                 </p>
                             </CardBody>
                         </Card>

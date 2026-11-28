@@ -8,6 +8,21 @@ spec) before starting a new phase.
 
 ---
 
+## Phase 5 — News + voting ✅
+
+**Shipped 2026-11-28** (PR #19). Migration 0022 applied. Tested live in Chrome on localhost: wrote and published a post, voted up, switched to down, cleared, reloaded (your vote is remembered), filtered by tag and category, archived it (the post 404s publicly).
+
+- `0022_news.sql`: `news_categories` (six; no `battle_report`, owner decision), `news_posts` (generated `score` column, `hot_score`), `news_votes`, `news_vote_log` (rate limit). The trigger keeps the counts and `hot_score` current; a direct update can't set the counts (`pg_trigger_depth()` guard). RPCs `cast_news_vote` and `my_news_votes` are service role only.
+- Hot score is Reddit's formula, not the HN-style one sketched in `CLAUDE.md`, so it never needs recomputing over time.
+- Voting is anonymous (owner decision). `/api/votes` takes a FingerprintJS v5 visitor ID (MIT, `monitoring: false`) on the first vote, then uses the httpOnly `cfo_vid` cookie. The visitor ID and the IP are HMAC'd with `FINGERPRINT_HMAC_SECRET`. The rate limit is 30 votes per IP per 10 minutes, kept in the database so it works across serverless instances. Cross-site POSTs are refused.
+- Routes: `/news` (`?sort=top|new`, `?category=`, `?tag=`, `?cursor=`), `/news/[slug]`, `/news/admin`, `/news/admin/new`, `/news/admin/[id]/edit`. The admin dashboard has a News card with the draft count. Code: `apps/web/lib/news.ts`, `app/news/_components/VoteControl.tsx`.
+
+Gotchas:
+- PostgREST sends float8 values back rounded, so a cursor on `hot_score` can't use `eq`. `listNews` matches within 1e-6 instead.
+- SQL checks: 26 in `tools/sql-tests/tests/07-news.mjs` (116 in all).
+
+---
+
 ## Phase 3 — Game days + RSVPs ✅
 
 **Shipped 2026-11-27** (PR #10, #11). Migration 0013 applied. Tested live in Chrome: plan, RSVP with role and note, .ics, Google/Outlook links, private feed without a session, edit (SEQUENCE bump), cancel and restore, and that a hidden game day doesn't leak to signed-out visitors.
@@ -346,9 +361,8 @@ These are intentional — they're either Phase-2+ work or unblocked-but-not-need
 
 From `CLAUDE.md`'s "Open Items the Builder Should Surface":
 
-1. (Phase 5+) News categories seed list — assumed to be
-   `official_news, tactics, painting, lore, community, industry,
-   battle_report`. Confirm before seeding.
+1. News categories → **decided Phase 5:** `official_news, tactics,
+   painting, lore, community, industry` (no `battle_report`).
 2. Cloudinary vs Supabase Storage → **decided Phase 1: ImageKit.io.**
 3. Google Sites content extraction → **decided Phase 1: Playwright
    scrape into JSON for review.**

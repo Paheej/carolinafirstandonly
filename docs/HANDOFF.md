@@ -2,17 +2,17 @@
 
 Read this first in a new session, then `docs/RUNBOOK.md` (how to do things) and `PROGRESS.md` (what each phase shipped, plus gotchas). `CLAUDE.md` is the original spec.
 
-_Last updated 2026-11-28._
+_Last updated 2026-11-28 (Phase 5)._
 
 ## Start here (next session)
 
-**Next step: Phase 5, News and voting** (`CLAUDE.md` → Build Order and Feature Specs → News).
+**Next step: Phase 6, the AI news agent** (`CLAUDE.md` → Build Order and Feature Specs → AI Agent).
 
-1. **Confirm the news categories with the owner before seeding them** (Open Item 5). The assumed list is `official_news, tactics, painting, lore, community, industry, battle_report`. The site says "recap", never "battle report", so ask whether `battle_report` should be `recap`.
-2. Then write migration `0022_news.sql` (`news_categories`, `news_posts`, `news_votes`, the vote-count/hot-score trigger), with `pnpm test:sql` checks.
-3. Build `/news` (Hot, Top and New), `/news/[slug]`, and the admin composer at `/news/admin/new`.
-4. Anonymous voting: FingerprintJS, HMAC with `FINGERPRINT_HMAC_SECRET`, and a rate limit. **The secret isn't set yet**: it's empty in `.env.local` and missing from Vercel. Generate one (`openssl rand -hex 32`) and add it to both, the way `TOKEN_ENCRYPTION_KEY` was added.
-5. Load the `frontend-design:frontend-design` skill before building the pages. Follow `CLAUDE.md` → Design System.
+1. Write migration `0023` for `agent_sources` and `agent_drafts`, and seed the sources. `news_categories` already exists (0022) with the six categories the agent's prompt should use.
+2. The agent's prompt must not offer `battle_report` (removed by the owner).
+3. Publishing a draft creates a `news_posts` row with `author_id = null` and `source_url` set. The feed already shows "via <host>" for that.
+4. `ANTHROPIC_API_KEY` and `YOUTUBE_API_KEY` aren't set yet. Ask the owner.
+5. Load the `frontend-design:frontend-design` skill before building `/news/admin/drafts`.
 
 The owner sends "nits" in batches between phases. Do each batch on one branch and one PR, check it in Chrome, then ask before merging. They usually say yes.
 
@@ -20,13 +20,13 @@ The owner sends "nits" in batches between phases. Do each batch on one branch an
 
 | Area | State |
 |---|---|
-| Phases 0–4 | Shipped and live. Archive, war-table redesign, groups and profiles, game days (RSVPs, waitlists, calendar feeds), and calendar busy-time sync with "Who's free". |
+| Phases 0–5 | Shipped and live. Phase 5: news feed (Hot/Top/New), post pages, the admin composer and anonymous voting. Archive, war-table redesign, groups and profiles, game days (RSVPs, waitlists, calendar feeds), and calendar busy-time sync with "Who's free". |
 | Polish since Phase 4 (PRs #14–#17) | Listed in "Recent changes" below. |
-| Migrations | **0001–0021 applied** on the hosted Supabase project. The next one is `0022`. |
+| Migrations | **0001–0022 applied** on the hosted Supabase project. The next one is `0023`. |
 | Production | `main` auto-deploys to https://carolinafirstandonly.vercel.app and https://new.carolinafirstandonly.com |
 | Bare domain | `carolinafirstandonly.com` still serves the old Google Sites page. Cutover is a Phase 7 task (see the RUNBOOK). |
 | Sign-in | Google works, and its branding is verified and published. Discord has an app and is configured, but a sign-in hasn't been confirmed end to end. Apple is waiting on the owner's Apple Developer approval. Email/password works. |
-| Tests | `pnpm test:sql` (90 database checks, also run in CI), `pnpm typecheck`, `pnpm --filter @cfo/web build`, `pnpm shots --base <url> <paths>`. |
+| Tests | `pnpm test:sql` (116 database checks, also run in CI), `pnpm typecheck`, `pnpm --filter @cfo/web build`, `pnpm shots --base <url> <paths>`. |
 | Old Google Site | **Fully migrated.** Seasons I–III (with Season III's 9 reference pages), the Old World Campaign (6 pages and 9 recaps), and the events. Only the index pages (Home, 40k Seasons, Events) were skipped. |
 
 ## Recent changes (2026-11-27 to 28, PRs #14–#17)
@@ -93,6 +93,15 @@ The owner sends "nits" in batches between phases. Do each batch on one branch an
 - **Env:** `TOKEN_ENCRYPTION_KEY`, `CRON_SECRET`, `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set in every Vercel environment and in `.env.local`. **If the key is lost, every connection has to be made again.**
 - **Groups:** "Curse of Strahd" (`/groups/curse-of-strahd`): invite only, listed in the directory, D&D, owned by the owner. "Who's free" was verified live with it (Jan 19 showed 0 of 1, matching the owner's busy block).
 
+## Phase 5: news and voting (shipped)
+
+See `PROGRESS.md` → Phase 5. In short:
+- Categories: Official News, Tactics, Painting, Lore, Community, Industry.
+- Anyone can vote. Votes are tied to a FingerprintJS visitor ID kept in a cookie and HMAC'd with `FINGERPRINT_HMAC_SECRET`, and each IP gets 30 votes per 10 minutes.
+- Admins write at `/news/admin/new`.
+- One archived test post ("Test post: checking news voting") is in the database. Delete it if the owner wants it gone.
+- The home page has no news section yet (the spec mentions "recent news"). Ask the owner.
+
 ## Later phases
 
-5 News and voting (next), 6 the AI news agent, 7 polish and the DNS cutover. See `CLAUDE.md` → Build Order.
+6 the AI news agent (next), 7 polish and the DNS cutover. See `CLAUDE.md` → Build Order.

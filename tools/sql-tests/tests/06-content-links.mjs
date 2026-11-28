@@ -13,4 +13,7 @@ export default async function ({ q, check }) {
     check('Old World campaign: completed, Fantasy, 6 pages, 9 recaps', ow?.status === 'completed' && ow.game_system === 'Warhammer Fantasy' && ow.pages === 6 && ow.recaps === 9, ow);
     const stray = (await q(`select count(*)::int n from recaps where slug like 'ow-%' and body_md ~ '\\]\\([^)/:]*\\.html\\)'`))[0].n;
     check('Old World recaps have no .html links', stray === 0, stray);
+
+    const s3 = (await q(`select count(*)::int n from archive_pages p join seasons s on s.id = p.season_id where s.slug = 'season-3'`))[0].n;
+    check('Season III has its 9 reference pages', s3 === 9, s3);
 }

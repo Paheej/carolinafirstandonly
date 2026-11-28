@@ -84,7 +84,7 @@ Source of truth: the `@theme` block in `packages/ui/src/styles.css` (mirrored in
 Fonts (loaded with `next/font` in `apps/web/app/layout.tsx`): **Archivo** with the width axis, set condensed (`font-stretch` 62–85%) for headings, nav, buttons and labels (`.cfo-ui`); **Source Serif 4** for body and battle-report prose.
 
 ### Rules
-- Pages open with `<PageHead>` (or a `<MatBand>`), which breaks out of the centered `<main>` full-bleed.
+- Pages open with `<PageHead>` (or a `<MatBand>`), which breaks out of the centered `<main>` full-bleed. Archive detail pages (season, event, recap, reference) pass `image` (hero image, first photo, or first image in the markdown), which fills the band with a gradient that is dark only behind the title. They also pass `tone="light"`, so a page with no photo gets a primer band instead of black. The owner found the plain black bands too dark on those pages.
 - Lists of things are ruled lists, not grids of identical cards. `Card` is for the rare panel that needs to stand apart.
 - No all-caps tracked labels, no monospace labels, no middle-dot meta strings.
 - Buttons: `primary` (gold), `secondary` (black), `outline` (quiet; turns gold inside a mat band), `ghost`, `danger`. For links styled as buttons use `buttonClasses()`.

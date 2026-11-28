@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { stripLeadingTitle } from '@/lib/markdown';
+import { firstImageUrl, sizedImage, stripLeadingTitle } from '@/lib/markdown';
 import { MarkdownRender, PageHead, SystemPill, buttonClasses } from '@cfo/ui';
 import { Pencil } from 'lucide-react';
 import { getArchiveEventBySlug, getSystemIconMap } from '@/lib/archive';
@@ -41,6 +41,8 @@ export default async function ArchiveEventPage({ params }: PageProps) {
     return (
         <>
             <PageHead
+                image={bannerOf(event.hero_image_url ?? firstImageUrl(event.description_md))}
+                tone="light"
                 kicker={
                     <Link href="/archive" className="no-underline hover:underline">
                         Archive
@@ -77,4 +79,9 @@ export default async function ArchiveEventPage({ params }: PageProps) {
             </div>
         </>
     );
+}
+
+/** Photo for the page head: sized for a full-width band. */
+function bannerOf(url: string | null | undefined) {
+    return url ? sizedImage(url, 1600) : null;
 }

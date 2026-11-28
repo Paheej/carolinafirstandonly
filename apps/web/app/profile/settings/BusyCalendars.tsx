@@ -70,13 +70,13 @@ export function BusyCalendars({ calendars, providers }: { calendars: MyCalendar[
                         <div className="flex flex-wrap gap-2">
                             {/* Plain links: the routes redirect to Google/Microsoft, which a fetch can't follow. */}
                             {providers.google && (
-                                <a href="/api/calendar-connect/google/start" className={buttonClasses('primary')}>
-                                    Connect Google Calendar
+                                <a href="/api/calendar-connect/google/start" className={buttonClasses(calendars.length ? 'outline' : 'primary')}>
+                                    {calendars.some((c) => c.provider === 'google') ? 'Connect another Google account' : 'Connect Google Calendar'}
                                 </a>
                             )}
                             {providers.outlook && (
                                 <a href="/api/calendar-connect/outlook/start" className={buttonClasses(providers.google ? 'outline' : 'primary')}>
-                                    Connect Outlook
+                                    {calendars.some((c) => c.provider === 'outlook') ? 'Connect another Outlook account' : 'Connect Outlook'}
                                 </a>
                             )}
                         </div>

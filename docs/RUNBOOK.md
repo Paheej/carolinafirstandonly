@@ -10,7 +10,7 @@ How to get things done on this project without the owner doing it by hand. Read 
   - merge a PR (merging deploys to production)
   - delete production data
   - approve an OAuth consent screen
-  - submit anything to Google, Apple or Microsoft for review
+  - submit anything to Google or Apple for review (the owner has declined Google verification of the calendar scopes for now)
 - **Branches and PRs.** Branch off `main`, open a PR, wait for CI, then merge once approved.
 - **Design rules** live in `CLAUDE.md` → Design System. Never use Carolina blue; the palette is Wake Forest black and old gold.
 
@@ -22,7 +22,7 @@ How to get things done on this project without the owner doing it by hand. Read 
 | Vercel | Team `paheejs-projects`, project `carolinafirstandonly`. The `vercel` CLI is logged in, and `apps/web` is linked. |
 | Supabase | Project ref `ffzmongphrwovudnrhwv` (dashboard name "Carolina_1st"). The `supabase` CLI is logged in. |
 | Cloudflare | DNS and email for `carolinafirstandonly.com`. Dashboard: `dash.cloudflare.com/09d17bfef0b0ec52087b37d2c4dd530e/carolinafirstandonly.com` |
-| Google Cloud | Project `carolina-first-and-only`: the OAuth client for sign-in, plus the Google Auth Platform branding (verified and published). |
+| Google Cloud | Project `carolina-first-and-only`: one OAuth client ("CFO Website") for sign-in and Connect Google Calendar, the Google Calendar API (enabled), the calendar scopes under Data Access (sensitive, unverified on purpose), and the Google Auth Platform branding (verified and published). |
 | Google Search Console | Domain property `carolinafirstandonly.com`, verified with a TXT record in Cloudflare. |
 | Discord | Developer app for OAuth. Redirect: the Supabase callback below. |
 | Apple | Developer enrollment pending. See HANDOFF. |
@@ -100,6 +100,11 @@ supabase db push --workdir packages/database --yes </dev/null    # apply
 - **Wait for a deploy:**
   `vercel ls carolinafirstandonly`, then `vercel inspect <deployment-url> --wait --timeout 6m`. The domain switches over a few seconds after "Ready".
 - **Environment variables:** `vercel env ls` and `vercel env add NAME production`. The local copy lives in `apps/web/.env.local`, which git ignores.
+
+## Secrets that must not be lost
+
+- `TOKEN_ENCRYPTION_KEY` (32 bytes, base64) encrypts members' Google refresh tokens and iCloud links. It's the same value in every Vercel environment and in `apps/web/.env.local`, because preview and production share one database. If you change it, every stored connection becomes unreadable.
+- `CRON_SECRET`: Vercel sends it as `Authorization: Bearer …` to `/api/cron/calendar-sync`. To run the sync by hand: `curl -H "Authorization: Bearer $CRON_SECRET" https://carolinafirstandonly.vercel.app/api/cron/calendar-sync`.
 
 ## Browser work (Claude in Chrome)
 

@@ -49,11 +49,14 @@ export default function PrivacyPage() {
                 </ul>
                 <h3>Calendars, only if you connect one</h3>
                 <p>
-                    A planned feature lets you connect a Google, Outlook or Apple calendar so the club can see
-                    when people are free. If you choose to connect one, we read only the times you&apos;re busy
-                    for the next 90 days. We never store event titles, descriptions, locations or attendees.
-                    Group members see combined availability (&ldquo;5 of 8 free&rdquo;), not your calendar. You
-                    can disconnect at any time, and we delete the stored busy times when you do.
+                    You can connect a Google or Apple (iCloud) calendar so the club can see when people are free.
+                    For Google, you sign in with Google and allow read access to your free/busy times and your list
+                    of calendars; Google never shares event titles or details with us. For iCloud, you paste your
+                    calendar&apos;s share link, and we discard titles, descriptions, locations and attendees as the
+                    calendar is read. Either way, once a day we keep only the times you&apos;re busy for the next 90
+                    days, and the connection is stored encrypted. Members of your groups see combined availability
+                    (&ldquo;5 of 8 free&rdquo;), not your calendar and not your name. You can pause or disconnect a
+                    calendar at any time, and disconnecting deletes the connection and the stored busy times.
                 </p>
                 <h3>Technical data</h3>
                 <p>
@@ -75,7 +78,8 @@ export default function PrivacyPage() {
                 <p>
                     If you sign in with Google, we receive only your name, email address and profile picture, and
                     use them only to create and display your account. If you connect Google Calendar, we request
-                    read-only access and use it only to find your busy times, as described above. Our use of
+                    access only to your free/busy times and calendar list, and use it only to find your busy times, as
+                    described above. Our use of
                     information received from Google APIs follows the{' '}
                     <a href="https://developers.google.com/terms/api-services-user-data-policy">
                         Google API Services User Data Policy
@@ -120,8 +124,8 @@ export default function PrivacyPage() {
 
                 <h2>Security</h2>
                 <p>
-                    Connections to the site are encrypted. Passwords are hashed, and calendar access tokens are
-                    stored encrypted. Each person can only see what they&apos;re allowed to, enforced in the
+                    Connections to the site are encrypted. Passwords are hashed, and calendar links and access tokens
+                    are stored encrypted. Each person can only see what they&apos;re allowed to, enforced in the
                     database itself. No system is perfectly secure, but we take reasonable steps to protect your
                     information.
                 </p>

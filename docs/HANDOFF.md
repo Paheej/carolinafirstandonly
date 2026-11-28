@@ -9,11 +9,12 @@ _Last updated 2026-11-27._
 | Area | State |
 |---|---|
 | Phases 0–3 | Shipped and live. Archive, war-table redesign, groups and profiles, game days with RSVPs, waitlists and calendar feeds. |
-| Migrations | 0001–0013 applied on the hosted Supabase project. |
+| Phase 4 | Shipped (PR #13). Connect Google Calendar (OAuth), iCloud via share link, daily cron, "Who's free" strip on the event form. Outlook is out of scope. |
+| Migrations | 0001–0014 applied on the hosted Supabase project. |
 | Production | `main` auto-deploys to https://carolinafirstandonly.vercel.app and https://new.carolinafirstandonly.com |
 | Bare domain | `carolinafirstandonly.com` still serves the old Google Sites page. Cutover is a Phase 7 task (see the RUNBOOK). |
 | Sign-in | Google works, and its branding is verified and published. Discord has an app and is configured, but a sign-in hasn't been confirmed end to end. Apple is waiting on the owner's Apple Developer approval. Email/password works. |
-| Tests | `pnpm test:sql` (56 database checks, also run in CI), `pnpm typecheck`, `pnpm --filter @cfo/web build`. |
+| Tests | `pnpm test:sql` (78 database checks, also run in CI), `pnpm typecheck`, `pnpm --filter @cfo/web build`. |
 
 ## Waiting on the owner
 
@@ -25,24 +26,32 @@ _Last updated 2026-11-27._
 - The waitlist and notifications with two real accounts. The logic passes `pnpm test:sql`, but nobody has tried it live with a second person. Suggested test: sign in with Discord in a private window as a second user.
 - A Discord sign-in, end to end.
 
-## Next: Phase 4 (calendar busy-time sync and availability)
+## Phase 4: calendar busy-time sync and availability (shipped)
 
-The goal is "5 of 8 free" when planning a game day. The plan:
-
-1. Migration `0014_calendar_sync.sql`:
-   - `calendar_connections`: one row per user per provider. Store refresh tokens encrypted with AES-GCM using `TOKEN_ENCRYPTION_KEY`, and never store them in plain text.
-   - `user_busy_blocks`: busy windows only, never titles.
-   - an `availability(group_id, start, end)` RPC that returns counts, not people.
-2. **Apple and iCloud first** (no OAuth needed). The member pastes their iCloud "public calendar" ICS URL. A daily Vercel Cron fetches it, parses it with `node-ical`, and writes the busy blocks. Hobby plan crons run at most once a day.
-3. **Google Calendar.**
-   - Ask for the `calendar.freebusy` (or `calendar.readonly`) scope in a separate "Connect Google Calendar" flow, not at sign-in.
-   - That is a **sensitive scope**, so Google will require a verification review (a demo video plus a scope justification) before people outside the test-user list can connect.
-   - Plan for it: keep the app in testing for calendar, or add the club's members as test users while the review runs.
-4. **Outlook.** This needs an Azure app registration (Microsoft account), with the Graph scope `Calendars.Read`.
-5. **UI.**
-   - Profile settings: a "Connected calendars" section.
-   - Event form: once a group and time are picked, show an availability strip (`/api/availability`).
-6. **Privacy page.** It already describes busy-times-only calendar sync. Keep the code matching it.
+- **Google:** a "Connect Google Calendar" button (OAuth), separate from sign-in, reusing the same OAuth client.
+  - Scopes: `calendar.freebusy` and `calendar.calendarlist.readonly`, so the site never sees event details.
+  - Sync reads the calendars the member shows in Google Calendar, skipping Google's built-in holiday and birthday calendars, and asks freeBusy for 30 days at a time.
+  - Routes: `/api/calendar-connect/google/start` and `/callback`, using PKCE and a state cookie checked against the signed-in user. Code: `apps/web/lib/calendar-oauth.ts`.
+  - Callback URLs registered on the OAuth client: `https://carolinafirstandonly.vercel.app`, `https://new.carolinafirstandonly.com` and `http://localhost:3000`, each followed by `/api/calendar-connect/google/callback`. **Add the bare domain's URL at the Phase 7 cutover.**
+  - The Google Calendar API is enabled, and both scopes are saved under Data Access.
+  - **These are sensitive scopes, unverified on purpose.** The owner accepted the "Google hasn't verified this app" screen (Advanced → continue) and the 100-user cap. Don't submit for verification unless they ask.
+- **iCloud:** Apple has no calendar OAuth, so members paste the share link under "Using an iPhone calendar?".
+  - The fetch only allows icloud.com hosts, re-checks the host on every redirect, caps responses at 5 MB and times out after 15 s.
+  - `apps/web/lib/ics-busy.ts` expands recurrences, skips cancelled and "free" events, reads all-day events as Eastern days, and merges overlaps.
+- **Outlook/Microsoft: out of scope** (owner decision, 2026-11-27).
+  - The DB constraint still allows `provider = 'outlook'`, because 0014 was already applied, but nothing uses it.
+  - The Phase 3 outbound "Add to Outlook" links for game days are a different feature and stay.
+- **Migration 0014:**
+  - `calendar_connections` stores one `encrypted_secret` (AES-256-GCM, `TOKEN_ENCRYPTION_KEY`), with at most 5 connections per member.
+  - `user_busy_blocks` stores times only.
+  - `replace_busy_blocks()` can only be called with the service role.
+  - `group_availability()` returns counts only, to group members, with days stepped in Eastern time.
+  - Tests: `tools/sql-tests/tests/04-calendar.mjs`.
+- **Sync:** Vercel Cron runs `/api/cron/calendar-sync` daily at 07:00 UTC (`apps/web/vercel.json`, `CRON_SECRET`), plus "Sync now" and a sync on connect.
+- **UI:** Profile settings → "Your busy times, for planning" (`#busy`). The event form shows the "Who's free" strip once the planner has a group.
+- **Verified live (2026-11-27):** the owner connected Google on localhost. One busy block was stored (times only), and the token is encrypted.
+- **Env:** `TOKEN_ENCRYPTION_KEY`, `CRON_SECRET`, `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set in every Vercel environment and in `.env.local`. **If the key is lost, every connection has to be made again.**
+- **Groups:** "Curse of Strahd" (`/groups/curse-of-strahd`): invite only, listed in the directory, D&D, owned by the owner. "Who's free" was verified live with it (Jan 19 showed 0 of 1, matching the owner's busy block).
 
 ## Later phases
 

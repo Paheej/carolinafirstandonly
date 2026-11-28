@@ -29,7 +29,7 @@ Migrate the existing Google Sites-based `carolinafirstandonly.com` to a modern c
 | Hosting | Vercel (Hobby tier is sufficient) |
 | Cron | Vercel Cron |
 | AI | Anthropic Claude API (`claude-sonnet-4-5` for drafting) |
-| Calendar parsing | `node-ical` for ICS; Google Calendar API and Microsoft Graph for OAuth |
+| Calendar parsing | `node-ical` for iCloud ICS links; Google Calendar freeBusy API via OAuth |
 | Fingerprinting | `@fingerprintjs/fingerprintjs` (open-source) |
 | Markdown editor | `@uiw/react-md-editor` |
 | Markdown render | `react-markdown` + `remark-gfm` |
@@ -158,25 +158,25 @@ profiles (
   created_at timestamptz default now()
 )
 
+-- As built in 0014_calendar_sync.sql (supersedes the original sketch):
 calendar_connections (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid references profiles(id) on delete cascade,
-  provider text check (provider in ('google','outlook','apple_ics')),
-  encrypted_refresh_token text,       -- nullable for apple_ics
-  ics_url text,                       -- nullable for OAuth providers
-  last_synced_at timestamptz,
+  user_id uuid not null references profiles(id) on delete cascade,
+  provider text not null default 'ics' check (provider in ('ics','google','outlook')),  -- 'outlook' unused (out of scope)
+  label text not null,
+  account text,                       -- Google account email, or the iCloud host; display only
+  encrypted_secret text not null,     -- AES-GCM: Google refresh token or iCloud share link
   enabled boolean default true,
-  unique (user_id, provider)
-)
+  last_synced_at timestamptz, last_error text, block_count int default 0,
+  created_at timestamptz default now()
+)                                     -- max 5 per user (trigger)
 
 user_busy_blocks (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid references profiles(id) on delete cascade,
+  user_id uuid not null references profiles(id) on delete cascade,
+  connection_id uuid not null references calendar_connections(id) on delete cascade,
   starts_at timestamptz not null,
-  ends_at timestamptz not null,
-  source_provider text not null,
-  source_hash text,                   -- de-dupe key
-  synced_at timestamptz default now()
+  ends_at timestamptz not null
 )
 create index on user_busy_blocks (user_id, starts_at, ends_at);
 
@@ -639,18 +639,16 @@ apps/agent/app/
   - On someone going from `yes` → `no`/cancelled, trigger promotes earliest waitlisted RSVP to `yes` for same role
 - **Availability helper:** When creating an event with a group selected and a proposed time window, the form fetches `/api/availability?group_id=X&start=Y&end=Z` and renders an aggregated grid: "5 of 8 group members available." Optional: members can expand to see anonymized busy/free blocks per person if they opt in.
 
-### Calendar Integration (read-only at launch)
+### Calendar Integration (read-only, shipped in Phase 4)
 
-- **Google Calendar:**
-  - User clicks "Connect Google Calendar" in settings → OAuth flow with scope `calendar.readonly`
-  - Store encrypted refresh token in `calendar_connections`
-  - Daily Vercel Cron job at 2am ET (`0 7 * * *` UTC) fetches free/busy info for next 90 days per connected user; writes to `user_busy_blocks`
-  - Only busy windows stored; no event titles, no descriptions, no locations
-- **Microsoft/Outlook:**
-  - Same flow via Microsoft Graph API, scope `Calendars.Read`
-- **Apple/iCloud:**
-  - No OAuth available. User generates a private ICS subscription URL in iCloud (Calendar.app → Calendar Info → "Public Calendar") and pastes it into settings
-  - Daily cron fetches the ICS, parses with `node-ical`, writes busy blocks
+- **Google Calendar:** "Connect Google Calendar" in `/profile/settings#busy` → our own OAuth flow (`/api/calendar-connect/google/start` → `/callback`, PKCE + state cookie), separate from sign-in, reusing the sign-in OAuth client.
+  - Scopes: `calendar.freebusy` + `calendar.calendarlist.readonly`, so we never receive event details.
+  - These are sensitive scopes. The owner accepted the "unverified app" warning and the 100-user cap, so there's no verification review for now.
+  - The encrypted refresh token lives in `calendar_connections`.
+- **Apple/iCloud:** Apple has no calendar OAuth. Members paste their iCloud calendar share link ("Using an iPhone calendar?"). It's fetched with an iCloud-only host allowlist, parsed with `node-ical`, and titles etc. are discarded.
+- **Outlook/Microsoft: out of scope** (owner decision, 2026-11-27). No Azure app.
+- **Sync:** Vercel Cron daily at 07:00 UTC (`/api/cron/calendar-sync`, `CRON_SECRET`), plus "Sync now" and a sync on connect. It covers the next 90 days, busy windows only, merged.
+- **Availability:** `group_availability()` returns counts only to group members. The event form's "Who's free" strip shows the chosen time and the next 13 days.
 - **Outbound (Phase 3, done):** per-event Google/Outlook links and .ics download, plus a personal subscription feed at `/api/calendar/<token>.ics` (token minted in profile settings).
 - **Two-way sync deferred.**
 
@@ -716,13 +714,14 @@ NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=
 CLOUDINARY_API_KEY=                 # server-only
 CLOUDINARY_API_SECRET=              # server-only
 
-# OAuth providers (configured in Supabase, but agent needs Google for calendar)
+# Google OAuth client (sign-in via Supabase, and Connect Google Calendar)
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-MICROSOFT_CLIENT_ID=
-MICROSOFT_CLIENT_SECRET=
 
-# Encryption for stored refresh tokens
+# Daily calendar sync cron
+CRON_SECRET=
+
+# Encryption for stored refresh tokens and iCloud links (never rotate without re-encrypting)
 TOKEN_ENCRYPTION_KEY=               # 32-byte base64, used for AES-GCM
 
 # Voting
@@ -772,10 +771,10 @@ Each phase produces a shippable increment. Run typecheck after each.
 - Waitlist promotion trigger
 - Hidden event invite management
 
-**Phase 4 — Calendar + Availability**
+**Phase 4 — Calendar + Availability** (done)
 - Schema: calendar_connections, user_busy_blocks
 - Google OAuth flow in `/profile/settings`
-- Outlook OAuth flow
+- ~~Outlook OAuth flow~~ (out of scope)
 - Apple ICS URL input
 - Daily Vercel Cron for syncing
 - `/api/availability` endpoint

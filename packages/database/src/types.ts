@@ -522,6 +522,40 @@ export interface Database {
                 Update: Partial<Database['public']['Tables']['user_calendar_feeds']['Insert']>;
                 Relationships: [];
             };
+            calendar_connections: {
+                Row: {
+                    id: string;
+                    user_id: string;
+                    provider: 'ics' | 'google' | 'outlook';
+                    label: string;
+                    account: string | null;
+                    encrypted_secret: string;
+                    enabled: boolean;
+                    last_synced_at: string | null;
+                    last_error: string | null;
+                    block_count: number;
+                    created_at: string;
+                };
+                Insert: {
+                    user_id: string;
+                    provider?: 'ics' | 'google' | 'outlook';
+                    label: string;
+                    account?: string | null;
+                    encrypted_secret: string;
+                    enabled?: boolean;
+                    last_synced_at?: string | null;
+                    last_error?: string | null;
+                    block_count?: number;
+                };
+                Update: Partial<Database['public']['Tables']['calendar_connections']['Insert']>;
+                Relationships: [];
+            };
+            user_busy_blocks: {
+                Row: { id: string; user_id: string; connection_id: string; starts_at: string; ends_at: string };
+                Insert: { user_id: string; connection_id: string; starts_at: string; ends_at: string };
+                Update: Partial<Database['public']['Tables']['user_busy_blocks']['Insert']>;
+                Relationships: [];
+            };
         };
         Views: Record<string, never>;
         Functions: {
@@ -569,6 +603,11 @@ export interface Database {
                     my_status: string | null;
                 }[];
             };
+            replace_busy_blocks: { Args: { p_connection: string; p_blocks: Json }; Returns: number };
+            group_availability: {
+                Args: { p_group: string; p_start: string; p_end: string; p_days?: number };
+                Returns: { day_index: number; starts_at: string; ends_at: string; members: number; connected: number; free: number }[];
+            };
         };
         Enums: Record<string, never>;
         CompositeTypes: Record<string, never>;
@@ -595,3 +634,4 @@ export type GameDay = Database['public']['Tables']['events']['Row'];
 export type EventRole = Database['public']['Tables']['event_roles']['Row'];
 export type EventRsvp = Database['public']['Tables']['event_rsvps']['Row'];
 export type GroupRoleTemplate = Database['public']['Tables']['group_role_templates']['Row'];
+export type CalendarConnection = Database['public']['Tables']['calendar_connections']['Row'];

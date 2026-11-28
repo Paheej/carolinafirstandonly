@@ -51,3 +51,9 @@ update public.game_systems set display_order = case slug
     when 'warhammer-fantasy-rpg' then 6
     when 'dungeons-and-dragons' then 7
     else display_order end;
+
+-- Junk "test" edition added by hand under D&D (2026-06-24); nothing uses it.
+delete from public.game_editions
+ where slug = 'test' and system_id = (select id from public.game_systems where slug = 'dungeons-and-dragons')
+   and not exists (select 1 from public.seasons where game_edition = 'test')
+   and not exists (select 1 from public.archive_events where game_edition = 'test');

@@ -134,7 +134,7 @@ export default async function ProfileSettingsPage({
                     </form>
                 )}
             </section>
-            <BusyCalendars calendars={calendars} providers={{ google: oauthConfigured('google'), outlook: oauthConfigured('outlook') }} />
+            <BusyCalendars calendars={calendars} providers={{ google: oauthConfigured('google') }} />
         </>
     );
 }

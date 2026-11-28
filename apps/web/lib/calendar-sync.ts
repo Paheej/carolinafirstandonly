@@ -7,10 +7,13 @@ import { OAuthSyncError, oauthBusyBlocks } from './calendar-oauth';
 /**
  * Busy-time sync. Server only.
  *
- * A member pastes a private calendar link (iCloud public calendar, Google's
- * "secret address in iCal format", Outlook's published calendar). We encrypt
- * it with AES-256-GCM (TOKEN_ENCRYPTION_KEY) before it touches the database,
- * fetch it daily, and keep only start/end times: no titles, places or people.
+ * Two kinds of connection:
+ *   google : "Connect Google Calendar" (OAuth, see calendar-oauth.ts). We store
+ *            the refresh token and ask Google's freeBusy API for busy times.
+ *   ics    : iCloud only, since Apple has no calendar OAuth. The member pastes
+ *            their calendar's share link and we read the ICS.
+ * Either secret is encrypted with AES-256-GCM (TOKEN_ENCRYPTION_KEY) before it
+ * touches the database. We sync daily and keep only start/end times.
  */
 
 // ---------------------------------------------------------------------------
@@ -39,10 +42,10 @@ export function decryptSecret(blob: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Links: only the big three calendar hosts, so the server can't be pointed at
+// Links: iCloud hosts only, so the server can't be pointed at
 // anything else (internal addresses, arbitrary sites).
 // ---------------------------------------------------------------------------
-const ALLOWED_HOSTS = [/(^|\.)icloud\.com$/, /^calendar\.google\.com$/, /^outlook\.(live|office|office365)\.com$/];
+const ALLOWED_HOSTS = [/(^|\.)icloud\.com$/];
 
 export function hostAllowed(host: string) {
     return ALLOWED_HOSTS.some((re) => re.test(host.toLowerCase()));
@@ -50,11 +53,8 @@ export function hostAllowed(host: string) {
 
 export function providerName(provider: CalendarConnection['provider'], host: string | null) {
     if (provider === 'google') return 'Google Calendar';
-    if (provider === 'outlook') return 'Outlook';
     if (!host) return 'Calendar';
     if (/icloud\.com$/.test(host)) return 'iCloud';
-    if (/google\.com$/.test(host)) return 'Google';
-    if (/outlook\./.test(host)) return 'Outlook';
     return 'Calendar';
 }
 
@@ -69,7 +69,7 @@ export function normalizeCalendarLink(input: string): { url: URL } | { error: st
     if (url.protocol === 'http:') url.protocol = 'https:';
     if (url.protocol !== 'https:') return { error: 'Calendar links start with webcal:// or https://.' };
     if (!hostAllowed(url.hostname)) {
-        return { error: 'Use a link from iCloud, Google Calendar or Outlook. Other calendar sites aren’t supported yet.' };
+        return { error: 'Use the share link from an iCloud calendar. For Google Calendar, use the Connect button instead.' };
     }
     return { url };
 }
@@ -118,13 +118,15 @@ export async function syncConnection(conn: Pick<CalendarConnection, 'id' | 'prov
             const link = normalizeCalendarLink(decryptSecret(conn.encrypted_secret));
             if ('error' in link) throw new SyncError(link.error);
             blocks = busyBlocksFromIcs(await fetchIcs(link.url));
-        } else {
+        } else if (conn.provider === 'google') {
             const r = await oauthBusyBlocks(conn.provider, decryptSecret(conn.encrypted_secret));
             blocks = r.blocks;
-            // Microsoft rotates refresh tokens; keep the newest one.
+            // Providers can rotate refresh tokens; keep the newest one.
             if (r.refreshToken) {
                 await admin.from('calendar_connections').update({ encrypted_secret: encryptSecret(r.refreshToken) }).eq('id', conn.id);
             }
+        } else {
+            throw new SyncError('This kind of calendar connection isn’t supported.');
         }
         const { data, error } = await admin.rpc('replace_busy_blocks', { p_connection: conn.id, p_blocks: blocks as unknown as Json });
         if (error) throw new Error(error.message);

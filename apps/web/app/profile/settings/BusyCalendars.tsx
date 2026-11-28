@@ -18,7 +18,7 @@ function syncedLine(c: MyCalendar) {
 }
 
 /** Profile settings: connect calendars so planners see "5 of 8 free". */
-export function BusyCalendars({ calendars, providers }: { calendars: MyCalendar[]; providers: { google: boolean; outlook: boolean } }) {
+export function BusyCalendars({ calendars, providers }: { calendars: MyCalendar[]; providers: { google: boolean } }) {
     return (
         <section id="busy" aria-labelledby="busy-h" className="grid max-w-2xl gap-4 border-t border-graphite/15 py-10">
             <h2 id="busy-h" className="text-[2rem] font-extrabold">Your busy times, for planning</h2>
@@ -27,8 +27,8 @@ export function BusyCalendars({ calendars, providers }: { calendars: MyCalendar[
                 example &ldquo;5 of 8 free&rdquo;. They never see your name next to it, and nobody sees what you&apos;re doing.
             </p>
             <p className="text-sm text-graphite-soft">
-                We only ever see when you&apos;re busy, for the next 90 days. Google and Outlook share busy times
-                with us without event titles, places or guests, and for iCloud we throw those away as the calendar is read.
+                We only ever see when you&apos;re busy, for the next 90 days. Google shares busy times with us
+                without event titles, places or guests, and for iCloud we throw those away as the calendar is read.
                 The connection is stored encrypted, and disconnecting deletes it and your busy times. We check once a day.
             </p>
 
@@ -66,17 +66,12 @@ export function BusyCalendars({ calendars, providers }: { calendars: MyCalendar[
 
             {calendars.length < 5 && (
                 <div className="grid gap-4">
-                    {(providers.google || providers.outlook) && (
+                    {providers.google && (
                         <div className="flex flex-wrap gap-2">
-                            {/* Plain links: the routes redirect to Google/Microsoft, which a fetch can't follow. */}
+                            {/* Plain links: the route redirects to Google, which a fetch can't follow. */}
                             {providers.google && (
                                 <a href="/api/calendar-connect/google/start" className={buttonClasses(calendars.length ? 'outline' : 'primary')}>
                                     {calendars.some((c) => c.provider === 'google') ? 'Connect another Google account' : 'Connect Google Calendar'}
-                                </a>
-                            )}
-                            {providers.outlook && (
-                                <a href="/api/calendar-connect/outlook/start" className={buttonClasses(providers.google ? 'outline' : 'primary')}>
-                                    {calendars.some((c) => c.provider === 'outlook') ? 'Connect another Outlook account' : 'Connect Outlook'}
                                 </a>
                             )}
                         </div>
@@ -84,7 +79,7 @@ export function BusyCalendars({ calendars, providers }: { calendars: MyCalendar[
                     <details className="rounded-[3px] bg-primer-lift p-4">
                         <summary className="cfo-ui cursor-pointer font-semibold">Using an iPhone calendar?</summary>
                         <p className="mt-3 text-sm">
-                            Apple doesn&apos;t offer a &ldquo;connect&rdquo; button like Google and Microsoft do, so iCloud calendars
+                            Apple doesn&apos;t offer a &ldquo;connect&rdquo; button like Google does, so iCloud calendars
                             connect with their share link instead. It takes about a minute.
                         </p>
                         <ol className="mt-2 ml-5 list-decimal space-y-1 text-sm">

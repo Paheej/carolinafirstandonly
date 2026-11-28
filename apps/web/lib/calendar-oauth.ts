@@ -1,16 +1,16 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { easternMidnight, mergeSpans, syncWindow, type Block } from './ics-busy';
+import { mergeSpans, syncWindow, type Block } from './ics-busy';
 
 /**
- * "Connect Google Calendar" / "Connect Outlook". Server only.
+ * "Connect Google Calendar". Server only.
  *
- * Scopes are the narrowest each provider offers for busy times:
- *   Google    calendar.freebusy + calendar.calendarlist.readonly (no event details at all)
- *   Microsoft Calendars.ReadBasic (no bodies or attendees; we read start, end, showAs only)
- * Refresh tokens are encrypted by the caller before storage.
+ * Scopes are the narrowest Google offers for busy times:
+ * calendar.freebusy + calendar.calendarlist.readonly, so we never see event
+ * details at all. Refresh tokens are encrypted by the caller before storage.
+ * Outlook/Microsoft is out of scope (decided 2026-11-27); iCloud uses a link.
  */
 
-export type OAuthProvider = 'google' | 'outlook';
+export type OAuthProvider = 'google';
 
 export class OAuthSyncError extends Error {}
 
@@ -39,19 +39,10 @@ const PROVIDERS: Record<OAuthProvider, ProviderConfig> = {
         clientSecret: () => process.env.GOOGLE_CLIENT_SECRET,
         extraAuthParams: { access_type: 'offline', prompt: 'consent', include_granted_scopes: 'false' },
     },
-    outlook: {
-        name: 'Outlook',
-        authUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
-        tokenUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/token',
-        scopes: ['openid', 'email', 'offline_access', 'Calendars.ReadBasic'],
-        clientId: () => process.env.MICROSOFT_CLIENT_ID,
-        clientSecret: () => process.env.MICROSOFT_CLIENT_SECRET,
-        extraAuthParams: { prompt: 'select_account' },
-    },
 };
 
 export function isOAuthProvider(p: string): p is OAuthProvider {
-    return p === 'google' || p === 'outlook';
+    return p === 'google';
 }
 
 export function oauthConfigured(p: OAuthProvider) {
@@ -179,44 +170,10 @@ async function googleBusy(accessToken: string): Promise<Block[]> {
     return mergeSpans(spans);
 }
 
-interface GraphEvent {
-    start: { dateTime: string };
-    end: { dateTime: string };
-    showAs?: string;
-    isCancelled?: boolean;
-    isAllDay?: boolean;
-}
-
-async function outlookBusy(accessToken: string): Promise<Block[]> {
-    const { from, to } = syncWindow();
-    const spans: [number, number][] = [];
-    let url: string | undefined =
-        `https://graph.microsoft.com/v1.0/me/calendarView?startDateTime=${from.toISOString()}&endDateTime=${to.toISOString()}` +
-        '&$select=start,end,showAs,isCancelled,isAllDay&$top=250';
-    for (let page = 0; url && page < 20; page++) {
-        const r: { value?: GraphEvent[]; '@odata.nextLink'?: string } = await getJson(
-            url,
-            { headers: { authorization: `Bearer ${accessToken}`, prefer: 'outlook.timezone="UTC"' } },
-            'Outlook',
-        );
-        for (const ev of r.value ?? []) {
-            if (ev.isCancelled || ev.showAs === 'free') continue;
-            if (ev.isAllDay) spans.push([easternMidnight(ev.start.dateTime.slice(0, 10)), easternMidnight(ev.end.dateTime.slice(0, 10))]);
-            else spans.push([Date.parse(`${ev.start.dateTime.replace(/Z?$/, '')}Z`), Date.parse(`${ev.end.dateTime.replace(/Z?$/, '')}Z`)]);
-        }
-        url = r['@odata.nextLink'];
-    }
-    return mergeSpans(spans);
-}
-
 /** Refresh access, read busy times. Returns a rotated refresh token when the provider issues one. */
 export async function oauthBusyBlocks(p: OAuthProvider, refreshToken: string): Promise<{ blocks: Block[]; refreshToken?: string }> {
     if (!oauthConfigured(p)) throw new OAuthSyncError(`${PROVIDERS[p].name} calendar connections aren't set up on the site yet.`);
-    const t = await tokenRequest(p, {
-        grant_type: 'refresh_token',
-        refresh_token: refreshToken,
-        ...(p === 'outlook' ? { scope: PROVIDERS.outlook.scopes.join(' ') } : {}),
-    });
-    const blocks = p === 'google' ? await googleBusy(t.access_token) : await outlookBusy(t.access_token);
+    const t = await tokenRequest(p, { grant_type: 'refresh_token', refresh_token: refreshToken });
+    const blocks = await googleBusy(t.access_token);
     return { blocks, refreshToken: t.refresh_token && t.refresh_token !== refreshToken ? t.refresh_token : undefined };
 }

@@ -40,16 +40,18 @@ export async function listNews(opts: {
     categoryId?: string | null;
     tag?: string | null;
     cursor?: string;
+    limit?: number;
 }): Promise<{ posts: NewsPost[]; nextCursor: string | null }> {
     const supabase = createServerSupabase(await cookies());
     const col = SORT_COLUMN[opts.sort];
+    const size = Math.min(opts.limit ?? NEWS_PAGE_SIZE, NEWS_PAGE_SIZE);
     let query = supabase
         .from('news_posts')
         .select('*')
         .eq('status', 'published')
         .order(col, { ascending: false })
         .order('id', { ascending: false })
-        .limit(NEWS_PAGE_SIZE + 1);
+        .limit(size + 1);
     if (opts.categoryId) query = query.eq('category_id', opts.categoryId);
     if (opts.tag) query = query.contains('tags', [opts.tag]);
     const cursor = decodeCursor(opts.cursor);
@@ -68,10 +70,10 @@ export async function listNews(opts: {
     }
     const { data } = await query;
     const rows = data ?? [];
-    const posts = rows.slice(0, NEWS_PAGE_SIZE);
+    const posts = rows.slice(0, size);
     const last = posts[posts.length - 1];
     const nextCursor =
-        rows.length > NEWS_PAGE_SIZE && last ? encodeCursor([last[col] as string | number, last.id]) : null;
+        rows.length > size && last ? encodeCursor([last[col] as string | number, last.id]) : null;
     return { posts, nextCursor };
 }
 

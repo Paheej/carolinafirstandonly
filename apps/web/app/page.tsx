@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Season } from '@cfo/database/types';
-import { MatBand, WarTable, buttonClasses } from '@cfo/ui';
+import { Badge, MatBand, WarTable, buttonClasses } from '@cfo/ui';
 import { CampaignHero, type HeroSlide } from './_components/CampaignHero';
 import { getCurrentUser } from '@/lib/auth';
 import {
@@ -16,6 +16,7 @@ import {
 import { SystemPills } from './_components/SystemPills';
 import { excerpt, externalLabel, firstImageUrl, sizedImage } from '@/lib/markdown';
 import { getNextGameDay } from '@/lib/events';
+import { fmtNewsDate, getNewsCategories, listNews } from '@/lib/news';
 import { fmtDay, fmtTimeRange } from '@/lib/time';
 
 function timelineDate(date: string | null, year: number | null) {
@@ -31,14 +32,17 @@ function systemLabel(c: Season) {
 
 export default async function HomePage() {
     const user = await getCurrentUser();
-    const [next, active, campaigns, events, recaps, iconMap] = await Promise.all([
+    const [next, active, campaigns, events, recaps, iconMap, news, newsCategories] = await Promise.all([
         getNextGameDay(user?.id ?? null),
         getActiveCampaigns(),
         getCampaignTimeline(),
         getEventTimeline(),
         getLatestRecaps(4),
         getSystemIconMap(),
+        listNews({ sort: 'hot', limit: 3 }),
+        getNewsCategories(),
     ]);
+    const catName = new Map(newsCategories.map((c) => [c.id, c.name]));
 
     const joinOrPlan = (
         <div className="border-t border-mat-line pt-5">
@@ -85,8 +89,46 @@ export default async function HomePage() {
                 )}
             </MatBand>
 
-            {/* ---- Recaps + campaigns -------------------------------------- */}
+            {/* ---- News + recaps + campaigns ------------------------------- */}
             <div className="grid gap-12 py-14 md:grid-cols-[8fr_4fr]">
+                <div className="grid min-w-0 content-start gap-14">
+                <section className="min-w-0" aria-labelledby="news-h">
+                    <div className="mb-7 flex flex-wrap items-baseline justify-between gap-4">
+                        <h2 id="news-h" className="text-[2.5rem] font-extrabold">
+                            News
+                        </h2>
+                        <Link href="/news" className="cfo-ui cfo-link font-semibold">
+                            All news
+                        </Link>
+                    </div>
+                    {news.posts.length === 0 ? (
+                        <p className="text-graphite-soft">No news yet.</p>
+                    ) : (
+                        <ul className="border-t border-graphite/15">
+                            {news.posts.map((p) => {
+                                const cat = p.category_id ? catName.get(p.category_id) : null;
+                                const blurb = p.excerpt || excerpt(p.body_md, 160);
+                                return (
+                                    <li key={p.id} className="border-b border-graphite/15">
+                                        <Link href={`/news/${p.slug}`} className="group block py-5 no-underline">
+                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                                {cat ? <Badge variant="gold">{cat}</Badge> : null}
+                                                <span className="cfo-ui cfo-num text-sm font-semibold text-graphite-soft">
+                                                    {fmtNewsDate(p.published_at)}
+                                                </span>
+                                            </div>
+                                            <h3 className="mt-1.5 text-[1.75rem] font-bold decoration-gold underline-offset-4 group-hover:underline">
+                                                {p.title}
+                                            </h3>
+                                            {blurb ? <p className="mt-1.5 max-w-[60ch] text-base text-graphite-soft">{blurb}</p> : null}
+                                        </Link>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    )}
+                </section>
+
                 <section className="min-w-0" aria-labelledby="reports-h">
                     <div className="mb-7 flex flex-wrap items-baseline justify-between gap-4">
                         <h2 id="reports-h" className="text-[2.5rem] font-extrabold">
@@ -134,6 +176,7 @@ export default async function HomePage() {
                         </ul>
                     )}
                 </section>
+                </div>
 
                 <div className="grid min-w-0 content-start gap-12">
                     <Timeline id="campaigns-h" title="Campaigns" entries={campaigns} iconMap={iconMap} />

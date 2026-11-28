@@ -99,7 +99,6 @@ See `PROGRESS.md` → Phase 5. In short:
 - Categories: Official News, Tactics, Painting, Lore, Community, Industry.
 - Anyone can vote. Votes are tied to a FingerprintJS visitor ID kept in a cookie and HMAC'd with `FINGERPRINT_HMAC_SECRET`, and each IP gets 30 votes per 10 minutes.
 - Admins write at `/news/admin/new`.
-- One archived test post ("Test post: checking news voting") is in the database. Delete it if the owner wants it gone.
 - The home page shows the 3 hottest posts above Recaps.
 
 ## Later phases

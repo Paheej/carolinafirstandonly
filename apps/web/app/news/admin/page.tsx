@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Badge, EmptyState, PageHead, buttonClasses } from '@cfo/ui';
-import { PenSquare } from 'lucide-react';
+import { Bot, PenSquare } from 'lucide-react';
+import { countAgentDrafts } from '@/lib/agent/admin';
 import type { NewsPost } from '@cfo/database/types';
 import { getCurrentUser } from '@/lib/auth';
 import { fmtNewsDate, getNewsCategories, listNewsForAdmin } from '@/lib/news';
@@ -19,7 +20,7 @@ const GROUPS: { status: NewsPost['status']; title: string }[] = [
 export default async function NewsAdminPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
     const user = await getCurrentUser();
     if (!user?.profile?.is_admin) notFound();
-    const [sp, posts, categories] = await Promise.all([searchParams, listNewsForAdmin(), getNewsCategories()]);
+    const [sp, posts, categories, agentDrafts] = await Promise.all([searchParams, listNewsForAdmin(), getNewsCategories(), countAgentDrafts()]);
     const catName = new Map(categories.map((c) => [c.id, c.name]));
 
     return (
@@ -29,9 +30,14 @@ export default async function NewsAdminPage({ searchParams }: { searchParams: Pr
                 title="News posts"
                 lede="Drafts are only visible to admins. Archived posts drop off the feed but keep their votes."
                 actions={
-                    <Link href="/news/admin/new" className={buttonClasses('primary')}>
-                        <PenSquare size={16} /> Write a post
-                    </Link>
+                    <div className="flex flex-wrap gap-2">
+                        <Link href="/news/admin/new" className={buttonClasses('primary')}>
+                            <PenSquare size={16} /> Write a post
+                        </Link>
+                        <Link href="/news/admin/drafts" className={buttonClasses('outline')}>
+                            <Bot size={16} /> Agent drafts{agentDrafts > 0 ? ` (${agentDrafts})` : ''}
+                        </Link>
+                    </div>
                 }
             />
             <Notice notice={first(sp.notice)} error={first(sp.error)} />

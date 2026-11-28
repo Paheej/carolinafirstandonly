@@ -28,7 +28,7 @@ Migrate the existing Google Sites-based `carolinafirstandonly.com` to a modern c
 | Storage | Supabase Storage for general uploads; Cloudinary for recap photos and on-the-fly transforms |
 | Hosting | Vercel (Hobby tier is sufficient) |
 | Cron | Vercel Cron |
-| AI | Anthropic Claude API (`claude-sonnet-4-5` for drafting) |
+| AI | Anthropic Claude API (`claude-sonnet-5-5` for drafting; override with `AGENT_MODEL`) |
 | Calendar parsing | `node-ical` for iCloud ICS links; Google Calendar freeBusy API via OAuth |
 | Fingerprinting | `@fingerprintjs/fingerprintjs` (open-source) |
 | Markdown editor | `@uiw/react-md-editor` |
@@ -43,8 +43,7 @@ Migrate the existing Google Sites-based `carolinafirstandonly.com` to a modern c
 ```
 carolinafirstandonly/
 ├── apps/
-│   ├── web/                      # Next.js site
-│   └── agent/                    # AI content agent (Vercel serverless + cron)
+│   └── web/                      # Next.js site (the news agent lives in apps/web/lib/agent)
 ├── packages/
 │   ├── database/                 # Supabase migrations + generated TS types
 │   ├── ui/                       # Shared design system components
@@ -57,7 +56,7 @@ carolinafirstandonly/
 └── CLAUDE.md                     # this file
 ```
 
-Both apps consume `@cfo/database`, `@cfo/ui`, and `@cfo/shared`. The agent app is a separate Next.js app (or pure Node) so it can be moved to a different host later if needed.
+The web app consumes `@cfo/database`, `@cfo/ui`, and `@cfo/shared`. The news agent (Phase 6) lives inside it, in `apps/web/lib/agent/`, so it shares the Vercel project, `CRON_SECRET` and the service key. The separate `apps/agent` scaffold was removed in Phase 6. The pipeline only depends on the database package, so it can move to its own app later.
 
 ---
 
@@ -515,15 +514,17 @@ apps/web/app/
 ├── layout.tsx
 └── globals.css
 
-apps/agent/app/
-├── api/
-│   ├── cron/run/route.ts               # Vercel Cron entrypoint (daily 6am)
-│   └── trigger/route.ts                # Manual trigger (admin only)
-└── lib/
-    ├── fetchers/{rss,youtube,scrape}.ts
-    ├── claude.ts                       # Anthropic API client
-    ├── pipeline.ts                     # source -> raw -> draft flow
-    └── dedupe.ts
+# News agent, as built in Phase 6 (inside apps/web)
+apps/web/
+├── app/api/cron/news-agent/route.ts    # Vercel Cron entrypoint (daily 6am ET, CRON_SECRET)
+├── app/news/admin/drafts/              # review queue, "Run the agent now" (server action), recent runs
+├── app/news/admin/drafts/[id]/         # draft editor: Publish / Save draft / Discard
+├── app/news/admin/sources/             # switch sources on and off
+└── lib/agent/
+    ├── fetchers.ts                     # RSS (rss-parser), YouTube (Data API or public feed), scrape (linkedom + Readability)
+    ├── claude.ts                       # Anthropic SDK call, structured JSON output, pricing
+    ├── pipeline.ts                     # sources -> dedupe -> draft -> store -> notify, budget + caps
+    └── admin.ts                        # reads for the admin pages
 ```
 
 ---
@@ -558,7 +559,7 @@ apps/agent/app/
 
 ### AI Agent
 
-**Configured sources (seed these in `0002_seed_sources.sql`):**
+**Configured sources (seeded in `0024_news_agent.sql`; see the notes in that file for what was changed after checking each one on 2026-11-28):**
 
 | Name | Type | URL / Channel |
 |---|---|---|
@@ -576,14 +577,14 @@ apps/agent/app/
 | Tabletop Gaming - The Australia Channel | youtube | (resolve channel ID at setup) |
 | Pro Acryl | youtube | (resolve channel ID at setup) |
 
-**YouTube channel IDs need to be resolved at setup time. Build a one-off script `scripts/resolve-youtube-channels.ts` that takes channel handles/URLs and resolves to channel IDs via the YouTube Data API.**
+**YouTube channel IDs are resolved with `node scripts/resolve-youtube-channels.mjs @handle ...` (Data API when `YOUTUBE_API_KEY` is set, otherwise the public channel page).** As built: Warhammer Community (403 to bots) and DakkaDakka (Cloudflare check) are seeded switched off; Bolter and Chainsword uses its RSS feed with gallery posts skipped; Chapter Valrak is "Chapter Master Valrak"; Pro Acryl is its maker's channel, Monument Hobbies; "Tabletop Gaming - The Australia Channel" couldn't be found and is off until someone adds its channel ID. Bell of Lost Souls articles sit behind a Cloudflare check, so its drafts come from the feed summary.
 
 **Pipeline:**
 
-1. **Trigger:** Vercel Cron daily at 6am ET (`0 11 * * *` UTC) hits `/api/cron/run` on the agent app. Manual trigger via admin UI hits `/api/trigger` (auth-gated).
+1. **Trigger:** Vercel Cron daily at 6am ET (`0 11 * * *` UTC) hits `/api/cron/news-agent` (`CRON_SECRET`). Admins can also press "Run the agent now" on `/news/admin/drafts` (a server action). One run at a time.
 2. **Fetch:** For each enabled source:
    - RSS → parse with `rss-parser`, get items since `last_run_at`
-   - YouTube → YouTube Data API `playlistItems.list` on uploads playlist since `last_run_at`; fetch video description and captions if available
+   - YouTube → YouTube Data API `playlistItems.list` on the uploads playlist when `YOUTUBE_API_KEY` is set, else the channel's public Atom feed. Title and description only: the API gives captions only to a video's owner, and the review screen says so
    - Web scrape → fetch HTML, extract main content with `@mozilla/readability`, dedupe by URL
 3. **Dedupe:** Skip any item whose `source_url` exists in `agent_drafts` already.
 4. **Summarize:** For each new item, call Claude API:
@@ -612,8 +613,10 @@ apps/agent/app/
 
 **Cost guardrails:**
 - Per-run cap: 15 drafts max (skip oldest if over)
-- Per-month token budget tracked in `audit_log` — alert when crossing $20/month
-- Use `claude-sonnet-4-5` for the draft pass; consider `claude-haiku-4-5` for the relevance filter if cost becomes an issue
+- Per-run cap: 30 Claude calls, at most `max_items` (default 5) new items per source, and a look-back of at most 7 days (3 on a source's first run)
+- Per-month budget: every run's tokens and cost go in `agent_runs` (and a summary row in `audit_log`). Once the month's cost reaches `AGENT_MONTHLY_BUDGET_USD` (default $20) the agent stops until the 1st and notifies admins once
+- Model: `claude-sonnet-5-5` at low effort with structured JSON output and server-side refusal fallback; set `AGENT_MODEL=claude-haiku-5-5` if cost becomes an issue
+- Links it reads and passes over go in `agent_seen_urls`, so it never pays to read them twice
 
 **Admin review at `/news/admin/drafts`:**
 - List of drafts, sortable by newsworthiness/date/source

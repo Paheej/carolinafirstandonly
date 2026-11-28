@@ -609,6 +609,120 @@ export interface Database {
                 Update: Partial<Database['public']['Tables']['news_posts']['Insert']>;
                 Relationships: [];
             };
+            agent_sources: {
+                Row: {
+                    id: string;
+                    name: string;
+                    source_type: 'rss' | 'youtube' | 'web_scrape';
+                    url: string;
+                    channel_id: string | null;
+                    enabled: boolean;
+                    default_category_id: string | null;
+                    default_tags: string[];
+                    config: Json;
+                    notes: string | null;
+                    last_run_at: string | null;
+                    last_error: string | null;
+                    last_item_count: number | null;
+                    created_at: string;
+                };
+                Insert: {
+                    name: string;
+                    source_type: 'rss' | 'youtube' | 'web_scrape';
+                    url: string;
+                    channel_id?: string | null;
+                    enabled?: boolean;
+                    default_category_id?: string | null;
+                    default_tags?: string[];
+                    config?: Json;
+                    notes?: string | null;
+                    last_run_at?: string | null;
+                    last_error?: string | null;
+                    last_item_count?: number | null;
+                };
+                Update: Partial<Database['public']['Tables']['agent_sources']['Insert']>;
+                Relationships: [];
+            };
+            agent_drafts: {
+                Row: {
+                    id: string;
+                    source_id: string | null;
+                    source_url: string;
+                    source_title: string | null;
+                    source_published_at: string | null;
+                    raw_excerpt: string | null;
+                    draft_title: string;
+                    draft_body_md: string;
+                    draft_excerpt: string | null;
+                    suggested_category_id: string | null;
+                    suggested_tags: string[];
+                    newsworthiness: number | null;
+                    status: 'draft' | 'published' | 'discarded';
+                    published_post_id: string | null;
+                    reviewed_by: string | null;
+                    reviewed_at: string | null;
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    source_id?: string | null;
+                    source_url: string;
+                    source_title?: string | null;
+                    source_published_at?: string | null;
+                    raw_excerpt?: string | null;
+                    draft_title: string;
+                    draft_body_md: string;
+                    draft_excerpt?: string | null;
+                    suggested_category_id?: string | null;
+                    suggested_tags?: string[];
+                    newsworthiness?: number | null;
+                    status?: 'draft' | 'published' | 'discarded';
+                    reviewed_by?: string | null;
+                    reviewed_at?: string | null;
+                };
+                Update: Partial<Database['public']['Tables']['agent_drafts']['Insert']>;
+                Relationships: [];
+            };
+            agent_seen_urls: {
+                Row: { url: string; source_id: string | null; reason: string | null; created_at: string };
+                Insert: { url: string; source_id?: string | null; reason?: string | null };
+                Update: Partial<Database['public']['Tables']['agent_seen_urls']['Insert']>;
+                Relationships: [];
+            };
+            agent_runs: {
+                Row: {
+                    id: string;
+                    trigger: 'cron' | 'manual';
+                    triggered_by: string | null;
+                    status: 'running' | 'ok' | 'partial' | 'failed' | 'over_budget';
+                    started_at: string;
+                    finished_at: string | null;
+                    items_found: number;
+                    drafts_created: number;
+                    items_skipped: number;
+                    input_tokens: number;
+                    output_tokens: number;
+                    cost_usd: number;
+                    model: string | null;
+                    errors: Json;
+                };
+                Insert: {
+                    trigger: 'cron' | 'manual';
+                    triggered_by?: string | null;
+                    status?: 'running' | 'ok' | 'partial' | 'failed' | 'over_budget';
+                    finished_at?: string | null;
+                    items_found?: number;
+                    drafts_created?: number;
+                    items_skipped?: number;
+                    input_tokens?: number;
+                    output_tokens?: number;
+                    cost_usd?: number;
+                    model?: string | null;
+                    errors?: Json;
+                };
+                Update: Partial<Database['public']['Tables']['agent_runs']['Insert']>;
+                Relationships: [];
+            };
         };
         Views: Record<string, never>;
         Functions: {
@@ -665,6 +779,20 @@ export interface Database {
                 Args: { p_fingerprint: string; p_posts: string[] };
                 Returns: { post_id: string; vote: number }[];
             };
+            publish_agent_draft: {
+                Args: {
+                    p_draft: string;
+                    p_slug: string;
+                    p_title: string;
+                    p_body_md: string;
+                    p_excerpt: string | null;
+                    p_category: string | null;
+                    p_tags: string[];
+                };
+                Returns: string;
+            };
+            agent_month_cost: { Args: Record<string, never>; Returns: number };
+            notify_admins: { Args: { p_kind: string; p_title: string; p_body: string | null; p_link: string | null }; Returns: number };
             group_availability: {
                 Args: { p_group: string; p_start: string; p_end: string; p_days?: number };
                 Returns: { day_index: number; starts_at: string; ends_at: string; members: number; connected: number; free: number }[];
@@ -698,3 +826,6 @@ export type GroupRoleTemplate = Database['public']['Tables']['group_role_templat
 export type CalendarConnection = Database['public']['Tables']['calendar_connections']['Row'];
 export type NewsCategory = Database['public']['Tables']['news_categories']['Row'];
 export type NewsPost = Database['public']['Tables']['news_posts']['Row'];
+export type AgentSource = Database['public']['Tables']['agent_sources']['Row'];
+export type AgentDraft = Database['public']['Tables']['agent_drafts']['Row'];
+export type AgentRun = Database['public']['Tables']['agent_runs']['Row'];

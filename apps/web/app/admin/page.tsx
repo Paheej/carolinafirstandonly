@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import type { Metadata } from 'next';
 import { Card, CardBody } from '@cfo/ui';
-import { ShieldCheck, BookMarked, Inbox, Newspaper } from 'lucide-react';
+import { ShieldCheck, BookMarked, Inbox, Newspaper, Bot } from 'lucide-react';
+import { countAgentDrafts } from '@/lib/agent/admin';
 import { createServerSupabase } from '@cfo/database/server';
 import { getCurrentUser } from '@/lib/auth';
 
@@ -34,7 +35,7 @@ export default async function AdminIndexPage() {
     if (!user) redirect('/auth/login?next=/admin');
     if (!user.profile?.is_admin) redirect('/');
 
-    const [pendingRecaps, newsDrafts] = await Promise.all([countPendingRecaps(), countNewsDrafts()]);
+    const [pendingRecaps, newsDrafts, agentDrafts] = await Promise.all([countPendingRecaps(), countNewsDrafts(), countAgentDrafts()]);
 
     return (
         <div className="space-y-8">
@@ -114,6 +115,31 @@ export default async function AdminIndexPage() {
                                 <p className="text-sm text-graphite-soft">
                                     Write, publish and archive news. The number is how
                                     many drafts are waiting.
+                                </p>
+                            </CardBody>
+                        </Card>
+                    </Link>
+                </li>
+                <li>
+                    <Link href="/news/admin/drafts" className="block no-underline">
+                        <Card interactive className="h-full">
+                            <CardBody className="flex h-full flex-col gap-3 px-6 py-6">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2">
+                                        <Bot size={18} className="text-gold-deep" />
+                                        <h2 className="font-display text-xl text-graphite">
+                                            News agent
+                                        </h2>
+                                    </div>
+                                    {agentDrafts > 0 ? (
+                                        <span className="inline-grid h-6 min-w-6 place-items-center rounded-full bg-gold text-[11px] font-semibold text-graphite px-1.5">
+                                            {agentDrafts}
+                                        </span>
+                                    ) : null}
+                                </div>
+                                <p className="text-sm text-graphite-soft">
+                                    Drafts the agent wrote from the sites it follows, its
+                                    runs and its sources. The number is how many drafts are waiting.
                                 </p>
                             </CardBody>
                         </Card>

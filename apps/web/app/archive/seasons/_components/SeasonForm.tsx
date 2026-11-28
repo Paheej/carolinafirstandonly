@@ -14,7 +14,7 @@ import {
 } from '@cfo/ui';
 import { Save } from 'lucide-react';
 import type { GameSystem, GameEdition } from '@cfo/database/types';
-import { GameSystemSelect } from '@/app/_components/GameSystemSelect';
+import { GamesPicker, type GameRow } from '@/app/_components/GamesPicker';
 
 function slugify(s: string): string {
     return s
@@ -31,8 +31,7 @@ export interface SeasonFormValues {
     year: string;
     starts_on: string;
     ends_on: string;
-    game_system: string;
-    game_edition: string;
+    games: GameRow[];
     hero_image_url: string;
     description_md: string;
     status: 'active' | 'completed';
@@ -54,8 +53,7 @@ const blank: SeasonFormValues = {
     year: '',
     starts_on: '',
     ends_on: '',
-    game_system: '',
-    game_edition: '',
+    games: [],
     hero_image_url: '',
     description_md: '',
     status: 'completed',
@@ -143,14 +141,11 @@ export function SeasonForm({
                         </div>
                     </div>
 
-                    <GameSystemSelect
+                    <GamesPicker
                         systems={systems}
                         editions={editions}
-                        systemValue={values.game_system}
-                        editionValue={values.game_edition}
-                        onChange={({ system, edition }) =>
-                            setValues((cur) => ({ ...cur, game_system: system, game_edition: edition }))
-                        }
+                        value={values.games}
+                        onChange={(games) => setValues((cur) => ({ ...cur, games }))}
                     />
 
                     <div className="grid gap-4 sm:grid-cols-3">

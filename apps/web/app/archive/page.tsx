@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { PageHead, SystemPill, EmptyState, buttonClasses } from '@cfo/ui';
+import { PageHead, EmptyState, buttonClasses } from '@cfo/ui';
 import { PenSquare, Plus, ShieldCheck } from 'lucide-react';
-import type { ArchiveEvent, Season } from '@cfo/database/types';
-import { getSeasons, getArchiveEvents, getSystemIconMap } from '@/lib/archive';
+import type { ArchiveEvent, GameRef, Season } from '@cfo/database/types';
+import { SystemPills } from '@/app/_components/SystemPills';
+import { gamesOf, getSeasons, getArchiveEvents, getSystemIconMap } from '@/lib/archive';
 import { getCurrentUser } from '@/lib/auth';
 import { excerpt } from '@/lib/markdown';
 
@@ -33,9 +34,7 @@ export default async function ArchiveIndexPage() {
         name: s.name,
         when: s.year ? String(s.year) : fmtDate(s.starts_on, { year: 'numeric' }),
         blurb: excerpt(s.description_md, 140),
-        system: s.game_system,
-        edition: s.game_edition,
-        icon: s.game_system ? iconMap[s.game_system] ?? null : null,
+        games: gamesOf(s),
     });
     const eventItem = (e: ArchiveEvent): ArchiveItem => ({
         id: e.id,
@@ -43,9 +42,7 @@ export default async function ArchiveIndexPage() {
         name: e.name,
         when: fmtDate(e.event_date, { month: 'long', year: 'numeric' }),
         blurb: excerpt(e.description_md, 140),
-        system: e.game_system,
-        edition: e.game_edition,
-        icon: e.game_system ? iconMap[e.game_system] ?? null : null,
+        games: gamesOf(e),
     });
 
     return (
@@ -85,8 +82,8 @@ export default async function ArchiveIndexPage() {
                         <EmptyState title="No campaigns yet" body="Seasons of campaign play will be listed here." />
                     ) : (
                         <>
-                            {running.length > 0 ? <ArchiveList title="Running now" items={running.map(seasonItem)} /> : null}
-                            {completed.length > 0 ? <ArchiveList title="Completed" items={completed.map(seasonItem)} /> : null}
+                            {running.length > 0 ? <ArchiveList title="Running now" items={running.map(seasonItem)} iconMap={iconMap} /> : null}
+                            {completed.length > 0 ? <ArchiveList title="Completed" items={completed.map(seasonItem)} iconMap={iconMap} /> : null}
                         </>
                     )}
                 </section>
@@ -102,7 +99,7 @@ export default async function ArchiveIndexPage() {
                     {events.length === 0 ? (
                         <EmptyState title="No special events yet" body="Tournament days and one-off narrative events will be listed here." />
                     ) : (
-                        <ArchiveList items={eventsDesc.map(eventItem)} />
+                        <ArchiveList items={eventsDesc.map(eventItem)} iconMap={iconMap} />
                     )}
                 </section>
             </div>
@@ -116,12 +113,10 @@ interface ArchiveItem {
     name: string;
     when: string | null;
     blurb: string | null;
-    system: string | null;
-    edition: string | null;
-    icon: string | null;
+    games: GameRef[];
 }
 
-function ArchiveList({ title, items }: { title?: string; items: ArchiveItem[] }) {
+function ArchiveList({ title, items, iconMap }: { title?: string; items: ArchiveItem[]; iconMap: Record<string, string> }) {
     return (
         <div className="min-w-0">
             {title ? <h3 className="cfo-ui mb-2 text-lg font-semibold text-graphite-soft">{title}</h3> : null}
@@ -136,7 +131,7 @@ function ArchiveList({ title, items }: { title?: string; items: ArchiveItem[] })
                                 {it.when ? <span className="cfo-ui cfo-num text-sm font-semibold text-graphite-soft">{it.when}</span> : null}
                             </div>
                             {it.blurb ? <p className="mt-1 text-base text-graphite-soft">{it.blurb}</p> : null}
-                            {it.system ? <SystemPill className="mt-2" system={it.system} edition={it.edition} icon={it.icon} /> : null}
+                            <SystemPills className="mt-2" games={it.games} iconMap={iconMap} />
                         </Link>
                     </li>
                 ))}

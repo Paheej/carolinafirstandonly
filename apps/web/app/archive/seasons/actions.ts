@@ -37,8 +37,8 @@ function rowFromValues(v: SeasonFormValues) {
         year: v.year ? Number(v.year) : null,
         starts_on: v.starts_on || null,
         ends_on: v.ends_on || null,
-        game_system: v.game_system || null,
-        game_edition: v.game_edition || null,
+        // games[0] is the main game; game_system/game_edition mirror it.
+        ...gameFields(v.games),
         hero_image_url: v.hero_image_url.trim() || null,
         description_md: v.description_md.trim() || null,
         status: v.status === 'active' ? ('active' as const) : ('completed' as const),
@@ -94,4 +94,9 @@ export async function updateSeason(
     revalidatePath('/archive');
     revalidatePath(`/archive/seasons/${currentSlug}`);
     redirect(`/archive/seasons/${currentSlug}`);
+}
+
+function gameFields(rows: { system: string; edition: string }[]) {
+    const games = rows.filter((g) => g.system).map((g) => ({ system: g.system, edition: g.edition || null }));
+    return { games, game_system: games[0]?.system ?? null, game_edition: games[0]?.edition ?? null };
 }

@@ -33,8 +33,8 @@ function rowFromValues(v: EventFormValues) {
         slug: v.slug.trim(),
         name: v.name.trim(),
         event_date: v.event_date || null,
-        game_system: v.game_system || null,
-        game_edition: v.game_edition || null,
+        // games[0] is the main game; game_system/game_edition mirror it.
+        ...gameFields(v.games),
         season_id: v.season_id || null,
         hero_image_url: v.hero_image_url.trim() || null,
         description_md: v.description_md.trim() || null,
@@ -88,4 +88,9 @@ export async function updateEvent(
     revalidatePath('/archive');
     revalidatePath(`/archive/events/${currentSlug}`);
     redirect(`/archive/events/${currentSlug}`);
+}
+
+function gameFields(rows: { system: string; edition: string }[]) {
+    const games = rows.filter((g) => g.system).map((g) => ({ system: g.system, edition: g.edition || null }));
+    return { games, game_system: games[0]?.system ?? null, game_edition: games[0]?.edition ?? null };
 }

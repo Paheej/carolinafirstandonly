@@ -7,6 +7,7 @@ import type {
     ArchivePage,
     GameSystem,
     GameEdition,
+    GameRef,
 } from '@cfo/database/types';
 
 /**
@@ -210,8 +211,7 @@ export interface TimelineEntry {
     date: string | null;
     year: number | null;
     active: boolean;
-    game_system: string | null;
-    game_edition: string | null;
+    games: GameRef[];
 }
 
 const sortKey = (c: TimelineEntry) => c.date ?? (c.year ? `${c.year}-00-00` : '0000');
@@ -229,8 +229,7 @@ export async function getCampaignTimeline(): Promise<TimelineEntry[]> {
             date: s.starts_on,
             year: s.year ?? (s.starts_on ? new Date(s.starts_on).getUTCFullYear() : null),
             active: s.status === 'active',
-            game_system: s.game_system,
-            game_edition: s.game_edition,
+            games: gamesOf(s),
         }))
         .sort(newestFirst);
 }
@@ -246,8 +245,34 @@ export async function getEventTimeline(): Promise<TimelineEntry[]> {
             date: e.event_date,
             year: e.event_date ? new Date(e.event_date).getUTCFullYear() : null,
             active: false,
-            game_system: e.game_system,
-            game_edition: e.game_edition,
+            games: gamesOf(e),
         }))
         .sort(newestFirst);
+}
+
+/** A season's or event's games: the `games` list, or its single game_system/edition for older rows. */
+export function gamesOf(row: { games?: GameRef[] | null; game_system: string | null; game_edition: string | null }): GameRef[] {
+    if (row.games && row.games.length > 0) return row.games;
+    return row.game_system ? [{ system: row.game_system, edition: row.game_edition }] : [];
+}
+
+/** "Warhammer 40k 11th and 3rd Edition, Net Epic Armageddon, Battlefleet Gothic" */
+export function gamesLabel(games: GameRef[]): string | null {
+    if (games.length === 0) return null;
+    const bySystem = new Map<string, string[]>();
+    for (const g of games) {
+        const eds = bySystem.get(g.system) ?? [];
+        if (g.edition) eds.push(g.edition);
+        bySystem.set(g.system, eds);
+    }
+    return [...bySystem.entries()]
+        .map(([sys, eds]) => {
+            if (eds.length === 0) return sys;
+            if (eds.length === 1) return `${sys}, ${eds[0]}`;
+            // "11th Edition" + "3rd Edition" -> "11th and 3rd Edition"
+            const short = eds.map((e) => e.replace(/ Edition$/, ''));
+            const allEditions = eds.every((e) => / Edition$/.test(e));
+            return `${sys}, ${short.slice(0, -1).join(', ')} and ${short[short.length - 1]}${allEditions ? ' Edition' : ''}`;
+        })
+        .join('; ');
 }

@@ -12,6 +12,8 @@ export interface GameSystemSelectProps {
     editionValue: string;
     onChange: (next: { system: string; edition: string }) => void;
     required?: boolean;
+    /** Prefix for element ids when several pickers share a form. */
+    idPrefix?: string;
 }
 
 /**
@@ -26,6 +28,7 @@ export function GameSystemSelect({
     editionValue,
     onChange,
     required,
+    idPrefix = '',
 }: GameSystemSelectProps) {
     const selectedSystem = systems.find((s) => s.name === systemValue) ?? null;
     const availableEditions = selectedSystem
@@ -40,11 +43,11 @@ export function GameSystemSelect({
     return (
         <div className="grid gap-4 sm:grid-cols-2">
             <div>
-                <Label htmlFor="game_system" required={required}>
+                <Label htmlFor={`${idPrefix}game_system`} required={required}>
                     Game system
                 </Label>
                 <select
-                    id="game_system"
+                    id={`${idPrefix}game_system`}
                     value={systemValue}
                     onChange={(e) => handleSystemChange(e.target.value)}
                     required={required}
@@ -59,9 +62,9 @@ export function GameSystemSelect({
                 </select>
             </div>
             <div>
-                <Label htmlFor="game_edition">Edition</Label>
+                <Label htmlFor={`${idPrefix}game_edition`}>Edition</Label>
                 <select
-                    id="game_edition"
+                    id={`${idPrefix}game_edition`}
                     value={editionValue}
                     onChange={(e) => onChange({ system: systemValue, edition: e.target.value })}
                     disabled={!selectedSystem || availableEditions.length === 0}

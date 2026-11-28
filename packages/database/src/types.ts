@@ -568,6 +568,47 @@ export interface Database {
                 Update: Partial<Database['public']['Tables']['user_busy_blocks']['Insert']>;
                 Relationships: [];
             };
+            news_categories: {
+                Row: { id: string; slug: string; name: string; display_order: number };
+                Insert: { slug: string; name: string; display_order?: number };
+                Update: Partial<Database['public']['Tables']['news_categories']['Insert']>;
+                Relationships: [];
+            };
+            news_posts: {
+                Row: {
+                    id: string;
+                    slug: string;
+                    title: string;
+                    body_md: string;
+                    excerpt: string | null;
+                    category_id: string | null;
+                    tags: string[];
+                    source_url: string | null;
+                    author_id: string | null;
+                    status: 'draft' | 'published' | 'archived';
+                    published_at: string | null;
+                    upvotes: number;
+                    downvotes: number;
+                    score: number;
+                    hot_score: number;
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    slug: string;
+                    title: string;
+                    body_md: string;
+                    excerpt?: string | null;
+                    category_id?: string | null;
+                    tags?: string[];
+                    source_url?: string | null;
+                    author_id?: string | null;
+                    status?: 'draft' | 'published' | 'archived';
+                    published_at?: string | null;
+                };
+                Update: Partial<Database['public']['Tables']['news_posts']['Insert']>;
+                Relationships: [];
+            };
         };
         Views: Record<string, never>;
         Functions: {
@@ -616,6 +657,14 @@ export interface Database {
                 }[];
             };
             replace_busy_blocks: { Args: { p_connection: string; p_blocks: Json }; Returns: number };
+            cast_news_vote: {
+                Args: { p_post: string; p_fingerprint: string; p_ip: string | null; p_vote: number };
+                Returns: { upvotes: number; downvotes: number; my_vote: number }[];
+            };
+            my_news_votes: {
+                Args: { p_fingerprint: string; p_posts: string[] };
+                Returns: { post_id: string; vote: number }[];
+            };
             group_availability: {
                 Args: { p_group: string; p_start: string; p_end: string; p_days?: number };
                 Returns: { day_index: number; starts_at: string; ends_at: string; members: number; connected: number; free: number }[];
@@ -647,3 +696,5 @@ export type EventRole = Database['public']['Tables']['event_roles']['Row'];
 export type EventRsvp = Database['public']['Tables']['event_rsvps']['Row'];
 export type GroupRoleTemplate = Database['public']['Tables']['group_role_templates']['Row'];
 export type CalendarConnection = Database['public']['Tables']['calendar_connections']['Row'];
+export type NewsCategory = Database['public']['Tables']['news_categories']['Row'];
+export type NewsPost = Database['public']['Tables']['news_posts']['Row'];

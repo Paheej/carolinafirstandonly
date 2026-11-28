@@ -54,8 +54,17 @@ export async function listNews(opts: {
     if (opts.tag) query = query.contains('tags', [opts.tag]);
     const cursor = decodeCursor(opts.cursor);
     if (cursor) {
-        const v = JSON.stringify(String(cursor[0]));
-        query = query.or(`${col}.lt.${v},and(${col}.eq.${v},id.lt.${cursor[1]})`);
+        const [value, id] = cursor;
+        if (col === 'hot_score' && typeof value === 'number') {
+            // hot_score is a double and comes back over JSON rounded, so "equal"
+            // means within 1e-6 (about 0.05 s of age).
+            const lo = value - 1e-6;
+            const hi = value + 1e-6;
+            query = query.or(`hot_score.lt.${lo},and(hot_score.gte.${lo},hot_score.lte.${hi},id.lt.${id})`);
+        } else {
+            const v = JSON.stringify(String(value));
+            query = query.or(`${col}.lt.${v},and(${col}.eq.${v},id.lt.${id})`);
+        }
     }
     const { data } = await query;
     const rows = data ?? [];

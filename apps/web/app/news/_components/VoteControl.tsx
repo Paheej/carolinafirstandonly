@@ -67,7 +67,7 @@ export function VoteControl({ postId, title, upvotes, downvotes, myVote, layout 
 
     const score = state.up - state.down;
     const arrow = (on: boolean, tone: 'up' | 'down') =>
-        `grid h-9 w-9 place-items-center rounded-[3px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
+        `grid h-9 w-9 place-items-center rounded-[3px] transition-colors disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold ${
             on
                 ? tone === 'up'
                     ? 'bg-gold-bright text-mat'
@@ -82,6 +82,7 @@ export function VoteControl({ postId, title, upvotes, downvotes, myVote, layout 
                 className={arrow(state.mine === 1, 'up')}
                 aria-pressed={state.mine === 1}
                 aria-label={`Upvote ${title}`}
+                disabled={busy}
                 onClick={() => cast(1)}
             >
                 <ChevronUp size={22} strokeWidth={2.5} aria-hidden="true" />
@@ -101,6 +102,7 @@ export function VoteControl({ postId, title, upvotes, downvotes, myVote, layout 
                 className={arrow(state.mine === -1, 'down')}
                 aria-pressed={state.mine === -1}
                 aria-label={`Downvote ${title}`}
+                disabled={busy}
                 onClick={() => cast(-1)}
             >
                 <ChevronDown size={22} strokeWidth={2.5} aria-hidden="true" />

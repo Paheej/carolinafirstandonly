@@ -75,5 +75,9 @@ export async function updatePost(id: string, values: PostFormValues): Promise<Po
 
     revalidatePath('/news');
     revalidatePath(`/news/${data.slug}`);
-    redirect(values.status === 'published' ? `/news/${data.slug}` : '/news/admin?notice=Saved.');
+    redirect(
+        values.status === 'published'
+            ? `/news/${data.slug}`
+            : `/news/admin?notice=${values.status === 'archived' ? 'Archived.' : 'Moved+to+drafts.'}`,
+    );
 }

@@ -123,8 +123,8 @@ Use Supabase Auth with the following providers, all configured via the Supabase 
 On first sign-in, the `/auth/callback` route ensures a row exists in `profiles` keyed to `auth.users.id`. The first sign-in by an email listed in `NEXT_PUBLIC_ADMIN_EMAILS` sets `is_admin = true` (same pattern as the Warhammer Conquest reference repo).
 
 ### Visibility model
-- **Public (no auth required):** Home, all of `/archive/*`, all of `/news/*` (read), individual public events, public group pages
-- **Auth required:** Voting on news, submitting recaps, creating/joining groups, RSVPing, viewing private events, profile/settings, admin areas
+- **Public (no auth required):** Home, all of `/archive/*`, all of `/news/*` (read and vote: voting is anonymous, owner decision 2026-11-28), individual public events, public group pages
+- **Auth required:** Submitting recaps, creating/joining groups, RSVPing, viewing private events, profile/settings, admin areas
 
 ---
 
@@ -438,7 +438,8 @@ create function update_news_vote_counts() returns trigger as $$ ... $$;
 
 -- 2. Hot score (Reddit-style, time-decayed)
 create function calculate_hot_score(ups int, downs int, created timestamptz) returns double precision as $$
-  -- score = (ups - downs) / power(extract(epoch from now() - created)/3600 + 2, 1.8)
+  -- Built (0022) as Reddit's formula instead: sign(s)*log10(max(|s|,1)) + (epoch(published_at) - 1134028003)/45000.
+  -- It never needs recomputing as time passes; 10 net votes = 12.5 hours of age.
 $$;
 
 -- 3. Recap submission approval
@@ -598,7 +599,7 @@ apps/agent/app/
      "title": "string (under 80 chars, no clickbait)",
      "body_md": "string (2-4 short paragraphs, markdown, includes an in-context link to source)",
      "excerpt": "string (under 200 chars)",
-     "suggested_category": "official_news|tactics|painting|lore|community|industry|battle_report",
+     "suggested_category": "official_news|tactics|painting|lore|community|industry",
      "suggested_tags": ["string"],
      "newsworthiness": 1-5,
      "is_relevant": boolean
@@ -822,7 +823,7 @@ When Claude Code hits these, pause and confirm with the user:
 
 4. **YouTube transcript availability:** Not all videos have captions. For videos without them, the agent can fall back to description-only summarization but quality drops. Document this in the source's UI.
 
-5. **News categories seed list:** I'm assuming `official_news`, `tactics`, `painting`, `lore`, `community`, `industry`, `battle_report`. Confirm with user before seeding.
+5. **News categories seed list:** **Decided 2026-11-28:** `official_news`, `tactics`, `painting`, `lore`, `community`, `industry`. No `battle_report` (recaps live in the archive).
 
 6. **Admin email allowlist:** Confirm the initial email(s).
 

@@ -112,6 +112,7 @@ supabase db push --workdir packages/database --yes </dev/null    # apply
 ## Secrets that must not be lost
 
 - `TOKEN_ENCRYPTION_KEY` (32 bytes, base64) encrypts members' Google refresh tokens and iCloud links. It's the same value in every Vercel environment and in `apps/web/.env.local`, because preview and production share one database. If you change it, every stored connection becomes unreadable.
+- `FINGERPRINT_HMAC_SECRET` (32 bytes, hex) hashes news voters' visitor IDs and IPs. It's the same value in every Vercel environment and in `.env.local`. If it changes, everyone's old votes stop counting as theirs, so people can vote again on old posts.
 - `CRON_SECRET`: Vercel sends it as `Authorization: Bearer …` to `/api/cron/calendar-sync`. To run the sync by hand: `curl -H "Authorization: Bearer $CRON_SECRET" https://carolinafirstandonly.vercel.app/api/cron/calendar-sync`.
 
 ## Browser work (Claude in Chrome)

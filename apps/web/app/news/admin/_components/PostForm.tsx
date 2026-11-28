@@ -150,7 +150,7 @@ export function PostForm({
 
                     <div>
                         <Label required>Post</Label>
-                        <MarkdownEditor value={values.body_md} onChange={(v) => set('body_md', v)} minHeight={360} />
+                        <MarkdownEditor value={values.body_md} onChange={(v) => set('body_md', v)} minHeight={360} placeholder="Write the post in markdown…" />
                     </div>
                 </CardBody>
             </Card>

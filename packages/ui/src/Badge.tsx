@@ -11,7 +11,7 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const variantClasses: Record<Variant, string> = {
     default: 'bg-primer text-graphite-soft border-graphite/15',
-    gold: 'bg-gold-bright/30 text-graphite border-gold/60',
+    gold: 'cfo-badge-gold bg-gold-bright/30 text-graphite border-gold/60',
     mat: 'bg-mat text-on-mat border-mat',
     danger: 'bg-casualty text-primer-lift border-casualty',
     success: 'bg-success text-primer-lift border-success',

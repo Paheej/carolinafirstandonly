@@ -406,3 +406,16 @@
    page head reads as graphite / deep gold instead. */
 .cfo-band-light :is(.text-on-mat, .text-on-mat-soft) { color: var(--color-graphite-soft); }
 .cfo-band-light .text-gold-bright { color: var(--color-gold-deep); }
+
+/* On the black or photo bands, the translucent gold badge goes solid so it
+   stays legible over dark art. */
+.cfo-band .cfo-badge-gold {
+    background: var(--color-gold-bright);
+    color: var(--color-mat);
+    border-color: var(--color-gold-bright);
+}
+/* Meta text over a photo: full-strength with a soft shadow. */
+.cfo-band-photo .text-on-mat-soft {
+    color: var(--color-on-mat);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.75);
+}

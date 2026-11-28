@@ -65,7 +65,7 @@ export function PageHead({ kicker, title, lede, actions, children, image, tone =
         return (
             <MatBand
                 as="header"
-                className="relative overflow-hidden"
+                className="cfo-band-photo relative overflow-hidden"
                 innerClassName="relative py-16 md:py-24"
                 style={{
                     backgroundImage: `linear-gradient(90deg, rgba(13,13,12,.82) 0%, rgba(13,13,12,.5) 45%, rgba(13,13,12,.08) 100%), linear-gradient(0deg, rgba(13,13,12,.55) 0%, rgba(13,13,12,0) 45%), url("${image.replace(/"/g, '%22')}")`,

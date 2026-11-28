@@ -16,7 +16,6 @@ Next.js 15 (App Router) · React 19 · TypeScript strict · Tailwind v4 · Supab
 ```
 apps/
   web/        Next.js site
-  agent/      AI content agent (cron + manual trigger)
 packages/
   database/   Supabase migrations + generated types
   ui/         Design system

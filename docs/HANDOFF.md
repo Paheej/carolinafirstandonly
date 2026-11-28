@@ -2,17 +2,17 @@
 
 Read this first in a new session, then `docs/RUNBOOK.md` (how to do things) and `PROGRESS.md` (what each phase shipped, plus gotchas). `CLAUDE.md` is the original spec.
 
-_Last updated 2026-11-28 (Phase 5)._
+_Last updated 2026-11-28 (Phase 6)._
 
 ## Start here (next session)
 
-**Next step: Phase 6, the AI news agent** (`CLAUDE.md` → Build Order and Feature Specs → AI Agent).
+**Phase 6 (the AI news agent) is built on branch `phase-6-news-agent`.** See `PROGRESS.md` → Phase 6. Before it can run in production:
 
-1. Write migration `0024` for `agent_sources` and `agent_drafts`, and seed the sources. `news_categories` already exists (0022) with the six categories the agent's prompt should use.
-2. The agent's prompt must not offer `battle_report` (removed by the owner).
-3. Publishing a draft creates a `news_posts` row with `author_id = null` and `source_url` set. The feed already shows "via <host>" for that.
-4. `ANTHROPIC_API_KEY` and `YOUTUBE_API_KEY` aren't set yet. Ask the owner.
-5. Load the `frontend-design:frontend-design` skill before building `/news/admin/drafts`.
+1. The owner approves pushing migration `0024_news_agent.sql` (new tables plus 13 seeded sources).
+2. `ANTHROPIC_API_KEY` is set in Vercel (all environments) and `.env.local`. `YOUTUBE_API_KEY` is optional.
+3. Merge, then press "Run the agent now" on `/news/admin/drafts` and review the first drafts in Chrome.
+
+After that comes **Phase 7**: polish and the DNS cutover (`CLAUDE.md` → Build Order).
 
 The owner sends "nits" in batches between phases. Do each batch on one branch and one PR, check it in Chrome, then ask before merging. They usually say yes.
 
@@ -22,7 +22,7 @@ The owner sends "nits" in batches between phases. Do each batch on one branch an
 |---|---|
 | Phases 0–5 | Shipped and live. Phase 5: news feed (Hot/Top/New), post pages, the admin composer and anonymous voting. Archive, war-table redesign, groups and profiles, game days (RSVPs, waitlists, calendar feeds), and calendar busy-time sync with "Who's free". |
 | Polish since Phase 4 (PRs #14–#17) | Listed in "Recent changes" below. |
-| Migrations | **0001–0023 applied** on the hosted Supabase project. The next one is `0024`. (0023 re-dated the imported Season II and Showdown recaps by their season or event, so the home page's Recaps shows the newest first.) |
+| Migrations | **0001–0023 applied** on the hosted Supabase project. `0024_news_agent.sql` is written and waiting for the owner's OK. The next new one is `0025`. (0023 re-dated the imported Season II and Showdown recaps by their season or event, so the home page's Recaps shows the newest first.) |
 | Production | `main` auto-deploys to https://carolinafirstandonly.vercel.app and https://new.carolinafirstandonly.com |
 | Bare domain | `carolinafirstandonly.com` still serves the old Google Sites page. Cutover is a Phase 7 task (see the RUNBOOK). |
 | Sign-in | Google works, and its branding is verified and published. Discord has an app and is configured, but a sign-in hasn't been confirmed end to end. Apple is waiting on the owner's Apple Developer approval. Email/password works. |
@@ -57,6 +57,8 @@ The owner sends "nits" in batches between phases. Do each batch on one branch an
 - Old World Campaign: the status "completed" and its placement were assumptions, and the winner is unknown. Ask if the owner wants it changed.
 
 ## Waiting on the owner
+
+0. **Phase 6:** an Anthropic API key, and the OK to push 0024. Also a link to "Tabletop Gaming - The Australia Channel" if they want it (couldn't find it).
 
 1. **Apple Developer approval.** Then they send the Team ID and Key ID. Run `scripts/apple-client-secret.mjs` (instructions are in the file), paste the result into Supabase → Authentication → Providers → Apple, enable the Apple button in `apps/web/app/auth/_components/AuthForm.tsx`, and set a reminder: the secret expires every 6 months.
 2. **Curse of Strahd details** (start date, DM, write-up). The season row `curse-of-strahd` has only a one-line description.
@@ -103,4 +105,4 @@ See `PROGRESS.md` → Phase 5. In short:
 
 ## Later phases
 
-6 the AI news agent (next), 7 polish and the DNS cutover. See `CLAUDE.md` → Build Order.
+6 the AI news agent (built, see above), 7 polish and the DNS cutover. See `CLAUDE.md` → Build Order.

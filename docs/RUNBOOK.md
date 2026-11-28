@@ -109,11 +109,20 @@ supabase db push --workdir packages/database --yes </dev/null    # apply
   `vercel ls carolinafirstandonly`, then `vercel inspect <deployment-url> --wait --timeout 6m`. The domain switches over a few seconds after "Ready".
 - **Environment variables:** `vercel env ls` and `vercel env add NAME production`. The local copy lives in `apps/web/.env.local`, which git ignores.
 
+## News agent (Phase 6)
+
+- **Env:** `ANTHROPIC_API_KEY` (required), `YOUTUBE_API_KEY` (optional; without it YouTube comes from the public feed, which 503s now and then), `AGENT_MONTHLY_BUDGET_USD` (default 20), `AGENT_MODEL` (default `claude-sonnet-5-5`). Set them in every Vercel environment and in `apps/web/.env.local`.
+- **Run it by hand:** press "Run the agent now" on `/news/admin/drafts`, or
+  `curl -H "Authorization: Bearer $CRON_SECRET" https://carolinafirstandonly.vercel.app/api/cron/news-agent`
+- **What it did:** `/news/admin/drafts` → Recent runs (counts, cost, problems per source). Each source's last error shows on `/news/admin/sources`.
+- **Add a source:** insert into `agent_sources` (admins can also do it through a migration). For YouTube, get the ID with `node scripts/resolve-youtube-channels.mjs @handle`. `config` takes `link_pattern`, `exclude_pattern` (regexes on item URLs) and `max_items`.
+- **Re-read a link it passed over:** delete its row from `agent_seen_urls` (service role).
+
 ## Secrets that must not be lost
 
 - `TOKEN_ENCRYPTION_KEY` (32 bytes, base64) encrypts members' Google refresh tokens and iCloud links. It's the same value in every Vercel environment and in `apps/web/.env.local`, because preview and production share one database. If you change it, every stored connection becomes unreadable.
 - `FINGERPRINT_HMAC_SECRET` (32 bytes, hex) hashes news voters' visitor IDs and IPs. It's the same value in every Vercel environment and in `.env.local`. If it changes, everyone's old votes stop counting as theirs, so people can vote again on old posts.
-- `CRON_SECRET`: Vercel sends it as `Authorization: Bearer …` to `/api/cron/calendar-sync`. To run the sync by hand: `curl -H "Authorization: Bearer $CRON_SECRET" https://carolinafirstandonly.vercel.app/api/cron/calendar-sync`.
+- `CRON_SECRET`: Vercel sends it as `Authorization: Bearer …` to `/api/cron/calendar-sync` and `/api/cron/news-agent`. To run the sync by hand: `curl -H "Authorization: Bearer $CRON_SECRET" https://carolinafirstandonly.vercel.app/api/cron/calendar-sync`.
 
 ## Browser work (Claude in Chrome)
 

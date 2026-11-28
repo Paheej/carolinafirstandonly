@@ -8,6 +8,25 @@ spec) before starting a new phase.
 
 ---
 
+## Phase 6 — AI news agent ✅ (code) — waiting on the API key and the 0024 push
+
+**Built 2026-11-28** on branch `phase-6-news-agent`.
+
+- `0024_news_agent.sql`: `agent_sources` (13 seeded, 10 on), `agent_drafts`, `agent_seen_urls` (links read and passed over, so they're never paid for twice), `agent_runs` (status, counts, tokens, cost). RPCs: `publish_agent_draft` (admins; post + draft status + audit row in one transaction), `agent_month_cost` and `notify_admins` (service role only). All tables are admin-only under RLS; the pipeline writes with the service role. SQL checks: `tools/sql-tests/tests/09-news-agent.mjs`.
+- Pipeline (`apps/web/lib/agent/`): fetch every enabled source in parallel, keep items newer than `last_run_at` minus a day (max 7 days back, 3 on a first run), at most `config.max_items` per source, drop URLs already drafted or seen, newest first. Then up to 30 Claude calls, 4 at a time, stopping at 15 drafts or the monthly budget. Each call is `claude-sonnet-5-5`, effort low, JSON schema output, server-side refusal fallback (`fallbacks: "default"`). Items with `is_relevant: false` or newsworthiness under 2 go to `agent_seen_urls`. Admins get one notification per run with drafts.
+- The agent lives in `apps/web`, not a separate app: it reuses the Vercel project, `CRON_SECRET`, the service key and the cron setup. The empty `apps/agent` scaffold was deleted (and its CI build step).
+- Routes: `/api/cron/news-agent` (cron, 6 am ET), `/news/admin/drafts` (queue sorted by newsworthiness, newest or source; "Run the agent now"; recent runs with their problems; recently reviewed), `/news/admin/drafts/[id]` (editor with the source beside it), `/news/admin/sources` (switch on/off). Links from `/news/admin` and `/admin`.
+- `scripts/resolve-youtube-channels.mjs` resolves handles to channel IDs.
+
+Gotchas:
+- Adding `@anthropic-ai/sdk` brought in `@opentelemetry/api` as a peer, which split `next` into two copies and broke `middleware.ts` types. `packages/database` now has `@opentelemetry/api` as a dev dependency so both resolve the same `next`.
+- Warhammer Community 403s automated clients and DakkaDakka is behind a Cloudflare challenge: seeded off. Don't try to get around either.
+- Bell of Lost Souls article pages are behind Cloudflare, but its feed isn't. `loadContent` falls back to the feed text when the article fetch fails.
+- The Miniatures Page is http only and ISO-8859-1. `fetchText` decodes by the declared charset.
+- YouTube's public `feeds/videos.xml` returns 503 now and then, so with `YOUTUBE_API_KEY` set the agent uses the Data API first.
+
+---
+
 ## Phase 5 — News + voting ✅
 
 **Shipped 2026-11-28** (PR #19). Migration 0022 applied. Tested live in Chrome on localhost: wrote and published a post, voted up, switched to down, cleared, reloaded (your vote is remembered), filtered by tag and category, archived it (the post 404s publicly).

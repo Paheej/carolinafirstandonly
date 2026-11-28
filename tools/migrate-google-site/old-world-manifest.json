@@ -1,0 +1,117 @@
+{
+  "takeoutDir": "/Users/paul_street/Downloads/Takeout/Drive/sites/Copy of www.carolinafirstandonly.com/DRAFT",
+  "items": [
+    {
+      "page": "Multiplayer Campaign",
+      "kind": "season",
+      "slug": "old-world-campaign",
+      "imagekitFolder": "/seasons/old-world-campaign/",
+      "title": "Old World Campaign"
+    },
+    {
+      "page": "Territory Chart",
+      "kind": "page",
+      "slug": "ow-territory-chart",
+      "imagekitFolder": "/pages/ow-territory-chart/",
+      "title": "Territory Chart"
+    },
+    {
+      "page": "Fighting Battles",
+      "kind": "page",
+      "slug": "ow-fighting-battles",
+      "imagekitFolder": "/pages/ow-fighting-battles/",
+      "title": "Fighting Battles"
+    },
+    {
+      "page": "Scenarios",
+      "kind": "page",
+      "slug": "ow-scenarios",
+      "imagekitFolder": "/pages/ow-scenarios/",
+      "title": "Scenarios"
+    },
+    {
+      "page": "Current Status",
+      "kind": "page",
+      "slug": "ow-current-status",
+      "imagekitFolder": "/pages/ow-current-status/",
+      "title": "Campaign Map"
+    },
+    {
+      "page": "Custom Cards",
+      "kind": "page",
+      "slug": "ow-custom-cards",
+      "imagekitFolder": "/pages/ow-custom-cards/",
+      "title": "Custom Magic Cards"
+    },
+    {
+      "page": "Fantasy Battle Reports",
+      "kind": "page",
+      "slug": "ow-2024-battle-reports",
+      "imagekitFolder": "/pages/ow-2024-battle-reports/",
+      "title": "PJ's 2024 Old World Games"
+    },
+    {
+      "page": "EMP vs BRET Feb24",
+      "kind": "recap",
+      "slug": "ow-emp-vs-bret-feb24",
+      "imagekitFolder": "/recaps/ow-emp-vs-bret-feb24/",
+      "title": "Empire vs Bretonnia (February 2024)"
+    },
+    {
+      "page": "EMP vs HE Feb24",
+      "kind": "recap",
+      "slug": "ow-emp-vs-he-feb24",
+      "imagekitFolder": "/recaps/ow-emp-vs-he-feb24/",
+      "title": "Empire vs High Elves (February 2024)"
+    },
+    {
+      "page": "EMP vs GOB Mar24",
+      "kind": "recap",
+      "slug": "ow-emp-vs-gob-mar24",
+      "imagekitFolder": "/recaps/ow-emp-vs-gob-mar24/",
+      "title": "Empire vs Goblins: Break Point (March 2024)"
+    },
+    {
+      "page": "EMP vs GOB Mar24 2",
+      "kind": "recap",
+      "slug": "ow-emp-vs-gob-mar24-2",
+      "imagekitFolder": "/recaps/ow-emp-vs-gob-mar24-2/",
+      "title": "Empire vs Goblins: Mountain Pass (March 2024)"
+    },
+    {
+      "page": "EMP vs DAEMON Apr24",
+      "kind": "recap",
+      "slug": "ow-emp-vs-daemon-apr24",
+      "imagekitFolder": "/recaps/ow-emp-vs-daemon-apr24/",
+      "title": "Empire vs Nurgle Daemons: Meeting Engagement (April 2024)"
+    },
+    {
+      "page": "EMP vs DAEMON Apr24 2",
+      "kind": "recap",
+      "slug": "ow-emp-vs-daemon-apr24-2",
+      "imagekitFolder": "/recaps/ow-emp-vs-daemon-apr24-2/",
+      "title": "Empire vs Nurgle Daemons: Mountain Pass (April 2024)"
+    },
+    {
+      "page": "EMP vs BRET APR24",
+      "kind": "recap",
+      "slug": "ow-emp-vs-bret-apr24",
+      "imagekitFolder": "/recaps/ow-emp-vs-bret-apr24/",
+      "title": "Empire vs Bretonnians (April 2024)"
+    },
+    {
+      "page": "EMP vs OGRE APR24",
+      "kind": "recap",
+      "slug": "ow-emp-vs-ogre-apr24",
+      "imagekitFolder": "/recaps/ow-emp-vs-ogre-apr24/",
+      "title": "Empire vs Ogres (April 2024)"
+    },
+    {
+      "page": "EMP vs WOOD APR24",
+      "kind": "recap",
+      "slug": "ow-emp-vs-wood-apr24",
+      "imagekitFolder": "/recaps/ow-emp-vs-wood-apr24/",
+      "title": "Empire vs Wood Elves (April 2024)"
+    }
+  ]
+}

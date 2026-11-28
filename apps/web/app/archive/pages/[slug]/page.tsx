@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { stripLeadingTitle } from '@/lib/markdown';
+import { firstImageUrl, sizedImage, stripLeadingTitle } from '@/lib/markdown';
 import { MarkdownRender, PageHead } from '@cfo/ui';
 import { getArchivePageBySlug } from '@/lib/archive';
 
@@ -24,6 +24,8 @@ export default async function ArchivePagePage({ params }: PageProps) {
     return (
         <>
             <PageHead
+                image={bannerOf(firstImageUrl(page.body_md))}
+                tone="light"
                 kicker={
                     <span className="flex flex-wrap gap-x-2">
                         <Link href="/archive" className="no-underline hover:underline">
@@ -40,4 +42,9 @@ export default async function ArchivePagePage({ params }: PageProps) {
             </article>
         </>
     );
+}
+
+/** Photo for the page head: sized for a full-width band. */
+function bannerOf(url: string | null | undefined) {
+    return url ? sizedImage(url, 1600) : null;
 }

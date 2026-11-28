@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { stripLeadingTitle } from '@/lib/markdown';
+import { firstImageUrl, sizedImage, stripLeadingTitle } from '@/lib/markdown';
 import { MarkdownRender, PageHead, SystemPill, buttonClasses } from '@cfo/ui';
 import { ExternalLink, PenSquare, Pencil } from 'lucide-react';
 import {
@@ -50,6 +50,8 @@ export default async function SeasonPage({ params }: PageProps) {
     return (
         <>
             <PageHead
+                image={bannerOf(season.hero_image_url ?? firstImageUrl(season.description_md))}
+                tone="light"
                 kicker={
                     <Link href="/archive" className="no-underline hover:underline">
                         Archive
@@ -84,7 +86,7 @@ export default async function SeasonPage({ params }: PageProps) {
                     ) : null}
                     {range ?? (season.year ? <span>{season.year}</span> : null)}
                     <span>
-                        {recaps.length} {recaps.length === 1 ? 'report' : 'reports'}
+                        {recaps.length} {recaps.length === 1 ? 'recap' : 'recaps'}
                     </span>
                 </div>
             </PageHead>
@@ -146,4 +148,9 @@ export default async function SeasonPage({ params }: PageProps) {
             </div>
         </>
     );
+}
+
+/** Photo for the page head: sized for a full-width band. */
+function bannerOf(url: string | null | undefined) {
+    return url ? sizedImage(url, 1600) : null;
 }

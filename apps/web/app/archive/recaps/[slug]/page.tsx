@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
-import { stripLeadingTitle } from '@/lib/markdown';
+import { firstImageUrl, sizedImage, stripLeadingTitle } from '@/lib/markdown';
 import { MarkdownRender, PageHead } from '@cfo/ui';
 import { createServerSupabase } from '@cfo/database/server';
 import { getRecapBySlug } from '@/lib/archive';
@@ -75,6 +75,8 @@ export default async function RecapPage({ params }: PageProps) {
     return (
         <>
             <PageHead
+                image={bannerOf(recap.photos[0]?.url ?? firstImageUrl(recap.body_md))}
+                tone="light"
                 kicker={
                     <span className="flex flex-wrap gap-x-2">
                         <Link href="/archive" className="no-underline hover:underline">
@@ -129,4 +131,9 @@ export default async function RecapPage({ params }: PageProps) {
             </article>
         </>
     );
+}
+
+/** Photo for the page head: sized for a full-width band. */
+function bannerOf(url: string | null | undefined) {
+    return url ? sizedImage(url, 1600) : null;
 }

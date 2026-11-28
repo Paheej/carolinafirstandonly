@@ -103,6 +103,14 @@
         margin-inline: calc(50% - 50vw);
     }
     .cfo-main > .cfo-band:first-child { margin-top: -2rem; }
+    /* Light page head for archive pages without a photo. */
+    .cfo-band-light {
+        background: var(--color-primer-lift);
+        color: var(--color-graphite);
+        border-bottom: 1px solid color-mix(in srgb, var(--color-gold) 45%, transparent);
+        margin-inline: calc(50% - 50vw);
+    }
+    .cfo-main > .cfo-band-light:first-child { margin-top: -2rem; }
 
     .cfo-kicker {
         font-family: var(--font-display);
@@ -393,3 +401,8 @@
         border-left: 1px solid rgba(27, 27, 26, 0.15);
     }
 }
+
+/* Unlayered so it beats Tailwind utilities: mat-colored text inside a light
+   page head reads as graphite / deep gold instead. */
+.cfo-band-light :is(.text-on-mat, .text-on-mat-soft) { color: var(--color-graphite-soft); }
+.cfo-band-light .text-gold-bright { color: var(--color-gold-deep); }

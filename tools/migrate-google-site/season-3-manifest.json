@@ -1,0 +1,68 @@
+{
+  "takeoutDir": "/Users/paul_street/Downloads/Takeout/Drive/sites/Copy of www.carolinafirstandonly.com/DRAFT",
+  "items": [
+    {
+      "page": "House Rules",
+      "kind": "page",
+      "slug": "s3-house-rules",
+      "imagekitFolder": "/pages/s3-house-rules/",
+      "title": "House Rules"
+    },
+    {
+      "page": "Campaign Turns",
+      "kind": "page",
+      "slug": "s3-campaign-turns",
+      "imagekitFolder": "/pages/s3-campaign-turns/",
+      "title": "Campaign Turns"
+    },
+    {
+      "page": "Victory Conditions",
+      "kind": "page",
+      "slug": "s3-victory-conditions",
+      "imagekitFolder": "/pages/s3-victory-conditions/",
+      "title": "Victory Conditions"
+    },
+    {
+      "page": "Map",
+      "kind": "page",
+      "slug": "s3-map",
+      "imagekitFolder": "/pages/s3-map/",
+      "title": "Campaign Map"
+    },
+    {
+      "page": "Special Move Examples",
+      "kind": "page",
+      "slug": "s3-special-move-examples",
+      "imagekitFolder": "/pages/s3-special-move-examples/",
+      "title": "Special Move Examples"
+    },
+    {
+      "page": "FAQ",
+      "kind": "page",
+      "slug": "s3-faq",
+      "imagekitFolder": "/pages/s3-faq/",
+      "title": "FAQ"
+    },
+    {
+      "page": "Scenario - Annihilation",
+      "kind": "page",
+      "slug": "s3-scenario-annihilation",
+      "imagekitFolder": "/pages/s3-scenario-annihilation/",
+      "title": "Scenario: Annihilation"
+    },
+    {
+      "page": "Scenario - Death or Glory",
+      "kind": "page",
+      "slug": "s3-scenario-death-or-glory",
+      "imagekitFolder": "/pages/s3-scenario-death-or-glory/",
+      "title": "Scenario: Death or Glory"
+    },
+    {
+      "page": "Scenario - Hold At All Costs",
+      "kind": "page",
+      "slug": "s3-scenario-hold-at-all-costs",
+      "imagekitFolder": "/pages/s3-scenario-hold-at-all-costs/",
+      "title": "Scenario: Hold at All Costs"
+    }
+  ]
+}

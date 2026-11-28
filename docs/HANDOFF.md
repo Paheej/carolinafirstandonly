@@ -8,7 +8,7 @@ _Last updated 2026-11-28 (Phase 5)._
 
 **Next step: Phase 6, the AI news agent** (`CLAUDE.md` → Build Order and Feature Specs → AI Agent).
 
-1. Write migration `0023` for `agent_sources` and `agent_drafts`, and seed the sources. `news_categories` already exists (0022) with the six categories the agent's prompt should use.
+1. Write migration `0024` for `agent_sources` and `agent_drafts`, and seed the sources. `news_categories` already exists (0022) with the six categories the agent's prompt should use.
 2. The agent's prompt must not offer `battle_report` (removed by the owner).
 3. Publishing a draft creates a `news_posts` row with `author_id = null` and `source_url` set. The feed already shows "via <host>" for that.
 4. `ANTHROPIC_API_KEY` and `YOUTUBE_API_KEY` aren't set yet. Ask the owner.
@@ -22,11 +22,11 @@ The owner sends "nits" in batches between phases. Do each batch on one branch an
 |---|---|
 | Phases 0–5 | Shipped and live. Phase 5: news feed (Hot/Top/New), post pages, the admin composer and anonymous voting. Archive, war-table redesign, groups and profiles, game days (RSVPs, waitlists, calendar feeds), and calendar busy-time sync with "Who's free". |
 | Polish since Phase 4 (PRs #14–#17) | Listed in "Recent changes" below. |
-| Migrations | **0001–0022 applied** on the hosted Supabase project. The next one is `0023`. |
+| Migrations | **0001–0023 applied** on the hosted Supabase project. The next one is `0024`. (0023 re-dated the imported Season II and Showdown recaps by their season or event, so the home page's Recaps shows the newest first.) |
 | Production | `main` auto-deploys to https://carolinafirstandonly.vercel.app and https://new.carolinafirstandonly.com |
 | Bare domain | `carolinafirstandonly.com` still serves the old Google Sites page. Cutover is a Phase 7 task (see the RUNBOOK). |
 | Sign-in | Google works, and its branding is verified and published. Discord has an app and is configured, but a sign-in hasn't been confirmed end to end. Apple is waiting on the owner's Apple Developer approval. Email/password works. |
-| Tests | `pnpm test:sql` (116 database checks, also run in CI), `pnpm typecheck`, `pnpm --filter @cfo/web build`, `pnpm shots --base <url> <paths>`. |
+| Tests | `pnpm test:sql` (119 database checks, also run in CI), `pnpm typecheck`, `pnpm --filter @cfo/web build`, `pnpm shots --base <url> <paths>`. |
 | Old Google Site | **Fully migrated.** Seasons I–III (with Season III's 9 reference pages), the Old World Campaign (6 pages and 9 recaps), and the events. Only the index pages (Home, 40k Seasons, Events) were skipped. |
 
 ## Recent changes (2026-11-27 to 28, PRs #14–#17)
@@ -100,7 +100,7 @@ See `PROGRESS.md` → Phase 5. In short:
 - Anyone can vote. Votes are tied to a FingerprintJS visitor ID kept in a cookie and HMAC'd with `FINGERPRINT_HMAC_SECRET`, and each IP gets 30 votes per 10 minutes.
 - Admins write at `/news/admin/new`.
 - One archived test post ("Test post: checking news voting") is in the database. Delete it if the owner wants it gone.
-- The home page has no news section yet (the spec mentions "recent news"). Ask the owner.
+- The home page shows the 3 hottest posts above Recaps.
 
 ## Later phases
 

@@ -1,5 +1,8 @@
 import * as React from 'react';
 
+/** Trig results can differ in the last digit between Node and the browser; round so hydration matches. */
+const r2 = (n: number) => Math.round(n * 100) / 100;
+
 export interface DungeonMapProps {
     /** Accessible description of what the map represents. */
     label?: string;
@@ -156,10 +159,10 @@ export function DungeonMap({
                         return (
                             <line
                                 key={i}
-                                x1={4.5 * SQ + Math.cos(a) * 0.9 * SQ}
-                                y1={3.5 * SQ + Math.sin(a) * 0.9 * SQ}
-                                x2={4.5 * SQ + Math.cos(a) * 2 * SQ}
-                                y2={3.5 * SQ + Math.sin(a) * 2 * SQ}
+                                x1={r2(4.5 * SQ + Math.cos(a) * 0.9 * SQ)}
+                                y1={r2(3.5 * SQ + Math.sin(a) * 0.9 * SQ)}
+                                x2={r2(4.5 * SQ + Math.cos(a) * 2 * SQ)}
+                                y2={r2(3.5 * SQ + Math.sin(a) * 2 * SQ)}
                             />
                         );
                     })}
@@ -169,8 +172,8 @@ export function DungeonMap({
                 <g fill="#2a2a27" stroke="#46453f" strokeWidth="1.5">
                     {[0, 1, 2, 3, 4, 5].map((i) => {
                         const a = (i / 6) * Math.PI * 2 + Math.PI / 6;
-                        const x = CRYPT.cx * SQ + Math.cos(a) * 2.7 * SQ;
-                        const y = CRYPT.cy * SQ + Math.sin(a) * 2.7 * SQ;
+                        const x = r2(CRYPT.cx * SQ + Math.cos(a) * 2.7 * SQ);
+                        const y = r2(CRYPT.cy * SQ + Math.sin(a) * 2.7 * SQ);
                         return <rect key={i} x={x - 6} y={y - 12} width={12} height={24} transform={`rotate(${(a * 180) / Math.PI + 90} ${x} ${y})`} />;
                     })}
                 </g>

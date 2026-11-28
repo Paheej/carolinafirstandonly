@@ -1,18 +1,19 @@
 'use client';
 
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
-import Link from 'next/link';
-import { DungeonMap, WarTable, buttonClasses } from '@cfo/ui';
+import { DungeonMap, WarTable } from '@cfo/ui';
 
-export interface HeroCampaign {
+/**
+ * One thing on the home page's table: the next game day or a running
+ * campaign. `content` is rendered on the server and passed in.
+ */
+export interface HeroSlide {
     id: string;
-    slug: string;
-    name: string;
-    system: string | null;
+    /** Short tab label, e.g. "Next game day" or the campaign name. */
+    tab: string;
+    /** Picks the board: D&D gets the dungeon map, everything else the war table. */
     gameSystem: string | null;
-    blurb: string | null;
-    externalUrl: string | null;
-    externalLabel: string | null;
+    content: ReactNode;
 }
 
 const ROTATE_MS = 9000;
@@ -39,26 +40,26 @@ function Board({ gameSystem }: { gameSystem: string | null }) {
 }
 
 /**
- * Home hero when no game day is scheduled: one running campaign at a time,
- * with its own board (war table for 40K, dungeon map for D&D). Advances on its
- * own every few seconds, pauses on hover or focus, stops once someone picks a
- * campaign, and never auto-advances for reduced motion.
+ * Home hero: the next game day (if any) and the running campaigns take turns
+ * on the table, each with its own board. Advances on its own, pauses on hover
+ * or focus, stops once someone picks a tab, and never auto-advances for
+ * reduced motion.
  */
-export function CampaignHero({ campaigns, footer }: { campaigns: HeroCampaign[]; footer?: ReactNode }) {
+export function CampaignHero({ slides, footer }: { slides: HeroSlide[]; footer?: ReactNode }) {
     const [index, setIndex] = useState(0);
     const [paused, setPaused] = useState(false);
     const [picked, setPicked] = useState(false);
     const tabs = useRef<(HTMLButtonElement | null)[]>([]);
-    const many = campaigns.length > 1;
+    const many = slides.length > 1;
 
     useEffect(() => {
         if (!many || paused || picked) return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        const t = setInterval(() => setIndex((i) => (i + 1) % campaigns.length), ROTATE_MS);
+        const t = setInterval(() => setIndex((i) => (i + 1) % slides.length), ROTATE_MS);
         return () => clearInterval(t);
-    }, [many, paused, picked, campaigns.length]);
+    }, [many, paused, picked, slides.length]);
 
-    const c = campaigns[index]!;
+    const s = slides[index]!;
 
     const pick = (i: number, focus = false) => {
         setIndex(i);
@@ -66,7 +67,7 @@ export function CampaignHero({ campaigns, footer }: { campaigns: HeroCampaign[];
         if (focus) tabs.current[i]?.focus();
     };
     const onKey = (e: KeyboardEvent) => {
-        const n = campaigns.length;
+        const n = slides.length;
         if (e.key === 'ArrowRight') pick((index + 1) % n, true);
         else if (e.key === 'ArrowLeft') pick((index - 1 + n) % n, true);
         else return;
@@ -84,8 +85,8 @@ export function CampaignHero({ campaigns, footer }: { campaigns: HeroCampaign[];
             <div className="grid min-w-0 gap-6">
                 <h1 id="table-h" className="cfo-kicker">On the table now</h1>
                 {many ? (
-                    <div role="tablist" aria-label="Running campaigns" className="-mt-2 flex flex-wrap gap-2" onKeyDown={onKey}>
-                        {campaigns.map((x, i) => (
+                    <div role="tablist" aria-label="On the table" className="-mt-2 flex flex-wrap gap-2" onKeyDown={onKey}>
+                        {slides.map((x, i) => (
                             <button
                                 key={x.id}
                                 ref={(el) => {
@@ -93,7 +94,7 @@ export function CampaignHero({ campaigns, footer }: { campaigns: HeroCampaign[];
                                 }}
                                 type="button"
                                 role="tab"
-                                id={`hero-tab-${x.slug}`}
+                                id={`hero-tab-${x.id}`}
                                 aria-selected={i === index}
                                 aria-controls="hero-panel"
                                 tabIndex={i === index ? 0 : -1}
@@ -104,36 +105,24 @@ export function CampaignHero({ campaigns, footer }: { campaigns: HeroCampaign[];
                                         : 'border-mat-line text-on-mat-soft hover:border-gold hover:text-on-mat'
                                 }`}
                             >
-                                {x.name}
+                                {x.tab}
                             </button>
                         ))}
                     </div>
                 ) : null}
                 <div
-                    key={c.id}
+                    key={s.id}
                     id="hero-panel"
                     role={many ? 'tabpanel' : undefined}
-                    aria-labelledby={many ? `hero-tab-${c.slug}` : undefined}
+                    aria-labelledby={many ? `hero-tab-${s.id}` : undefined}
                     className="cfo-fade grid gap-2.5"
                 >
-                    <h2 className="text-[clamp(2.25rem,5vw,3.5rem)] font-[850] leading-[0.95] text-on-mat">{c.name}</h2>
-                    {c.system ? <p className="cfo-ui text-on-mat-soft">{c.system}</p> : null}
-                    {c.blurb ? <p className="max-w-[46ch] text-on-mat-soft">{c.blurb}</p> : null}
-                    <div className="flex flex-wrap gap-3 pt-1">
-                        {c.externalUrl ? (
-                            <a href={c.externalUrl} className={buttonClasses('primary')}>
-                                {c.externalLabel}
-                            </a>
-                        ) : null}
-                        <Link href={`/archive/seasons/${c.slug}`} className={buttonClasses(c.externalUrl ? 'outline' : 'primary')}>
-                            Campaign page
-                        </Link>
-                    </div>
+                    {s.content}
                 </div>
                 {footer}
             </div>
-            <div key={`board-${c.id}`} className="cfo-fade min-w-0">
-                <Board gameSystem={c.gameSystem} />
+            <div key={`board-${s.id}`} className="cfo-fade min-w-0">
+                <Board gameSystem={s.gameSystem} />
             </div>
         </div>
     );

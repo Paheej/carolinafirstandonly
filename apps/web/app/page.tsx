@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Season } from '@cfo/database/types';
 import { MatBand, WarTable, SystemPill, buttonClasses } from '@cfo/ui';
-import { CampaignHero } from './_components/CampaignHero';
+import { CampaignHero, type HeroSlide } from './_components/CampaignHero';
 import { getCurrentUser } from '@/lib/auth';
 import {
     getActiveCampaigns,
@@ -52,66 +52,32 @@ export default async function HomePage() {
         </div>
     );
 
-    // The table features the next game day (running campaigns listed under it);
-    // with none scheduled, the running campaigns take turns on the table.
+    // The next game day (if any) and each running campaign take turns on the
+    // table, each with its own board: dungeon map for D&D, war table otherwise.
+    const slides: HeroSlide[] = [
+        ...(next
+            ? [{ id: `event-${next.id}`, tab: 'Next game day', gameSystem: next.group?.systems?.[0] ?? null, content: <NextGameDay next={next} /> }]
+            : []),
+        ...active.map((c) => ({ id: c.id, tab: c.name, gameSystem: c.game_system, content: <CampaignSlide c={c} /> })),
+    ];
+
     return (
         <>
-            {/* ---- The war table -------------------------------------------- */}
+            {/* ---- The table ------------------------------------------------ */}
             <MatBand aria-labelledby="table-h" innerClassName="grid items-center gap-10 py-10 md:grid-cols-[5fr_7fr] md:py-14">
-                {!next && active.length > 0 ? (
-                    <CampaignHero
-                        campaigns={active.map((c) => ({
-                            id: c.id,
-                            slug: c.slug,
-                            name: c.name,
-                            system: systemLabel(c),
-                            gameSystem: c.game_system,
-                            blurb: excerpt(c.description_md, 160),
-                            externalUrl: c.external_url,
-                            externalLabel: c.external_url ? externalLabel(c.external_url) : null,
-                        }))}
-                        footer={joinOrPlan}
-                    />
+                {slides.length > 0 ? (
+                    <CampaignHero slides={slides} footer={joinOrPlan} />
                 ) : (
                     <>
                         <div className="grid min-w-0 gap-6">
-                            {next ? (
-                                <NextGameDay next={next} />
-                            ) : (
-                                <>
-                                    <h1 id="table-h" className="cfo-kicker">Carolina First and Only</h1>
-                                    <p className="max-w-[46ch] text-on-mat-soft">
-                                        Tabletop games in Clemmons and Winston-Salem: 40K campaigns, D&D, and the odd tournament day.
-                                    </p>
-                                    {joinOrPlan}
-                                </>
-                            )}
-                            {next && active.length > 0 ? (
-                                <div className="border-t border-mat-line pt-5">
-                                    <h2 className="cfo-kicker mb-2">On the table now</h2>
-                                    <ul className="cfo-ui grid gap-1.5">
-                                        {active.map((c) => (
-                                            <li key={c.id} className="flex flex-wrap items-baseline gap-x-3">
-                                                <Link href={`/archive/seasons/${c.slug}`} className="text-[1.15rem] font-semibold text-on-mat no-underline hover:underline hover:decoration-gold-bright">
-                                                    {c.name}
-                                                </Link>
-                                                {c.external_url ? (
-                                                    <a href={c.external_url} className="text-on-mat-soft underline-offset-4 hover:text-on-mat hover:underline">
-                                                        {externalLabel(c.external_url)}
-                                                    </a>
-                                                ) : null}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ) : null}
+                            <h1 id="table-h" className="cfo-kicker">Carolina First and Only</h1>
+                            <p className="max-w-[46ch] text-on-mat-soft">
+                                Tabletop games in Clemmons and Winston-Salem: 40K campaigns, D&D, and the odd tournament day.
+                            </p>
+                            {joinOrPlan}
                         </div>
                         <div className="min-w-0">
                             <WarTable />
-                            <p className="cfo-ui mt-2.5 text-sm text-on-mat-soft">
-                                A Strike Force board, 60 by 44 inches. Objective 1 sits dead center; the dashed ring is 6
-                                inches.
-                            </p>
                         </div>
                     </>
                 )}
@@ -176,13 +142,32 @@ export default async function HomePage() {
     );
 }
 
+function CampaignSlide({ c }: { c: Season }) {
+    const blurb = excerpt(c.description_md, 160);
+    const system = systemLabel(c);
+    return (
+        <>
+            <h2 className="text-[clamp(2.25rem,5vw,3.5rem)] font-[850] leading-[0.95] text-on-mat">{c.name}</h2>
+            {system ? <p className="cfo-ui text-on-mat-soft">{system}</p> : null}
+            {blurb ? <p className="max-w-[46ch] text-on-mat-soft">{blurb}</p> : null}
+            <div className="flex flex-wrap gap-3 pt-1">
+                {c.external_url ? (
+                    <a href={c.external_url} className={buttonClasses('primary')}>
+                        {externalLabel(c.external_url)}
+                    </a>
+                ) : null}
+                <Link href={`/archive/seasons/${c.slug}`} className={buttonClasses(c.external_url ? 'outline' : 'primary')}>
+                    Campaign page
+                </Link>
+            </div>
+        </>
+    );
+}
+
 function NextGameDay({ next }: { next: NonNullable<Awaited<ReturnType<typeof getNextGameDay>>> }) {
     return (
         <div className="grid gap-3">
-            <p className="cfo-kicker">Next game day</p>
-            <h1 id="table-h" className="text-[clamp(2.5rem,6vw,4.5rem)] font-[850] leading-[0.95] text-on-mat">
-                {next.title}
-            </h1>
+            <h2 className="text-[clamp(2.25rem,5vw,3.5rem)] font-[850] leading-[0.95] text-on-mat">{next.title}</h2>
             <dl className="cfo-num grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-base">
                 <dt className="cfo-ui text-on-mat-soft">When</dt>
                 <dd>
